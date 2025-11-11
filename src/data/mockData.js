@@ -1,5 +1,5 @@
 /**
- * Mock Data for ReadKidz Application
+ * Mock Data for StoryUniverse Application
  * Contains sample books, testimonials, gallery items, and feature data
  */
 
@@ -78,7 +78,7 @@ export const testimonials = [
     name: "Jennifer Martinez",
     role: "Parent",
     avatar: "https://i.pravatar.cc/150?img=1",
-    quote: "ReadKidz transformed bedtime stories! My daughter loves seeing herself as the hero in her own adventures. The AI-generated illustrations are absolutely magical.",
+    quote: "StoryUniverse transformed bedtime stories! My daughter loves seeing herself as the hero in her own adventures. The AI-generated illustrations are absolutely magical.",
     rating: 5,
     location: "Austin, TX"
   },
@@ -105,7 +105,7 @@ export const testimonials = [
     name: "David Rodriguez",
     role: "School Librarian",
     avatar: "https://i.pravatar.cc/150?img=12",
-    quote: "ReadKidz encourages creativity and literacy in ways I've never seen before. Students are excited to write and illustrate their own stories.",
+    quote: "StoryUniverse encourages creativity and literacy in ways I've never seen before. Students are excited to write and illustrate their own stories.",
     rating: 5,
     location: "Chicago, IL"
   },

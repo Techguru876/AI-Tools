@@ -10,9 +10,9 @@ function Navbar() {
   return (
     <nav className="navbar" role="navigation" aria-label="Main navigation">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo" aria-label="ReadKidz home">
+        <Link to="/" className="navbar-logo" aria-label="StoryUniverse home">
           <span className="logo-icon" aria-hidden="true">📚</span>
-          <span className="logo-text">ReadKidz</span>
+          <span className="logo-text">StoryUniverse</span>
         </Link>
 
         <ul className="navbar-menu" role="menubar">

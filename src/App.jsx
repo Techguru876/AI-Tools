@@ -8,7 +8,7 @@ import './App.css'
 
 /**
  * Main App Component
- * Handles routing for all pages in the ReadKidz application
+ * Handles routing for all pages in the StoryUniverse application
  */
 function App() {
   return (

@@ -9,7 +9,7 @@ import './HomePage.css'
 
 /**
  * HomePage Component
- * Main landing page for ReadKidz
+ * Main landing page for StoryUniverse
  * Includes hero, features, gallery, testimonials, and CTA sections
  */
 function HomePage() {

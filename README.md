@@ -1,6 +1,6 @@
-# ReadKidz - AI-Powered Children's Book Creation Platform
+# StoryUniverse - AI-Powered Children's Book Creation Platform
 
-ReadKidz is a comprehensive React application that empowers families, educators, and children to create personalized storybooks with AI-powered text generation, custom illustrations, and animated video production.
+StoryUniverse is a comprehensive React application that empowers families, educators, and children to create personalized storybooks with AI-powered text generation, custom illustrations, and animated video production.
 
 ## Features
 
@@ -134,7 +134,7 @@ To integrate real AI services, replace the mock implementations with actual API 
 
 ## Accessibility Features
 
-ReadKidz is built with accessibility as a priority:
+StoryUniverse is built with accessibility as a priority:
 
 - **ARIA Labels**: All interactive elements have descriptive labels
 - **Alt Text**: Images include meaningful descriptions

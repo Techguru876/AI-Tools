@@ -15,9 +15,9 @@ function Footer() {
         <div className="footer-grid">
           {/* Brand Column */}
           <div className="footer-column">
-            <Link to="/" className="footer-logo" aria-label="ReadKidz home">
+            <Link to="/" className="footer-logo" aria-label="StoryUniverse home">
               <span className="logo-icon" aria-hidden="true">📚</span>
-              <span className="logo-text">ReadKidz</span>
+              <span className="logo-text">StoryUniverse</span>
             </Link>
             <p className="footer-description">
               Empowering children's creativity through AI-powered storytelling
@@ -114,7 +114,7 @@ function Footer() {
 
         <div className="footer-bottom">
           <p className="footer-copyright">
-            © {currentYear} ReadKidz. All rights reserved.
+            © {currentYear} StoryUniverse. All rights reserved.
           </p>
           <p className="footer-note">
             Made with ❤️ for children and families worldwide
