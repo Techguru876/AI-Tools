@@ -1,0 +1,20 @@
+# Horror Video Assembler Dependencies
+
+# MoviePy - Video editing library
+moviepy>=1.0.3
+
+# Image processing (required by moviepy)
+Pillow>=9.0.0
+
+# Audio processing (required by moviepy)
+numpy>=1.21.0
+
+# Progress bar for rendering
+tqdm>=4.65.0
+
+# Image manipulation
+imageio>=2.25.0
+imageio-ffmpeg>=0.4.8
+
+# Decorator utilities (moviepy dependency)
+decorator>=4.4.2
