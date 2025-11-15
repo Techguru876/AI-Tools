@@ -1,0 +1,110 @@
+{
+  "video": {
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "fps": 30,
+    "output_file": "output/horror_story.mp4"
+  },
+  "audio": {
+    "narration": {
+      "file": "assets/narration/narration.wav"
+    },
+    "ambience": {
+      "file": "assets/ambience/ambience.wav",
+      "volume": 0.15,
+      "enabled": true
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene_1",
+      "image": "assets/scenes/scene_1.png",
+      "start_time": 0.0,
+      "end_time": 8.5,
+      "effects": {
+        "ken_burns": {
+          "enabled": true,
+          "zoom_start": 1.0,
+          "zoom_end": 1.1,
+          "pan_x": 0,
+          "pan_y": -20
+        }
+      },
+      "sfx": [
+        {
+          "file": "assets/sfx/thunder.wav",
+          "offset": 2.0,
+          "volume": 0.6
+        },
+        {
+          "file": "assets/sfx/wind.wav",
+          "offset": 0.0,
+          "volume": 0.3
+        }
+      ]
+    },
+    {
+      "id": "scene_2",
+      "image": "assets/scenes/scene_2.png",
+      "start_time": 8.5,
+      "end_time": 15.0,
+      "effects": {
+        "ken_burns": {
+          "enabled": true,
+          "zoom_start": 1.0,
+          "zoom_end": 1.08,
+          "pan_x": 30,
+          "pan_y": 0
+        }
+      },
+      "sfx": [
+        {
+          "file": "assets/sfx/creak.wav",
+          "offset": 1.5,
+          "volume": 0.5
+        }
+      ]
+    },
+    {
+      "id": "scene_3",
+      "image": "assets/scenes/scene_3.png",
+      "start_time": 15.0,
+      "end_time": 23.0,
+      "effects": {
+        "ken_burns": {
+          "enabled": true,
+          "zoom_start": 1.05,
+          "zoom_end": 1.0,
+          "pan_x": -25,
+          "pan_y": 15
+        }
+      },
+      "sfx": [
+        {
+          "file": "assets/sfx/heartbeat.wav",
+          "offset": 0.0,
+          "volume": 0.4
+        },
+        {
+          "file": "assets/sfx/whisper.wav",
+          "offset": 4.0,
+          "volume": 0.7
+        }
+      ]
+    },
+    {
+      "id": "scene_4",
+      "image": "assets/scenes/scene_4.png",
+      "start_time": 23.0,
+      "end_time": 30.0,
+      "effects": {
+        "ken_burns": {
+          "enabled": false
+        }
+      },
+      "sfx": []
+    }
+  ]
+}
