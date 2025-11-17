@@ -1,0 +1,739 @@
+// Prisma Schema for SocialMuse
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  BRAND_OWNER
+  AGENCY_MANAGER
+  AGENCY_MEMBER
+  FREELANCER
+  TEAM_MEMBER
+  VIEWER
+}
+
+enum SubscriptionTier {
+  FREE
+  STARTER
+  PROFESSIONAL
+  AGENCY
+  ENTERPRISE
+}
+
+model User {
+  id                String              @id @default(cuid())
+  email             String              @unique
+  passwordHash      String
+  name              String
+  avatar            String?
+  role              UserRole            @default(TEAM_MEMBER)
+  emailVerified     Boolean             @default(false)
+  isActive          Boolean             @default(true)
+  lastLogin         DateTime?
+
+  // Relations
+  organizations     OrganizationMember[]
+  ownedOrganizations Organization[]     @relation("OrganizationOwner")
+  createdPosts      Post[]              @relation("PostCreator")
+  createdCampaigns  Campaign[]          @relation("CampaignCreator")
+  comments          Comment[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([email])
+  @@map("users")
+}
+
+model Organization {
+  id                String              @id @default(cuid())
+  name              String
+  slug              String              @unique
+  description       String?
+  logo              String?
+  website           String?
+  industry          String?
+
+  // Subscription
+  subscriptionTier  SubscriptionTier    @default(FREE)
+  subscriptionStatus String             @default("active")
+  stripeCustomerId  String?             @unique
+
+  // Owner
+  ownerId           String
+  owner             User                @relation("OrganizationOwner", fields: [ownerId], references: [id])
+
+  // Relations
+  members           OrganizationMember[]
+  brands            Brand[]
+  campaigns         Campaign[]
+  workflowRules     WorkflowRule[]
+  analytics         Analytics[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([slug])
+  @@index([ownerId])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id              String        @id @default(cuid())
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            UserRole      @default(TEAM_MEMBER)
+  permissions     Json?         // Custom permissions object
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+// ============================================
+// BRAND MANAGEMENT
+// ============================================
+
+model Brand {
+  id                String              @id @default(cuid())
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name              String
+  description       String?
+  logo              String?
+  colors            Json?               // Brand colors palette
+  fonts             Json?               // Brand fonts
+  tone              String?             // Brand tone/voice
+  style             String?             // Content style
+  targetAudience    Json?               // Target audience details
+  location          String?             // Primary location
+  timezone          String              @default("UTC")
+
+  // Brand Context
+  companyData       Json?               // Company details, products, services
+  brandGuidelines   String?             // Long text brand guidelines
+  keywords          String[]            // Brand keywords
+  hashtags          String[]            // Default hashtags
+
+  // Relations
+  socialAccounts    SocialAccount[]
+  posts             Post[]
+  campaigns         Campaign[]
+  assets            Asset[]
+  competitors       Competitor[]
+
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([organizationId])
+  @@map("brands")
+}
+
+// ============================================
+// SOCIAL MEDIA ACCOUNTS
+// ============================================
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  PINTEREST
+  TWITTER
+  TIKTOK
+  YOUTUBE
+}
+
+model SocialAccount {
+  id                String          @id @default(cuid())
+  brandId           String
+  brand             Brand           @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  platform          SocialPlatform
+  accountId         String          // Platform-specific account ID
+  username          String
+  displayName       String?
+  profilePicture    String?
+
+  // OAuth tokens
+  accessToken       String?
+  refreshToken      String?
+  tokenExpiry       DateTime?
+
+  isConnected       Boolean         @default(true)
+  lastSync          DateTime?
+
+  // Relations
+  posts             Post[]
+  analytics         PlatformAnalytics[]
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([brandId, platform, accountId])
+  @@index([brandId])
+  @@map("social_accounts")
+}
+
+// ============================================
+// CONTENT & POSTS
+// ============================================
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  FAILED
+  ARCHIVED
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  CAROUSEL
+  VIDEO
+  STORY
+  REEL
+  SHORT
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+}
+
+model Campaign {
+  id                String              @id @default(cuid())
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  brandId           String
+  brand             Brand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  name              String
+  description       String?
+  objective         String?             // awareness, engagement, conversion, etc.
+
+  startDate         DateTime
+  endDate           DateTime?
+
+  creatorId         String
+  creator           User                @relation("CampaignCreator", fields: [creatorId], references: [id])
+
+  // Relations
+  posts             Post[]
+  analytics         CampaignAnalytics[]
+
+  status            String              @default("active")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([organizationId])
+  @@index([brandId])
+  @@map("campaigns")
+}
+
+model Post {
+  id                String              @id @default(cuid())
+  brandId           String
+  brand             Brand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  campaignId        String?
+  campaign          Campaign?           @relation(fields: [campaignId], references: [id])
+  socialAccountId   String?
+  socialAccount     SocialAccount?      @relation(fields: [socialAccountId], references: [id])
+
+  type              PostType
+  status            PostStatus          @default(DRAFT)
+
+  // Content
+  caption           String?
+  hashtags          String[]
+  mentions          String[]
+  media             Json[]              // Array of media objects {type, url, thumbnail}
+  link              String?
+  callToAction      Json?               // CTA object {type, text, url}
+
+  // Scheduling
+  scheduledFor      DateTime?
+  publishedAt       DateTime?
+  timezone          String              @default("UTC")
+
+  // AI Generation Context
+  generationPrompt  String?
+  generationContext Json?               // Context used for AI generation
+
+  // Approval Workflow
+  approvalStatus    ApprovalStatus      @default(PENDING)
+  approvalNotes     String?
+  approvedBy        String?
+  approvedAt        DateTime?
+
+  // Platform-specific IDs
+  platformPostId    String?             // ID returned by social platform
+  platformUrl       String?
+
+  // Analytics
+  engagementData    Json?               // Cached engagement metrics
+
+  // Creator
+  creatorId         String
+  creator           User                @relation("PostCreator", fields: [creatorId], references: [id])
+
+  // Relations
+  versions          PostVersion[]
+  comments          Comment[]
+  analytics         PostAnalytics[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  publishedVersion  Int                 @default(1)
+
+  @@index([brandId])
+  @@index([campaignId])
+  @@index([socialAccountId])
+  @@index([status])
+  @@index([scheduledFor])
+  @@map("posts")
+}
+
+model PostVersion {
+  id                Int                 @id @default(autoincrement())
+  postId            String
+  post              Post                @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  version           Int
+  caption           String?
+  hashtags          String[]
+  media             Json[]
+
+  createdAt         DateTime            @default(now())
+
+  @@unique([postId, version])
+  @@map("post_versions")
+}
+
+// ============================================
+// MEDIA & ASSETS
+// ============================================
+
+enum AssetType {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  TEMPLATE
+}
+
+model Asset {
+  id                String              @id @default(cuid())
+  brandId           String
+  brand             Brand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  name              String
+  description       String?
+  type              AssetType
+
+  // File details
+  url               String
+  thumbnailUrl      String?
+  fileSize          Int?
+  mimeType          String?
+  width             Int?
+  height            Int?
+  duration          Int?                // For video/audio in seconds
+
+  // AI Generation
+  generatedByAI     Boolean             @default(false)
+  generationPrompt  String?
+  aiProvider        String?             // midjourney, leonardo, dalle, etc.
+
+  // Metadata
+  tags              String[]
+  folder            String?
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([brandId])
+  @@index([type])
+  @@map("assets")
+}
+
+// ============================================
+// ENGAGEMENT & COMMUNITY
+// ============================================
+
+enum CommentSource {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  TWITTER
+  TIKTOK
+  YOUTUBE
+}
+
+enum CommentStatus {
+  NEW
+  REPLIED
+  FLAGGED
+  ARCHIVED
+  SPAM
+}
+
+model Comment {
+  id                String              @id @default(cuid())
+  postId            String?
+  post              Post?               @relation(fields: [postId], references: [id])
+
+  source            CommentSource
+  sourceCommentId   String              @unique
+
+  authorName        String
+  authorUsername    String?
+  authorAvatar      String?
+  authorId          String?             // Platform-specific author ID
+
+  text              String
+  sentiment         String?             // positive, negative, neutral
+
+  status            CommentStatus       @default(NEW)
+
+  // Reply
+  replyText         String?
+  repliedAt         DateTime?
+  repliedById       String?
+  repliedBy         User?               @relation(fields: [repliedById], references: [id])
+  autoReplied       Boolean             @default(false)
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([postId])
+  @@index([status])
+  @@index([sourceCommentId])
+  @@map("comments")
+}
+
+model DirectMessage {
+  id                String              @id @default(cuid())
+  brandId           String
+
+  platform          SocialPlatform
+  conversationId    String
+  messageId         String              @unique
+
+  senderName        String
+  senderUsername    String?
+  senderId          String?
+
+  text              String
+  attachments       Json?
+
+  isFromBrand       Boolean             @default(false)
+
+  replyText         String?
+  repliedAt         DateTime?
+  autoReplied       Boolean             @default(false)
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([brandId])
+  @@index([conversationId])
+  @@map("direct_messages")
+}
+
+// ============================================
+// WORKFLOW AUTOMATION
+// ============================================
+
+enum TriggerType {
+  SCHEDULE
+  WEATHER
+  NEWS
+  INVENTORY
+  PERFORMANCE
+  EVENT
+  WEBHOOK
+  MANUAL
+}
+
+enum ActionType {
+  CREATE_POST
+  SEND_EMAIL
+  SEND_SMS
+  NOTIFY_TEAM
+  UPDATE_INVENTORY
+  PAUSE_CAMPAIGN
+}
+
+model WorkflowRule {
+  id                String              @id @default(cuid())
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  name              String
+  description       String?
+
+  isActive          Boolean             @default(true)
+
+  // Trigger
+  triggerType       TriggerType
+  triggerConfig     Json                // Trigger-specific configuration
+
+  // Conditions
+  conditions        Json?               // Array of condition objects
+
+  // Actions
+  actions           Json[]              // Array of action objects
+
+  // Execution
+  lastTriggered     DateTime?
+  executionCount    Int                 @default(0)
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([organizationId])
+  @@index([isActive])
+  @@map("workflow_rules")
+}
+
+model WorkflowExecution {
+  id                String              @id @default(cuid())
+  ruleId            String
+
+  status            String              // success, failed, partial
+  triggerData       Json?
+  actionsExecuted   Json[]
+  errors            Json?
+
+  executedAt        DateTime            @default(now())
+
+  @@index([ruleId])
+  @@map("workflow_executions")
+}
+
+// ============================================
+// ANALYTICS
+// ============================================
+
+model Analytics {
+  id                String              @id @default(cuid())
+  organizationId    String
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  date              DateTime
+  period            String              // daily, weekly, monthly
+
+  // Overall metrics
+  totalPosts        Int                 @default(0)
+  totalEngagement   Int                 @default(0)
+  totalReach        Int                 @default(0)
+  totalImpressions  Int                 @default(0)
+
+  // Engagement breakdown
+  likes             Int                 @default(0)
+  comments          Int                 @default(0)
+  shares            Int                 @default(0)
+  saves             Int                 @default(0)
+
+  // Platform breakdown
+  platformMetrics   Json?
+
+  createdAt         DateTime            @default(now())
+
+  @@unique([organizationId, date, period])
+  @@index([organizationId])
+  @@map("analytics")
+}
+
+model PostAnalytics {
+  id                String              @id @default(cuid())
+  postId            String
+  post              Post                @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  date              DateTime
+
+  impressions       Int                 @default(0)
+  reach             Int                 @default(0)
+  engagement        Int                 @default(0)
+  likes             Int                 @default(0)
+  comments          Int                 @default(0)
+  shares            Int                 @default(0)
+  saves             Int                 @default(0)
+  clicks            Int                 @default(0)
+
+  engagementRate    Float               @default(0)
+
+  createdAt         DateTime            @default(now())
+
+  @@unique([postId, date])
+  @@index([postId])
+  @@map("post_analytics")
+}
+
+model CampaignAnalytics {
+  id                String              @id @default(cuid())
+  campaignId        String
+  campaign          Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  date              DateTime
+
+  totalPosts        Int                 @default(0)
+  impressions       Int                 @default(0)
+  reach             Int                 @default(0)
+  engagement        Int                 @default(0)
+  clicks            Int                 @default(0)
+  conversions       Int                 @default(0)
+
+  spend             Float               @default(0)
+  revenue           Float               @default(0)
+  roi               Float               @default(0)
+
+  createdAt         DateTime            @default(now())
+
+  @@unique([campaignId, date])
+  @@index([campaignId])
+  @@map("campaign_analytics")
+}
+
+model PlatformAnalytics {
+  id                String              @id @default(cuid())
+  socialAccountId   String
+  socialAccount     SocialAccount       @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  date              DateTime
+
+  followers         Int                 @default(0)
+  followersGrowth   Int                 @default(0)
+  impressions       Int                 @default(0)
+  reach             Int                 @default(0)
+  engagement        Int                 @default(0)
+
+  demographics      Json?
+
+  createdAt         DateTime            @default(now())
+
+  @@unique([socialAccountId, date])
+  @@index([socialAccountId])
+  @@map("platform_analytics")
+}
+
+model Competitor {
+  id                String              @id @default(cuid())
+  brandId           String
+  brand             Brand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  name              String
+  platform          SocialPlatform
+  username          String
+
+  // Metrics
+  followers         Int?
+  avgEngagement     Float?
+  postFrequency     Float?
+
+  // Insights
+  topHashtags       String[]
+  topTopics         String[]
+  contentTypes      Json?
+
+  lastAnalyzed      DateTime?
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@unique([brandId, platform, username])
+  @@index([brandId])
+  @@map("competitors")
+}
+
+// ============================================
+// SYSTEM & SECURITY
+// ============================================
+
+model AuditLog {
+  id                String              @id @default(cuid())
+  userId            String?
+  user              User?               @relation(fields: [userId], references: [id])
+
+  action            String
+  resource          String
+  resourceId        String?
+
+  details           Json?
+  ipAddress         String?
+  userAgent         String?
+
+  createdAt         DateTime            @default(now())
+
+  @@index([userId])
+  @@index([resource, resourceId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id                String              @id @default(cuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type              String
+  title             String
+  message           String
+  link              String?
+
+  isRead            Boolean             @default(false)
+
+  createdAt         DateTime            @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+model ApiKey {
+  id                String              @id @default(cuid())
+  name              String
+  key               String              @unique
+
+  organizationId    String
+
+  permissions       String[]
+
+  lastUsed          DateTime?
+  expiresAt         DateTime?
+
+  isActive          Boolean             @default(true)
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([key])
+  @@index([organizationId])
+  @@map("api_keys")
+}
