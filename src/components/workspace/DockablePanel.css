@@ -1,0 +1,207 @@
+/**
+ * Dockable Panel Styles
+ * Professional panel system with drag, drop, and resize
+ */
+
+.dockable-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow var(--transition-normal);
+}
+
+.dockable-panel:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.dockable-panel.dragging {
+  opacity: 0.8;
+  box-shadow: var(--shadow-glow);
+  z-index: 9999 !important;
+}
+
+/* Panel positioning */
+.dockable-panel-left {
+  border-right: 1px solid var(--color-border-default);
+  border-radius: 0;
+}
+
+.dockable-panel-right {
+  border-left: 1px solid var(--color-border-default);
+  border-radius: 0;
+}
+
+.dockable-panel-bottom {
+  border-top: 1px solid var(--color-border-default);
+  border-radius: 0;
+}
+
+.dockable-panel-floating {
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--radius-lg);
+}
+
+/* Panel header */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: move;
+  user-select: none;
+}
+
+.panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.panel-icon {
+  font-size: 16px;
+}
+
+.panel-title {
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.panel-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.panel-control-btn {
+  padding: var(--spacing-xs);
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.panel-control-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.panel-control-btn:active {
+  background: var(--color-bg-active);
+}
+
+/* Panel content */
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-md);
+}
+
+/* Collapsed state */
+.dockable-panel.collapsed .panel-content {
+  display: none;
+}
+
+.dockable-panel.collapsed {
+  height: auto !important;
+}
+
+/* Resize handles */
+.resize-handle {
+  position: absolute;
+  background: transparent;
+  z-index: 10;
+}
+
+.resize-handle:hover {
+  background: var(--color-accent-primary);
+  opacity: 0.5;
+}
+
+.resize-handle-right {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: ew-resize;
+}
+
+.resize-handle-left {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: ew-resize;
+}
+
+.resize-handle-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+.resize-handle-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+.resize-handle-corner {
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+}
+
+.resize-handle-corner::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--color-border-default);
+  border-bottom: 2px solid var(--color-border-default);
+}
+
+/* Panel glow effects */
+.dockable-panel-floating:focus-within {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Scrollbar styling */
+.panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-bg-active);
+}

@@ -1,6 +1,7 @@
-// PhotoVideo Pro - Main Application Entry Point
+// InfinityStudio - Main Application Entry Point
+// Professional creative suite combining Premiere Pro, Photoshop, After Effects, and Lofi Studio
 // This is the core Tauri application that bridges the Rust backend with the React frontend
-// All backend processing (video/image manipulation, file I/O, rendering) happens here
+// All backend processing (video/image/animation, file I/O, rendering, streaming) happens here
 
 #![cfg_attr(
     all(not(debug_assertions), target_os = "windows"),
@@ -12,6 +13,8 @@ mod commands;           // Tauri command handlers for frontend-backend communica
 mod video_engine;       // Video processing: timeline, playback, effects, rendering
 mod image_engine;       // Image processing: layers, filters, adjustments, selections
 mod audio_engine;       // Audio processing: mixing, effects, VST support
+mod animation_engine;   // Animation: keyframes, After Effects-style compositing
+mod motion_graphics;    // Motion graphics: particles, kinetic text, 3D cameras/lights
 mod effects;            // Video/image effects library
 mod color;              // Color grading, LUTs, curves, scopes
 mod export;             // Export engine for multiple formats
@@ -25,7 +28,7 @@ use tauri::Manager;
 fn main() {
     // Initialize logging for debugging and error tracking
     env_logger::init();
-    info!("Starting PhotoVideo Pro application");
+    info!("Starting InfinityStudio application - Create Without Limits ∞");
 
     tauri::Builder::default()
         // Register all command handlers - these are callable from the frontend

@@ -10,6 +10,7 @@ pub mod audio;
 pub mod ai;
 pub mod export;
 pub mod utils;
+pub mod streaming;  // NEW - OBS integration, YouTube API, playlist automation
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;

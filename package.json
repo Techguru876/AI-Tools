@@ -1,7 +1,7 @@
 {
-  "name": "photovideo-pro",
-  "version": "1.0.0",
-  "description": "Advanced cross-platform photo and video editing application combining Premiere Pro and Photoshop capabilities",
+  "name": "infinity-studio",
+  "version": "2.0.0",
+  "description": "InfinityStudio - Professional creative suite combining Premiere Pro, Photoshop, After Effects, and Lofi Studio capabilities. Create without limits.",
   "main": "index.js",
   "scripts": {
     "dev": "tauri dev",
@@ -19,13 +19,20 @@
   "keywords": [
     "photo-editing",
     "video-editing",
+    "animation",
+    "motion-graphics",
+    "after-effects",
     "cross-platform",
     "desktop-app",
     "premiere-pro",
     "photoshop",
-    "tauri"
+    "lofi-studio",
+    "streaming",
+    "obs-integration",
+    "tauri",
+    "infinity-studio"
   ],
-  "author": "PhotoVideo Pro Team",
+  "author": "InfinityStudio Team",
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^1.5.3",
