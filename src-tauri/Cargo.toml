@@ -31,6 +31,7 @@ thiserror = "1.0"
 anyhow = "1.0"
 log = "0.4"
 env_logger = "0.11"
+rand = "0.8"
 
 # Image processing
 imageproc = "0.23"
