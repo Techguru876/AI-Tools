@@ -1,0 +1,122 @@
+/**
+ * Timeline Styles
+ */
+
+.timeline {
+  height: 250px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.time-display {
+  font-family: 'Courier New', monospace;
+  font-size: var(--font-size-md);
+  padding: 0 var(--spacing-md);
+}
+
+.timeline-zoom {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.timeline-tracks {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+}
+
+.time-ruler {
+  height: 30px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+.time-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-left: 1px solid var(--border-color);
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent-primary);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.track {
+  height: 60px;
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.track-header {
+  width: 120px;
+  padding: var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.track-header button {
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+}
+
+.track-content {
+  flex: 1;
+  position: relative;
+  background: var(--bg-primary);
+}
+
+.clip {
+  position: absolute;
+  height: calc(100% - 8px);
+  top: 4px;
+  background: var(--accent-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  overflow: hidden;
+  cursor: move;
+}
+
+.clip:hover {
+  box-shadow: 0 0 0 2px var(--accent-hover);
+}
+
+.clip-name {
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clip-effects {
+  font-size: 10px;
+  color: var(--text-secondary);
+}

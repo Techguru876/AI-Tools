@@ -1,0 +1,58 @@
+/**
+ * Toolbar Styles
+ */
+
+.toolbar {
+  flex: 0 0 auto;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  max-height: 50%;
+  overflow-y: auto;
+}
+
+.toolbar-title {
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.toolbar-tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.tool-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-sm);
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.tool-button:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-color);
+}
+
+.tool-button.active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.tool-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.tool-name {
+  font-size: var(--font-size-sm);
+}

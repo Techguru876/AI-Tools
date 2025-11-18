@@ -1,0 +1,79 @@
+/**
+ * Layers Panel Styles
+ */
+
+.layers-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.layers-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.layer-item:hover {
+  background: var(--bg-hover);
+}
+
+.layer-item.selected {
+  background: var(--accent-primary);
+}
+
+.layer-visibility {
+  padding: var(--spacing-xs);
+  font-size: 16px;
+  background: transparent;
+  border: none;
+}
+
+.layer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.layer-name {
+  font-size: var(--font-size-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layer-type {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.layer-opacity {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.layer-delete {
+  padding: var(--spacing-xs);
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.layer-delete:hover {
+  opacity: 1;
+  color: var(--error-color);
+}
