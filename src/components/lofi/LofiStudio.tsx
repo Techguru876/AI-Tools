@@ -16,9 +16,14 @@ import TemplateLibrary from './TemplateLibrary'
 import AnimationPresetPanel from './AnimationPresetPanel'
 import AssetLibrary from './AssetLibrary'
 import ExportAutomation from './ExportAutomation'
+import GuidedWizard from './GuidedWizard'
+import AIAssistant from './AIAssistant'
+import LoopAutomation from './LoopAutomation'
+import CommunityHub from './CommunityHub'
+import MobileControls from './MobileControls'
 import './LofiStudio.css'
 
-type ActivePanel = 'canvas' | 'templates' | 'animations' | 'assets' | 'export' | 'wizard'
+type ActivePanel = 'canvas' | 'templates' | 'animations' | 'assets' | 'export' | 'wizard' | 'ai' | 'loop' | 'community'
 
 export default function LofiStudio() {
   const {
@@ -234,6 +239,33 @@ export default function LofiStudio() {
               <span className="nav-label">Assets</span>
             </button>
 
+            <button
+              className={`nav-button ${activePanel === 'ai' ? 'active' : ''}`}
+              onClick={() => setActivePanel('ai')}
+              title="AI Assistant"
+            >
+              <span className="nav-icon">🤖</span>
+              <span className="nav-label">AI</span>
+            </button>
+
+            <button
+              className={`nav-button ${activePanel === 'loop' ? 'active' : ''}`}
+              onClick={() => setActivePanel('loop')}
+              title="Loop Automation"
+            >
+              <span className="nav-icon">🔄</span>
+              <span className="nav-label">Loop</span>
+            </button>
+
+            <button
+              className={`nav-button ${activePanel === 'community' ? 'active' : ''}`}
+              onClick={() => setActivePanel('community')}
+              title="Community Hub"
+            >
+              <span className="nav-icon">🌍</span>
+              <span className="nav-label">Community</span>
+            </button>
+
             {mode === 'beginner' && (
               <button
                 className={`nav-button ${activePanel === 'wizard' ? 'active' : ''}`}
@@ -265,32 +297,13 @@ export default function LofiStudio() {
 
           {activePanel === 'export' && <ExportAutomation />}
 
-          {activePanel === 'wizard' && (
-            <div className="wizard-panel">
-              <div className="wizard-content">
-                <h2>🧙 Guided Wizard</h2>
-                <p>Step-by-step workflow coming soon!</p>
-                <div className="wizard-steps">
-                  <div className="wizard-step">
-                    <span className="step-number">1</span>
-                    <span className="step-label">Choose Template or Start Fresh</span>
-                  </div>
-                  <div className="wizard-step">
-                    <span className="step-number">2</span>
-                    <span className="step-label">Customize Your Scene</span>
-                  </div>
-                  <div className="wizard-step">
-                    <span className="step-number">3</span>
-                    <span className="step-label">Add Music & Animations</span>
-                  </div>
-                  <div className="wizard-step">
-                    <span className="step-number">4</span>
-                    <span className="step-label">Preview & Export</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {activePanel === 'wizard' && <GuidedWizard />}
+
+          {activePanel === 'ai' && <AIAssistant />}
+
+          {activePanel === 'loop' && <LoopAutomation />}
+
+          {activePanel === 'community' && <CommunityHub />}
         </div>
 
         {/* Right sidebar - Properties/Info */}
@@ -358,9 +371,16 @@ export default function LofiStudio() {
             {activePanel === 'animations' && 'Select an element first, then apply animations with one click'}
             {activePanel === 'assets' && 'Import your own files or generate assets with AI'}
             {activePanel === 'export' && 'Choose a platform preset or customize your export settings'}
+            {activePanel === 'wizard' && 'Follow the step-by-step guide to create your first lofi video'}
+            {activePanel === 'ai' && 'Use AI tools to enhance your scene with smart suggestions'}
+            {activePanel === 'loop' && 'Create perfect seamless loops with automatic synchronization'}
+            {activePanel === 'community' && 'Discover and share amazing lofi creations'}
           </span>
         </div>
       )}
+
+      {/* Mobile Controls */}
+      <MobileControls />
     </div>
   )
 }

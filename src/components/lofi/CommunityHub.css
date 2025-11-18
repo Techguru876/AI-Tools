@@ -1,0 +1,123 @@
+.community-hub {
+  height: 100%;
+  padding: 24px;
+  background: var(--bg-darker, #13131a);
+  overflow-y: auto;
+}
+
+.community-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: var(--brand-cyan, #00d9ff);
+}
+
+.community-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 24px 0;
+}
+
+.community-tabs button {
+  padding: 10px 20px;
+  background: var(--bg-dark, #1a1a24);
+  border: 1px solid var(--border-default, #2a2a3a);
+  border-radius: 6px;
+  color: var(--text-primary, #e8e8f0);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.community-tabs button.active {
+  background: var(--brand-cyan, #00d9ff);
+  color: #ffffff;
+}
+
+.community-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.community-card {
+  background: var(--bg-dark, #1a1a24);
+  border: 1px solid var(--border-default, #2a2a3a);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.community-card:hover {
+  border-color: var(--brand-cyan, #00d9ff);
+  transform: translateY(-4px);
+}
+
+.card-thumb {
+  height: 160px;
+}
+
+.card-info {
+  padding: 16px;
+}
+
+.card-info h4 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: var(--text-primary, #e8e8f0);
+}
+
+.card-info p {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: var(--text-secondary, #b0b0c8);
+}
+
+.card-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--text-tertiary, #7a7a90);
+}
+
+.download-btn {
+  width: 100%;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #00d9ff, #00b8d4);
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.download-btn:hover {
+  transform: scale(1.02);
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+}
+
+.upload-form input,
+.upload-form textarea {
+  padding: 12px;
+  background: var(--bg-dark, #1a1a24);
+  border: 1px solid var(--border-default, #2a2a3a);
+  border-radius: 6px;
+  color: var(--text-primary, #e8e8f0);
+  font-family: inherit;
+}
+
+.upload-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #00d9ff, #00b8d4);
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
