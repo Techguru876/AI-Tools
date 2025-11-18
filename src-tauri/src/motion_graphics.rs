@@ -70,6 +70,13 @@ impl ParticleSystem {
             }
         }
 
+        // Clone properties we need in the closure to avoid borrow conflicts
+        let gravity = self.properties.gravity;
+        let wind = self.properties.wind;
+        let turbulence = self.properties.turbulence;
+        let rotation_speed = self.properties.rotation_speed;
+        let color_over_life = self.properties.color_over_life.clone();
+
         // Update existing particles
         self.particles.retain_mut(|particle| {
             particle.age += delta_time;
@@ -79,20 +86,20 @@ impl ParticleSystem {
             }
 
             // Apply physics
-            particle.velocity.0 += self.properties.gravity.0 * delta_time;
-            particle.velocity.1 += self.properties.gravity.1 * delta_time;
-            particle.velocity.2 += self.properties.gravity.2 * delta_time;
+            particle.velocity.0 += gravity.0 * delta_time;
+            particle.velocity.1 += gravity.1 * delta_time;
+            particle.velocity.2 += gravity.2 * delta_time;
 
             // Apply wind
-            particle.velocity.0 += self.properties.wind.0 * delta_time;
-            particle.velocity.1 += self.properties.wind.1 * delta_time;
-            particle.velocity.2 += self.properties.wind.2 * delta_time;
+            particle.velocity.0 += wind.0 * delta_time;
+            particle.velocity.1 += wind.1 * delta_time;
+            particle.velocity.2 += wind.2 * delta_time;
 
             // Apply turbulence (noise)
-            if self.properties.turbulence > 0.0 {
+            if turbulence > 0.0 {
                 let mut rng = rand::thread_rng();
-                let turb_x = rng.gen_range(-self.properties.turbulence..self.properties.turbulence);
-                let turb_y = rng.gen_range(-self.properties.turbulence..self.properties.turbulence);
+                let turb_x = rng.gen_range(-turbulence..turbulence);
+                let turb_y = rng.gen_range(-turbulence..turbulence);
                 particle.velocity.0 += turb_x * delta_time;
                 particle.velocity.1 += turb_y * delta_time;
             }
@@ -103,11 +110,11 @@ impl ParticleSystem {
             particle.position.2 += particle.velocity.2 * delta_time;
 
             // Update rotation
-            particle.rotation += self.properties.rotation_speed * delta_time;
+            particle.rotation += rotation_speed * delta_time;
 
             // Update color/opacity based on lifetime
             let life_progress = particle.age / particle.lifetime;
-            particle.color = self.interpolate_color_over_life(life_progress);
+            particle.color = Self::interpolate_color(life_progress, &color_over_life);
 
             true // Keep particle alive
         });
@@ -154,21 +161,21 @@ impl ParticleSystem {
             lifetime: self.particle_lifetime,
             size: size * size_variance,
             rotation: rng.gen_range(0.0..360.0),
-            color: self.interpolate_color_over_life(0.0),
+            color: Self::interpolate_color(0.0, &self.properties.color_over_life),
         };
 
         self.particles.push(particle);
     }
 
-    fn interpolate_color_over_life(&self, life_progress: f32) -> (u8, u8, u8, u8) {
-        if self.properties.color_over_life.is_empty() {
+    fn interpolate_color(life_progress: f32, color_over_life: &[(f32, u8, u8, u8, u8)]) -> (u8, u8, u8, u8) {
+        if color_over_life.is_empty() {
             return (255, 255, 255, 255);
         }
 
         // Find surrounding color stops
-        for i in 0..self.properties.color_over_life.len() - 1 {
-            let (t0, r0, g0, b0, a0) = self.properties.color_over_life[i];
-            let (t1, r1, g1, b1, a1) = self.properties.color_over_life[i + 1];
+        for i in 0..color_over_life.len() - 1 {
+            let (t0, r0, g0, b0, a0) = color_over_life[i];
+            let (t1, r1, g1, b1, a1) = color_over_life[i + 1];
 
             if life_progress >= t0 && life_progress <= t1 {
                 let t = (life_progress - t0) / (t1 - t0);
@@ -181,7 +188,7 @@ impl ParticleSystem {
             }
         }
 
-        self.properties.color_over_life.last().map(|&(_, r, g, b, a)| (r, g, b, a)).unwrap()
+        color_over_life.last().map(|&(_, r, g, b, a)| (r, g, b, a)).unwrap_or((255, 255, 255, 255))
     }
 
     /// Renders particles to buffer
