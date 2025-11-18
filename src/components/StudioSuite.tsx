@@ -11,6 +11,7 @@ import ExplainerStudio from './explainer/ExplainerStudio'
 import ASMRStudio from './asmr/ASMRStudio'
 import StorytellingStudio from './storytelling/StorytellingStudio'
 import ProductivityStudio from './productivity/ProductivityStudio'
+import HorrorStudio from './horror/HorrorStudio'
 import './StudioSuite.css'
 
 export type StudioType =
@@ -20,6 +21,7 @@ export type StudioType =
   | 'asmr'
   | 'storytelling'
   | 'productivity'
+  | 'horror'
   | 'news'
   | 'meme'
 
@@ -77,6 +79,13 @@ export default function StudioSuite() {
       icon: '⏱️',
       description: 'Pomodoro & study timers',
       color: '#ff9800',
+    },
+    {
+      id: 'horror',
+      name: 'Horror',
+      icon: '🎃',
+      description: 'Horror stories & creepypasta',
+      color: '#b71c1c',
     },
     {
       id: 'news',
@@ -153,6 +162,7 @@ export default function StudioSuite() {
         {activeStudio === 'asmr' && <ASMRStudio />}
         {activeStudio === 'storytelling' && <StorytellingStudio />}
         {activeStudio === 'productivity' && <ProductivityStudio />}
+        {activeStudio === 'horror' && <HorrorStudio />}
       </div>
 
       {/* Pro Mode Transition */}
