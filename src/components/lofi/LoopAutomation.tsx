@@ -73,10 +73,14 @@ export default function LoopAutomation() {
       }
 
       setLoopAnalysis(mockAnalysis)
-      setAudioLoopStart(mockAnalysis.audioLoop.start)
-      setAudioLoopEnd(mockAnalysis.audioLoop.end)
-      setVisualLoopStart(mockAnalysis.visualLoop.start)
-      setVisualLoopEnd(mockAnalysis.visualLoop.end)
+      if (mockAnalysis.audioLoop) {
+        setAudioLoopStart(mockAnalysis.audioLoop.start)
+        setAudioLoopEnd(mockAnalysis.audioLoop.end)
+      }
+      if (mockAnalysis.visualLoop) {
+        setVisualLoopStart(mockAnalysis.visualLoop.start)
+        setVisualLoopEnd(mockAnalysis.visualLoop.end)
+      }
     } catch (error) {
       console.error('Loop analysis failed:', error)
     } finally {

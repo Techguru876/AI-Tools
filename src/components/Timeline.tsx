@@ -5,7 +5,7 @@
 
 import { useRef, useState } from 'react'
 import { useProjectStore } from '../stores/projectStore'
-import { invoke } from '@tauri-apps/api/tauri'
+// import { invoke } from '@tauri-apps/api/tauri'
 import '../styles/Timeline.css'
 
 export default function Timeline() {

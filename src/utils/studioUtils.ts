@@ -280,7 +280,7 @@ export interface UploadSchedule {
 }
 
 export async function scheduleUpload(
-  videoPath: string,
+  _videoPath: string,
   schedule: UploadSchedule
 ): Promise<{ id: string; status: string }> {
   console.log('Scheduling upload:', schedule)

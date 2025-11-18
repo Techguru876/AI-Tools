@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { generateTTS, parseCSV, searchStockMedia, batchProcess } from '../../utils/studioUtils'
+import { generateTTS, searchStockMedia, batchProcess } from '../../utils/studioUtils'
 import './HorrorStudio.css'
 
 interface Scene {
@@ -91,12 +91,13 @@ export default function HorrorStudio() {
     { id: 'static', name: 'Static Noise', desc: 'TV static overlay' },
   ]
 
-  const brandingPacks = [
-    { id: 'minimal', name: 'Minimal Dark' },
-    { id: 'blood-red', name: 'Blood Red' },
-    { id: 'gothic', name: 'Gothic' },
-    { id: 'vhs-retro', name: 'VHS Retro' },
-  ]
+  // Branding packs feature - reserved for future use
+  // const brandingPacks = [
+  //   { id: 'minimal', name: 'Minimal Dark' },
+  //   { id: 'blood-red', name: 'Blood Red' },
+  //   { id: 'gothic', name: 'Gothic' },
+  //   { id: 'vhs-retro', name: 'VHS Retro' },
+  // ]
 
   const handleCreateProject = () => {
     const newProject: HorrorProject = {
@@ -212,7 +213,7 @@ export default function HorrorStudio() {
     }))
   }
 
-  const handleSearchVisuals = async (sceneId: string) => {
+  const handleSearchVisuals = async (_sceneId: string) => {
     if (!visualSearchQuery.trim()) return
     const results = await searchStockMedia(visualSearchQuery, 'image', 'pixabay')
     setVisualSearchResults(results)

@@ -459,7 +459,7 @@ export const useLofiStore = create<LofiStoreState>()(
       },
 
       setMusicTrack: (track: MusicTrack | null) => {
-        get().updateScene({ music_track: track })
+        get().updateScene({ music_track: track ?? undefined })
       },
 
       detectLoopPoints: async () => {
@@ -514,7 +514,7 @@ export const useLofiStore = create<LofiStoreState>()(
       toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
       toggleGuides: () => set((state) => ({ showGuides: !state.showGuides })),
 
-      exportScene: async (format: 'video' | 'gif' | 'frames') => {
+      exportScene: async (_format: 'video' | 'gif' | 'frames') => {
         // Would call Rust backend for actual export
         return '/path/to/exported/file'
       },

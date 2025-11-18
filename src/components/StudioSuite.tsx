@@ -8,7 +8,7 @@ import { useState } from 'react'
 import LofiStudio from './lofi/LofiStudio'
 import QuotesStudio from './quotes/QuotesStudio'
 import ExplainerStudio from './explainer/ExplainerStudio'
-import ASMRStudio from './asmr/ASMRStudio'
+import AsmrStudio from './asmr/AsmrStudio'
 import StorytellingStudio from './storytelling/StorytellingStudio'
 import ProductivityStudio from './productivity/ProductivityStudio'
 import HorrorStudio from './horror/HorrorStudio'
@@ -159,7 +159,7 @@ export default function StudioSuite() {
         {activeStudio === 'lofi' && <LofiStudio />}
         {activeStudio === 'quotes' && <QuotesStudio />}
         {activeStudio === 'explainer' && <ExplainerStudio />}
-        {activeStudio === 'asmr' && <ASMRStudio />}
+        {activeStudio === 'asmr' && <AsmrStudio />}
         {activeStudio === 'storytelling' && <StorytellingStudio />}
         {activeStudio === 'productivity' && <ProductivityStudio />}
         {activeStudio === 'horror' && <HorrorStudio />}

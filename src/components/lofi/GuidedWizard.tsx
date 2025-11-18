@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react'
-import { useLofiStore, LofiTemplate, AnimationPreset, MusicTrack } from '../../stores/lofiStore'
+import { useLofiStore, LofiTemplate, MusicTrack } from '../../stores/lofiStore'
 import './GuidedWizard.css'
 
 type WizardStep = 'welcome' | 'choose-start' | 'customize' | 'add-music' | 'add-animations' | 'preview' | 'export' | 'complete'
@@ -22,7 +22,6 @@ interface WizardState {
 
 export default function GuidedWizard() {
   const {
-    currentScene,
     createNewScene,
     applyTemplate,
     setMusicTrack,

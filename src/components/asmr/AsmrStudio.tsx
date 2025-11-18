@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { autoSelectMusic, batchProcess } from '../../utils/studioUtils'
+// Unused imports removed
 import './AsmrStudio.css'
 
 interface SoundLayer {

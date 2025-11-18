@@ -177,20 +177,6 @@ export default function ExplainerStudio() {
     setSearchResults(results)
   }
 
-  const handleAddVisualToSlide = (videoId: string, slideId: string, visualUrl: string, visualType: 'image' | 'broll') => {
-    setVideos(videos.map(v => {
-      if (v.id === videoId) {
-        v.slides = v.slides.map(s => {
-          if (s.id === slideId) {
-            return { ...s, visualUrl, visualType }
-          }
-          return s
-        })
-      }
-      return v
-    }))
-  }
-
   const handleUpdateSlide = (videoId: string, slideId: string, field: 'title' | 'content' | 'duration', value: string | number) => {
     setVideos(videos.map(v => {
       if (v.id === videoId) {

@@ -25,7 +25,7 @@ interface SegmentationResult {
 }
 
 export default function AIAssistant() {
-  const { currentScene, suggestedPalettes, suggestedMusic, updateElement } = useLofiStore()
+  const { currentScene } = useLofiStore()
 
   const [activeTool, setActiveTool] = useState<AITool | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)

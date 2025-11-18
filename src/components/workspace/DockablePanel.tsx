@@ -5,7 +5,7 @@
  */
 
 import { useState, useRef, useEffect, ReactNode, CSSProperties } from 'react'
-import { useWorkspaceStore, PanelConfig } from '../../stores/workspaceStore'
+import { useWorkspaceStore } from '../../stores/workspaceStore'
 import './DockablePanel.css'
 
 interface DockablePanelProps {
@@ -35,12 +35,12 @@ export default function DockablePanel({
   collapsible = true,
   closable = true,
 }: DockablePanelProps) {
-  const { panels, updatePanel, removePanel, addPanel } = useWorkspaceStore()
+  const { panels, updatePanel, addPanel } = useWorkspaceStore()
   const panel = panels.find(p => p.id === id)
 
   const [isDragging, setIsDragging] = useState(false)
-  const [isResizing, setIsResizing] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [_isResizing, setIsResizing] = useState(false)
+  const [_dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const panelRef = useRef<HTMLDivElement>(null)
 
   // Initialize panel if it doesn't exist
@@ -74,7 +74,7 @@ export default function DockablePanel({
     }
   }
 
-  const handleResizeStart = (e: React.MouseEvent, direction: 'horizontal' | 'vertical') => {
+  const handleResizeStart = (_e: React.MouseEvent, _direction: 'horizontal' | 'vertical') => {
     e.preventDefault()
     e.stopPropagation()
     setIsResizing(true)

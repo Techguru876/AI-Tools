@@ -19,7 +19,7 @@ import './styles/App.css'
 function App() {
   const [activeMode, setActiveMode] = useState<'video' | 'photo'>('video')
   const [systemInfo, setSystemInfo] = useState<any>(null)
-  const { project, initProject } = useProjectStore()
+  const { initProject } = useProjectStore()
 
   useEffect(() => {
     // Initialize application
