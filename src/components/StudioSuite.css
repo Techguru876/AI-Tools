@@ -37,6 +37,32 @@
   letter-spacing: 0.05em;
 }
 
+.header-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.settings-button {
+  padding: 10px 20px;
+  background: var(--bg-dark, #1a1a24);
+  border: 1px solid var(--border-default, #2a2a3a);
+  border-radius: 8px;
+  color: var(--text-primary, #e8e8f0);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.settings-button:hover {
+  background: var(--bg-darker, #13131a);
+  border-color: #00d9ff;
+  color: #00d9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 217, 255, 0.2);
+}
+
 .pro-mode-button {
   padding: 10px 20px;
   background: linear-gradient(135deg, #a855f7, #9333ea);

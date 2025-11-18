@@ -12,6 +12,9 @@ import AsmrStudio from './asmr/AsmrStudio'
 import StorytellingStudio from './storytelling/StorytellingStudio'
 import ProductivityStudio from './productivity/ProductivityStudio'
 import HorrorStudio from './horror/HorrorStudio'
+import NewsStudio from './news/NewsStudio'
+import MemeStudio from './meme/MemeStudio'
+import Settings from './Settings'
 import './StudioSuite.css'
 
 export type StudioType =
@@ -33,9 +36,14 @@ interface Studio {
   color: string
 }
 
-export default function StudioSuite() {
+interface StudioSuiteProps {
+  onSwitchToProMode?: () => void
+}
+
+export default function StudioSuite({ onSwitchToProMode }: StudioSuiteProps = {}) {
   const [activeStudio, setActiveStudio] = useState<StudioType>('lofi')
   const [showProTransition, setShowProTransition] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
 
   const studios: Studio[] = [
     {
@@ -91,25 +99,27 @@ export default function StudioSuite() {
       id: 'news',
       name: 'News',
       icon: '📰',
-      description: 'News & trends (Coming Soon)',
+      description: 'News & trending videos',
       color: '#e91e63',
     },
     {
       id: 'meme',
       name: 'Meme',
       icon: '😂',
-      description: 'Reactions & memes (Coming Soon)',
+      description: 'Viral memes & reactions',
       color: '#00bcd4',
     },
   ]
 
   const handleOpenInProMode = () => {
-    setShowProTransition(true)
-    // Would transition to Core Tool with current project
-    setTimeout(() => {
-      alert('Transitioning to Core Tool (Pro Mode)...\n\nYour project will open with full advanced editing capabilities.')
-      setShowProTransition(false)
-    }, 1500)
+    if (onSwitchToProMode) {
+      setShowProTransition(true)
+      setTimeout(() => {
+        onSwitchToProMode()
+      }, 1500)
+    } else {
+      alert('Pro Mode transition is not available in this context.')
+    }
   }
 
   return (
@@ -121,6 +131,9 @@ export default function StudioSuite() {
           <p className="tagline">Create Without Limits</p>
         </div>
         <div className="header-right">
+          <button className="settings-button" onClick={() => setShowSettings(true)}>
+            ⚙️ Settings
+          </button>
           <button className="pro-mode-button" onClick={handleOpenInProMode}>
             ⚡ Open in Pro Mode
           </button>
@@ -132,18 +145,11 @@ export default function StudioSuite() {
         {studios.map((studio) => (
           <button
             key={studio.id}
-            className={`studio-tab ${activeStudio === studio.id ? 'active' : ''} ${
-              studio.id === 'news' || studio.id === 'meme' ? 'disabled' : ''
-            }`}
-            onClick={() => {
-              if (studio.id !== 'news' && studio.id !== 'meme') {
-                setActiveStudio(studio.id)
-              }
-            }}
+            className={`studio-tab ${activeStudio === studio.id ? 'active' : ''}`}
+            onClick={() => setActiveStudio(studio.id)}
             style={{
               '--studio-color': studio.color,
             } as React.CSSProperties}
-            disabled={studio.id === 'news' || studio.id === 'meme'}
           >
             <span className="tab-icon">{studio.icon}</span>
             <div className="tab-info">
@@ -163,6 +169,8 @@ export default function StudioSuite() {
         {activeStudio === 'storytelling' && <StorytellingStudio />}
         {activeStudio === 'productivity' && <ProductivityStudio />}
         {activeStudio === 'horror' && <HorrorStudio />}
+        {activeStudio === 'news' && <NewsStudio />}
+        {activeStudio === 'meme' && <MemeStudio />}
       </div>
 
       {/* Pro Mode Transition */}
@@ -176,6 +184,9 @@ export default function StudioSuite() {
           </div>
         </div>
       )}
+
+      {/* Settings Modal */}
+      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
     </div>
   )
 }
