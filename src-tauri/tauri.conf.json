@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "PhotoVideo Pro",
+    "productName": "InfinityStudio",
     "version": "1.0.0"
   },
   "tauri": {
@@ -49,8 +49,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.photovideo.pro",
-      "longDescription": "Professional photo and video editing application combining advanced features from industry-leading tools",
+      "identifier": "com.infinitystudio.app",
+      "longDescription": "All-in-one content creation suite with specialized studios for lofi music videos, quotes, explainer videos, ASMR, storytelling, productivity timers, and horror content",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -59,7 +59,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "Advanced photo and video editor",
+      "shortDescription": "All-in-one content creation suite",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -80,7 +80,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "PhotoVideo Pro",
+        "title": "InfinityStudio",
         "width": 1600,
         "height": 1000,
         "minWidth": 1200,
