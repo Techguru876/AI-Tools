@@ -1,0 +1,19 @@
+.menu-bar {
+  height: 40px;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-md);
+  -webkit-app-region: drag;
+}
+
+.app-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.menu-spacer {
+  flex: 1;
+}

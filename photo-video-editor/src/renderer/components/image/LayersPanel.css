@@ -1,0 +1,138 @@
+.layers-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.layers-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--bg-dark);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.layer-item:hover {
+  background: var(--bg-light);
+}
+
+.layer-item.active {
+  background: var(--bg-light);
+  border: 1px solid var(--primary);
+}
+
+.layer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.layer-controls button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 12px;
+}
+
+.layer-thumbnail {
+  width: 40px;
+  height: 40px;
+  background: var(--bg-medium);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.thumbnail-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #333 25%, transparent 25%),
+    linear-gradient(-45deg, #333 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #333 75%),
+    linear-gradient(-45deg, transparent 75%, #333 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+}
+
+.layer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.layer-name {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layer-properties {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.blend-mode-select {
+  font-size: 11px;
+  padding: 2px 4px;
+}
+
+.opacity-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.opacity-control input {
+  flex: 1;
+}
+
+.opacity-control span {
+  font-size: 11px;
+  min-width: 35px;
+  text-align: right;
+}
+
+.delete-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+}
+
+.delete-btn:hover {
+  color: #FF3B30;
+}
+
+.layer-toolbar {
+  height: 50px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+}
+
+.layer-toolbar button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 18px;
+}

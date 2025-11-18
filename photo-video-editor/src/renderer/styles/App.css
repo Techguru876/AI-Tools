@@ -1,0 +1,69 @@
+/**
+ * APP LAYOUT STYLES
+ */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 300px;
+  background: var(--bg-medium);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-left {
+  border-right: 1px solid var(--border);
+}
+
+.sidebar-right {
+  border-left: 1px solid var(--border);
+  border-right: none;
+}
+
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-dark);
+}
+
+.timeline-container {
+  height: 300px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-medium);
+}
+
+.panel-header {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}

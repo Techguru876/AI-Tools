@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build output
+dist/
+build/
+release/
+
+# Temporary files
+temp/
+*.tmp
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# AI Models (optional - too large for git)
+models/*
+!models/.gitkeep
+
+# Projects and autosave
+projects/autosave/

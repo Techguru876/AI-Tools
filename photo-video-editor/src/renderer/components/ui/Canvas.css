@@ -1,0 +1,49 @@
+.canvas-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #666;
+}
+
+.canvas-toolbar {
+  height: 40px;
+  background: var(--bg-medium);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-md);
+}
+
+.canvas-wrapper {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.canvas-wrapper canvas {
+  background: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  transform-origin: center;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.zoom-controls button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+}
+
+.zoom-controls span {
+  min-width: 50px;
+  text-align: center;
+  font-size: 12px;
+}

@@ -1,0 +1,119 @@
+/**
+ * GLOBAL STYLES
+ *
+ * Base styles and CSS variables
+ */
+
+:root {
+  /* Colors */
+  --bg-dark: #1E1E1E;
+  --bg-medium: #2D2D2D;
+  --bg-light: #3C3C3C;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --border: #3C3C3C;
+  --primary: #007AFF;
+  --highlight: #007AFF;
+  --selection: rgba(0, 122, 255, 0.3);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+button {
+  background: var(--bg-medium);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: var(--bg-light);
+}
+
+button:active {
+  background: var(--bg-dark);
+}
+
+button.active {
+  background: var(--primary);
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-light);
+  outline: none;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--primary);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+select {
+  background: var(--bg-medium);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
