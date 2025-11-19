@@ -29,8 +29,8 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // Enable standalone output for optimized Docker builds
-  output: 'standalone',
+  // Note: Remove 'output: standalone' for Vercel deployment
+  // Only use standalone for Docker/self-hosted deployments
 }
 
 module.exports = nextConfig
