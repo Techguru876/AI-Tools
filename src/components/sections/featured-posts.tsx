@@ -49,32 +49,60 @@ export function FeaturedPosts() {
         </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {featuredPosts.map((post) => (
-          <Link key={post.id} href={`/posts/${post.id}`}>
-            <Card className="h-full transition-all hover:shadow-lg">
-              <CardHeader>
-                <div className="mb-2 flex items-center justify-between">
-                  <Badge variant="secondary">{post.category}</Badge>
-                  {post.trending && (
-                    <div className="flex items-center text-xs text-orange-500">
-                      <TrendingUp className="mr-1 h-3 w-3" />
-                      Trending
+      <div className="grid auto-rows-[200px] gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {featuredPosts.map((post, index) => {
+          // Create dynamic bento layout - first post is featured (larger)
+          const isFeatured = index === 0
+          const gridClass = isFeatured
+            ? 'md:col-span-2 md:row-span-2'
+            : index === 2
+            ? 'md:row-span-2'
+            : ''
+
+          return (
+            <Link key={post.id} href={`/posts/${post.id}`} className={gridClass}>
+              <Card className="interactive-card group h-full overflow-hidden">
+                <CardHeader className="relative h-full">
+                  {/* Gradient overlay for better text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+
+                  <div className="relative z-10 mb-2 flex items-center justify-between">
+                    <Badge variant="secondary" className="backdrop-blur-sm">
+                      {post.category}
+                    </Badge>
+                    {post.trending && (
+                      <div className="flex items-center gap-1 rounded-full bg-orange-500/20 px-2 py-1 text-xs text-orange-500 backdrop-blur-sm">
+                        <TrendingUp className="h-3 w-3" />
+                        Trending
+                      </div>
+                    )}
+                  </div>
+
+                  <CardTitle
+                    className={`relative z-10 transition-colors group-hover:text-primary ${
+                      isFeatured ? 'text-2xl' : 'line-clamp-2 text-lg'
+                    }`}
+                  >
+                    {post.title}
+                  </CardTitle>
+
+                  <CardDescription
+                    className={`relative z-10 mt-2 ${isFeatured ? 'line-clamp-4' : 'line-clamp-2'}`}
+                  >
+                    {post.excerpt}
+                  </CardDescription>
+
+                  <div className="relative z-10 mt-auto flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {post.readTime} min
                     </div>
-                  )}
-                </div>
-                <CardTitle className="line-clamp-2">{post.title}</CardTitle>
-                <CardDescription className="line-clamp-3">{post.excerpt}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <Clock className="mr-1 h-3 w-3" />
-                  {post.readTime} min read
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                  </div>
+                </CardHeader>
+              </Card>
+            </Link>
+          )
+        })}
       </div>
     </section>
   )

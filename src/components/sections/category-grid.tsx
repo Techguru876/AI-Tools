@@ -33,14 +33,23 @@ export function CategoryGrid() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-        {categories.map((category) => {
+        {categories.map((category, index) => {
           const Icon = category.icon
           return (
-            <Link key={category.name} href={`/category/${category.name.toLowerCase()}`}>
-              <Card className="transition-all hover:shadow-lg hover:scale-105">
+            <Link
+              key={category.name}
+              href={`/category/${category.name.toLowerCase()}`}
+              className="reveal-on-scroll"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              <Card className="interactive-card group h-full">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{category.name}</CardTitle>
-                  <Icon className={`h-4 w-4 ${category.color}`} />
+                  <CardTitle className="text-sm font-medium transition-colors group-hover:text-primary">
+                    {category.name}
+                  </CardTitle>
+                  <Icon
+                    className={`h-4 w-4 transition-transform group-hover:scale-110 ${category.color}`}
+                  />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{category.count}</div>
