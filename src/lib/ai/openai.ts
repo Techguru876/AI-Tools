@@ -158,6 +158,10 @@ export async function generateImage(
     style: options?.style || 'vivid',
   })
 
+  if (!response.data || response.data.length === 0) {
+    throw new Error('No image data returned from OpenAI')
+  }
+
   const image = response.data[0]
   if (!image.url) {
     throw new Error('No image URL returned from OpenAI')
