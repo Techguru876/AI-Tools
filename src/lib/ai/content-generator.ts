@@ -1,4 +1,5 @@
 import { generateContent } from './claude'
+import { generateContentWithOpenAI } from './openai'
 import { SYSTEM_PROMPTS, CONTENT_PROMPTS } from './prompts'
 import { slugify } from '@/lib/utils'
 import type { ContentType } from '@prisma/client'
@@ -13,6 +14,7 @@ export interface GenerateArticleInput {
   product1?: string
   product2?: string
   criteria?: string
+  aiProvider?: 'claude' | 'openai' // Allow choosing AI provider
 }
 
 export interface GeneratedArticle {
@@ -37,6 +39,11 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
     case 'NEWS':
       systemPrompt = SYSTEM_PROMPTS.TECH_NEWS
       userPrompt = CONTENT_PROMPTS.generateNews(input.topic, input.additionalContext)
+      break
+
+    case 'AI_NEWS':
+      systemPrompt = SYSTEM_PROMPTS.AI_NEWS
+      userPrompt = CONTENT_PROMPTS.generateAINews(input.topic, input.additionalContext)
       break
 
     case 'REVIEW':
@@ -74,13 +81,25 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
       break
   }
 
-  // Generate the article content
-  const result = await generateContent({
-    prompt: userPrompt,
-    systemPrompt,
-    temperature: 0.7,
-    maxTokens: 4000,
-  })
+  // Generate the article content using selected AI provider
+  const provider = input.aiProvider || 'claude'
+  let result
+
+  if (provider === 'openai') {
+    result = await generateContentWithOpenAI({
+      prompt: userPrompt,
+      systemPrompt,
+      temperature: 0.7,
+      maxTokens: 4000,
+    })
+  } else {
+    result = await generateContent({
+      prompt: userPrompt,
+      systemPrompt,
+      temperature: 0.7,
+      maxTokens: 4000,
+    })
+  }
 
   // Extract title from the generated content (first H1)
   const titleMatch = result.content.match(/^#\s+(.+)$/m)

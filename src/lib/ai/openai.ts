@@ -1,0 +1,263 @@
+import OpenAI from 'openai'
+import { env } from '@/lib/env'
+
+// Initialize OpenAI client (optional - only if API key is provided)
+export const openai = env.OPENAI_API_KEY
+  ? new OpenAI({
+      apiKey: env.OPENAI_API_KEY,
+    })
+  : null
+
+export interface GenerateContentOptionsOpenAI {
+  prompt: string
+  model?: string
+  temperature?: number
+  maxTokens?: number
+  systemPrompt?: string
+}
+
+export interface GeneratedContentOpenAI {
+  content: string
+  usage: {
+    inputTokens: number
+    outputTokens: number
+    totalTokens: number
+  }
+}
+
+/**
+ * Generate content using OpenAI's GPT models
+ * This provides an alternative to Claude for content generation
+ */
+export async function generateContentWithOpenAI(
+  options: GenerateContentOptionsOpenAI
+): Promise<GeneratedContentOpenAI> {
+  if (!openai) {
+    throw new Error('OpenAI API key not configured')
+  }
+
+  const {
+    prompt,
+    model = 'gpt-4-turbo-preview',
+    temperature = 0.7,
+    maxTokens = 4000,
+    systemPrompt,
+  } = options
+
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = []
+
+  if (systemPrompt) {
+    messages.push({
+      role: 'system',
+      content: systemPrompt,
+    })
+  }
+
+  messages.push({
+    role: 'user',
+    content: prompt,
+  })
+
+  const completion = await openai.chat.completions.create({
+    model,
+    messages,
+    temperature,
+    max_tokens: maxTokens,
+  })
+
+  const content = completion.choices[0]?.message?.content
+  if (!content) {
+    throw new Error('No content generated from OpenAI')
+  }
+
+  return {
+    content,
+    usage: {
+      inputTokens: completion.usage?.prompt_tokens || 0,
+      outputTokens: completion.usage?.completion_tokens || 0,
+      totalTokens: completion.usage?.total_tokens || 0,
+    },
+  }
+}
+
+/**
+ * Generate embeddings for semantic search and content recommendations
+ */
+export async function generateEmbedding(text: string): Promise<number[]> {
+  if (!openai) {
+    throw new Error('OpenAI API key not configured')
+  }
+
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-3-small',
+    input: text,
+  })
+
+  return response.data[0].embedding
+}
+
+/**
+ * Generate embeddings for multiple texts in batch
+ */
+export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
+  if (!openai) {
+    throw new Error('OpenAI API key not configured')
+  }
+
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-3-small',
+    input: texts,
+  })
+
+  return response.data.map((item) => item.embedding)
+}
+
+/**
+ * Calculate cosine similarity between two embedding vectors
+ * Used for finding similar content
+ */
+export function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length) {
+    throw new Error('Vectors must have the same length')
+  }
+
+  let dotProduct = 0
+  let normA = 0
+  let normB = 0
+
+  for (let i = 0; i < a.length; i++) {
+    dotProduct += a[i] * b[i]
+    normA += a[i] * a[i]
+    normB += b[i] * b[i]
+  }
+
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB))
+}
+
+/**
+ * Generate an image using DALL-E 3
+ */
+export async function generateImage(
+  prompt: string,
+  options?: {
+    size?: '1024x1024' | '1792x1024' | '1024x1792'
+    quality?: 'standard' | 'hd'
+    style?: 'vivid' | 'natural'
+  }
+): Promise<{ url: string; revisedPrompt: string }> {
+  if (!openai) {
+    throw new Error('OpenAI API key not configured')
+  }
+
+  const response = await openai.images.generate({
+    model: 'dall-e-3',
+    prompt,
+    n: 1,
+    size: options?.size || '1024x1024',
+    quality: options?.quality || 'standard',
+    style: options?.style || 'vivid',
+  })
+
+  const image = response.data[0]
+  if (!image.url) {
+    throw new Error('No image URL returned from OpenAI')
+  }
+
+  return {
+    url: image.url,
+    revisedPrompt: image.revised_prompt || prompt,
+  }
+}
+
+/**
+ * Analyze sentiment of text using GPT-4
+ */
+export async function analyzeSentiment(
+  text: string
+): Promise<{
+  sentiment: 'positive' | 'negative' | 'neutral'
+  score: number
+  explanation: string
+}> {
+  if (!openai) {
+    throw new Error('OpenAI API key not configured')
+  }
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4-turbo-preview',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a sentiment analysis expert. Analyze the sentiment of the given text and respond with JSON only.',
+      },
+      {
+        role: 'user',
+        content: `Analyze the sentiment of this text and respond with JSON in this format:
+{
+  "sentiment": "positive" | "negative" | "neutral",
+  "score": 0.0 to 1.0,
+  "explanation": "brief explanation"
+}
+
+Text: ${text}`,
+      },
+    ],
+    temperature: 0.3,
+    response_format: { type: 'json_object' },
+  })
+
+  const content = completion.choices[0]?.message?.content
+  if (!content) {
+    throw new Error('No sentiment analysis returned')
+  }
+
+  return JSON.parse(content)
+}
+
+/**
+ * Moderate content for inappropriate material
+ */
+export async function moderateContent(text: string): Promise<{
+  flagged: boolean
+  categories: {
+    hate: boolean
+    hateThreatening: boolean
+    harassment: boolean
+    harassmentThreatening: boolean
+    selfHarm: boolean
+    selfHarmIntent: boolean
+    selfHarmInstructions: boolean
+    sexual: boolean
+    sexualMinors: boolean
+    violence: boolean
+    violenceGraphic: boolean
+  }
+}> {
+  if (!openai) {
+    throw new Error('OpenAI API key not configured')
+  }
+
+  const moderation = await openai.moderations.create({
+    input: text,
+  })
+
+  const result = moderation.results[0]
+
+  return {
+    flagged: result.flagged,
+    categories: {
+      hate: result.categories.hate,
+      hateThreatening: result.categories['hate/threatening'],
+      harassment: result.categories.harassment,
+      harassmentThreatening: result.categories['harassment/threatening'],
+      selfHarm: result.categories['self-harm'],
+      selfHarmIntent: result.categories['self-harm/intent'],
+      selfHarmInstructions: result.categories['self-harm/instructions'],
+      sexual: result.categories.sexual,
+      sexualMinors: result.categories['sexual/minors'],
+      violence: result.categories.violence,
+      violenceGraphic: result.categories['violence/graphic'],
+    },
+  }
+}

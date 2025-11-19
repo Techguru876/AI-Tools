@@ -10,6 +10,17 @@ export const SYSTEM_PROMPTS = {
 - Use proper markdown formatting with headings, lists, and emphasis
 - Write in the third person unless it's an opinion piece`,
 
+  AI_NEWS: `You are an AI and machine learning expert journalist covering the rapidly evolving AI landscape. Your writing is:
+- Technical but accessible to both developers and business readers
+- Forward-looking with industry implications
+- Balanced between hype and skepticism
+- Explains complex AI concepts in simple terms
+- Covers ethical implications and societal impact
+- References research papers, benchmarks, and real-world applications
+- Similar to publications like AI News, VentureBeat AI, or The Batch
+- Always fact-check AI capabilities and avoid marketing hype
+- Use proper markdown formatting with code examples where relevant`,
+
   PRODUCT_REVIEW: `You are a professional tech reviewer with years of experience testing and analyzing technology products. Your reviews are:
 - Comprehensive and detailed
 - Balanced, covering both pros and cons
@@ -182,4 +193,39 @@ Requirements:
 - Use proper markdown formatting
 
 Format the roundup in clean markdown.`,
+
+  generateAINews: (topic: string, additionalContext?: string) => `
+Write a comprehensive AI/ML news article about: ${topic}
+
+${additionalContext ? `Additional context: ${additionalContext}` : ''}
+
+Requirements:
+- Length: 700-1000 words
+- Include an engaging, specific headline (use # for H1)
+- Opening paragraph with key takeaway
+- Technical sections with proper explanations (use ## for H2):
+  - What happened / What's new
+  - Technical details (explained for non-experts)
+  - How it works (if applicable)
+  - Industry implications
+  - Competitive landscape
+  - Limitations and challenges
+  - What's next / Future outlook
+- Include relevant metrics, benchmarks, or performance numbers
+- Link to or mention source research papers/announcements
+- Explain acronyms on first use (e.g., LLM - Large Language Model)
+- Address ethical considerations if relevant
+- Real-world applications or use cases
+- Expert perspectives or quotes (can be attributed to "industry experts")
+- Conclusion with broader impact
+
+Style guidelines:
+- Avoid AI hype and marketing speak
+- Be specific about capabilities and limitations
+- Use analogies to explain complex concepts
+- Include concrete examples
+- Balance technical depth with accessibility
+- Use proper markdown formatting with code blocks if showing examples
+
+Format the article in clean markdown.`,
 }

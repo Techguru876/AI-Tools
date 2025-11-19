@@ -22,6 +22,7 @@ export default function AIGeneratorPage() {
     specifications: '',
     product1: '',
     product2: '',
+    aiProvider: 'claude',
   })
 
   const handleGenerate = async () => {
@@ -91,12 +92,29 @@ export default function AIGeneratorPage() {
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               >
                 <option value="ARTICLE">Article</option>
-                <option value="NEWS">News</option>
+                <option value="NEWS">Tech News</option>
+                <option value="AI_NEWS">AI News</option>
                 <option value="REVIEW">Product Review</option>
                 <option value="GUIDE">How-to Guide</option>
                 <option value="COMPARISON">Comparison</option>
                 <option value="ROUNDUP">Best Of Roundup</option>
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="aiProvider">AI Provider</Label>
+              <select
+                id="aiProvider"
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                value={formData.aiProvider}
+                onChange={(e) => setFormData({ ...formData, aiProvider: e.target.value })}
+              >
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="openai">GPT-4 (OpenAI)</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Claude is recommended for tech content. GPT-4 is faster but may be less detailed.
+              </p>
             </div>
 
             <div className="space-y-2">

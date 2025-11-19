@@ -170,6 +170,7 @@ enum ContentType {
   COMPARISON
   GUIDE
   NEWS
+  AI_NEWS      // Dedicated AI and machine learning news
   ROUNDUP
   SPONSORED
 }
