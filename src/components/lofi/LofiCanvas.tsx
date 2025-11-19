@@ -197,9 +197,10 @@ export default function LofiCanvas({
       if (typeof element.source === 'string') {
         return element.source
       } else if (typeof element.source === 'object') {
-        return element.source.url || element.source.file_path || null
+        return element.source.path || element.source.url || null
       }
     }
+    // @ts-ignore - Legacy support for old templates
     return element.image_url || null
   }
 
