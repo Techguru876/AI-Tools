@@ -105,6 +105,9 @@ export default function LofiCanvas({
     }
   }
 
+  // Image cache for performance
+  const imageCache = useRef<Map<string, HTMLImageElement>>(new Map())
+
   const renderElement = (ctx: CanvasRenderingContext2D, element: SceneElement) => {
     ctx.save()
 
@@ -114,21 +117,109 @@ export default function LofiCanvas({
     ctx.scale(element.scale, element.scale)
     ctx.globalAlpha = element.opacity
 
-    // In a real implementation, this would:
-    // 1. Load the actual image/video from element.source
-    // 2. Draw it with proper dimensions
-    // 3. Apply blend modes
-    // For now, draw a placeholder
+    // Apply blend mode if specified
+    if (element.blend_mode) {
+      ctx.globalCompositeOperation = element.blend_mode
+    }
 
-    ctx.fillStyle = element.element_type === 'Background' ? '#2a2a3a' : '#00d9ff'
-    ctx.fillRect(-50, -50, 100, 100)
+    // Load and render actual image
+    const imageUrl = getElementImageUrl(element)
 
-    // Draw element name
-    ctx.fillStyle = '#ffffff'
-    ctx.font = '12px Inter'
-    ctx.fillText(element.name, -40, 60)
+    if (imageUrl) {
+      let img = imageCache.current.get(imageUrl)
+
+      if (!img) {
+        // Create and cache image
+        img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.src = imageUrl
+        imageCache.current.set(imageUrl, img)
+
+        // Re-render when image loads
+        img.onload = () => {
+          if (canvasRef.current) {
+            // Trigger re-render by updating a state that causes useEffect to run
+            setZoom((z) => z) // Dummy update to trigger re-render
+          }
+        }
+
+        img.onerror = () => {
+          console.error(`Failed to load image: ${imageUrl}`)
+          // Remove from cache so it can be retried
+          imageCache.current.delete(imageUrl)
+        }
+      }
+
+      // Draw image if loaded
+      if (img.complete && img.naturalWidth > 0) {
+        const imgWidth = img.naturalWidth
+        const imgHeight = img.naturalHeight
+        const aspectRatio = imgWidth / imgHeight
+
+        // Default render size based on element type
+        let renderWidth = 200
+        let renderHeight = 200 / aspectRatio
+
+        if (element.element_type === 'Background') {
+          // Backgrounds cover the entire canvas
+          renderWidth = width
+          renderHeight = height
+        } else if (element.element_type === 'Character') {
+          renderWidth = 150
+          renderHeight = 150 / aspectRatio
+        } else if (element.element_type === 'Prop') {
+          renderWidth = 100
+          renderHeight = 100 / aspectRatio
+        }
+
+        ctx.drawImage(
+          img,
+          -renderWidth / 2,
+          -renderHeight / 2,
+          renderWidth,
+          renderHeight
+        )
+      } else {
+        // Draw placeholder while loading
+        drawPlaceholder(ctx, element)
+      }
+    } else {
+      // No image URL, draw placeholder
+      drawPlaceholder(ctx, element)
+    }
 
     ctx.restore()
+  }
+
+  const getElementImageUrl = (element: SceneElement): string | null => {
+    // Extract image URL from various source types
+    if (element.source) {
+      if (typeof element.source === 'string') {
+        return element.source
+      } else if (typeof element.source === 'object') {
+        return element.source.url || element.source.file_path || null
+      }
+    }
+    return element.image_url || null
+  }
+
+  const drawPlaceholder = (ctx: CanvasRenderingContext2D, element: SceneElement) => {
+    // Draw placeholder rectangle
+    ctx.fillStyle = element.element_type === 'Background' ? '#2a2a3a' : 'rgba(0, 217, 255, 0.3)'
+    ctx.strokeStyle = '#00d9ff'
+    ctx.lineWidth = 2
+    ctx.setLineDash([5, 5])
+
+    const size = element.element_type === 'Background' ? 100 : 60
+    ctx.fillRect(-size / 2, -size / 2, size, size)
+    ctx.strokeRect(-size / 2, -size / 2, size, size)
+
+    // Draw element name
+    ctx.setLineDash([])
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '11px Inter, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(element.name || element.element_type, 0, size / 2 + 15)
   }
 
   const drawSelectionBox = (ctx: CanvasRenderingContext2D, element: SceneElement) => {

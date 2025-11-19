@@ -3,6 +3,8 @@
  * Common functions used across all studio mini-apps
  */
 
+import { fetchWithRetry } from './apiRetry'
+
 // API Configuration
 export interface APIConfig {
   openai?: string

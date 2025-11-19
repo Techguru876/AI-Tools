@@ -7,6 +7,8 @@ import React, { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import StudioSuite from './components/StudioSuite'
 import App from './App'
+import ErrorBoundary from './components/common/ErrorBoundary'
+import { ToastProvider } from './components/common/ToastContainer'
 import './styles/index.css'
 
 function InfinityStudio() {
@@ -54,6 +56,10 @@ function InfinityStudio() {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <InfinityStudio />
+    <ErrorBoundary>
+      <ToastProvider>
+        <InfinityStudio />
+      </ToastProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 )
