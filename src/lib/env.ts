@@ -3,11 +3,14 @@ import { z } from 'zod'
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.string().url(),
-    NEXTAUTH_SECRET: z.string().min(1),
+    // Optional for initial deployment - required when using database features
+    DATABASE_URL: z.string().url().optional(),
+    // Optional for initial deployment - required when using auth features
+    NEXTAUTH_SECRET: z.string().min(1).optional(),
     NEXTAUTH_URL: z.string().url().optional(),
 
-    ANTHROPIC_API_KEY: z.string().min(1),
+    // Optional for initial deployment - required when using AI generation features
+    ANTHROPIC_API_KEY: z.string().min(1).optional(),
     OPENAI_API_KEY: z.string().optional(),
 
     UNSPLASH_ACCESS_KEY: z.string().optional(),
@@ -28,7 +31,8 @@ export const env = createEnv({
     REDIS_URL: z.string().url().optional(),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().url(),
+    // Optional - defaults to localhost in development, should be set in production
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
     NEXT_PUBLIC_APP_NAME: z.string().default('AI Tech Blog'),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
   },
