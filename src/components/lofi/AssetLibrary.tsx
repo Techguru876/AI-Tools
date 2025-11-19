@@ -4,15 +4,17 @@
  * - Local files
  * - Suno AI (music generation)
  * - Pixabay/Unsplash (stock images)
- * - Leonardo/OpenAI (AI art generation)
+ * - Leonardo/OpenAI DALL-E (AI art generation)
+ * - OpenAI Sora (AI video generation)
  */
 
 import { useState } from 'react'
 import { useLofiStore, SceneElement, MusicTrack } from '../../stores/lofiStore'
-import { generateAIImage, searchStockMedia } from '../../utils/studioUtils'
+import { generateAIImage, generateAIVideo, searchStockMedia } from '../../utils/studioUtils'
+import { useToast } from '../common/ToastContainer'
 import './AssetLibrary.css'
 
-type AssetSource = 'local' | 'suno' | 'pixabay' | 'unsplash' | 'leonardo' | 'openai'
+type AssetSource = 'local' | 'suno' | 'pixabay' | 'unsplash' | 'leonardo' | 'openai' | 'sora'
 type AssetType = 'background' | 'character' | 'prop' | 'overlay' | 'music'
 
 interface AssetLibraryProps {
@@ -21,6 +23,7 @@ interface AssetLibraryProps {
 
 export default function AssetLibrary({ defaultType = 'background' }: AssetLibraryProps) {
   const { assetLibrary, addElement, setMusicTrack } = useLofiStore()
+  const { success, error: showError, warning } = useToast()
   const [selectedType, setSelectedType] = useState<AssetType>(defaultType)
   const [selectedSource, setSelectedSource] = useState<AssetSource>('local')
   const [searchQuery, setSearchQuery] = useState('')
@@ -74,6 +77,12 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
       label: 'DALL-E',
       icon: '🤖',
       types: ['background', 'character', 'prop'],
+    },
+    {
+      id: 'sora',
+      label: 'Sora Video',
+      icon: '🎬',
+      types: ['background', 'overlay'],
     },
   ]
 
@@ -133,7 +142,7 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
   // Handle stock media search
   const handleStockSearch = async () => {
     if (!searchQuery.trim()) {
-      alert('Please enter a search query')
+      warning('Please enter a search query')
       return
     }
 
@@ -150,11 +159,11 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
       setStockMedia(results)
 
       if (results.length === 0) {
-        alert('No results found. Try a different search term.')
+        warning('No results found. Try a different search term.')
       }
     } catch (error: any) {
       console.error('Stock search failed:', error)
-      alert(`Search failed: ${error.message}`)
+      showError(`Search failed: ${error.message}`)
     } finally {
       setIsSearching(false)
     }
@@ -184,7 +193,7 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
     }
 
     addElement(element)
-    alert(`Added stock image from ${item.provider} by ${item.author}`)
+    success(`Added stock image from ${item.provider} by ${item.author}`)
   }
 
   // Handle AI generation
@@ -221,10 +230,50 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
       }
 
       addElement(element)
-      alert('Image generated successfully! Added to scene.')
+      success('Image generated successfully! Added to scene.')
     } catch (error: any) {
       console.error('AI generation failed:', error)
-      alert(`Image generation failed: ${error.message}`)
+      showError(`Image generation failed: ${error.message}`)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // Handle AI video generation (Sora)
+  const handleGenerateVideo = async () => {
+    if (!searchQuery.trim()) {
+      warning('Please enter a description for the video to generate')
+      return
+    }
+
+    setIsGenerating(true)
+
+    try {
+      const videoUrl = await generateAIVideo(searchQuery, {
+        duration: 10,
+        quality: '1080p',
+        aspectRatio: '16:9',
+      })
+
+      const element: SceneElement = {
+        id: crypto.randomUUID(),
+        name: `Generated ${selectedType} Video`,
+        element_type: selectedType === 'background' ? 'Background' : 'Overlay',
+        x: selectedType === 'background' ? 960 : 400,
+        y: selectedType === 'background' ? 540 : 300,
+        scale: 1.0,
+        rotation: 0,
+        opacity: 1.0,
+        z_index: selectedType === 'background' ? 0 : 50,
+        source: { type: 'Video', prompt: searchQuery, url: videoUrl },
+        animations: [],
+      }
+
+      addElement(element)
+      success('Video generated successfully! Added to scene.')
+    } catch (error: any) {
+      console.error('AI video generation failed:', error)
+      showError(`Video generation failed: ${error.message}`)
     } finally {
       setIsGenerating(false)
     }
@@ -448,6 +497,77 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
 
             <div className="credits-info">
               💡 Each generation uses 2 credits. You have 20 credits remaining.
+            </div>
+          </div>
+        )
+
+      case 'sora':
+        return (
+          <div className="ai-generate-area">
+            <div className="generate-header">
+              <h3>🎬 Sora Video Generation</h3>
+              <p>Generate realistic and imaginative video scenes with OpenAI Sora</p>
+            </div>
+
+            <div className="generate-form">
+              <textarea
+                placeholder="Describe the video scene you want to generate... (e.g., 'A serene Japanese garden with cherry blossoms gently falling, camera slowly panning across a koi pond')"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                rows={4}
+              />
+
+              <div className="generate-options">
+                <label>
+                  <span>Duration:</span>
+                  <select>
+                    <option value="5">5 seconds</option>
+                    <option value="10">10 seconds</option>
+                    <option value="15">15 seconds</option>
+                    <option value="20">20 seconds</option>
+                  </select>
+                </label>
+
+                <label>
+                  <span>Quality:</span>
+                  <select>
+                    <option value="720p">720p (Fast)</option>
+                    <option value="1080p">1080p (Standard)</option>
+                    <option value="4k">4K (Premium)</option>
+                  </select>
+                </label>
+
+                <label>
+                  <span>Aspect Ratio:</span>
+                  <select>
+                    <option value="16:9">16:9 (Landscape)</option>
+                    <option value="9:16">9:16 (Portrait)</option>
+                    <option value="1:1">1:1 (Square)</option>
+                  </select>
+                </label>
+              </div>
+
+              <button
+                className="generate-button primary"
+                onClick={handleGenerateVideo}
+                disabled={isGenerating || !searchQuery.trim()}
+              >
+                {isGenerating ? '🎬 Generating Video...' : '✨ Generate Video'}
+              </button>
+            </div>
+
+            <div className="credits-info">
+              💡 Each video generation uses 10 credits. You have 50 credits remaining.
+            </div>
+
+            <div className="sora-tips">
+              <h4>💡 Tips for better videos:</h4>
+              <ul>
+                <li>Be specific about camera movements (pan, zoom, dolly)</li>
+                <li>Describe lighting and atmosphere (golden hour, moody, bright)</li>
+                <li>Include temporal elements (gentle breeze, flowing water, drifting clouds)</li>
+                <li>Mention style references (cinematic, anime-style, realistic)</li>
+              </ul>
             </div>
           </div>
         )

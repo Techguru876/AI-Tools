@@ -399,9 +399,58 @@ export async function generateAIImage(
 
   } catch (error: any) {
     console.error('AI Image Generation Error:', error)
-    alert(`AI Image Error: ${error.message}`)
-    // Return placeholder on error
-    return `https://via.placeholder.com/1024x1024/667eea/ffffff?text=AI+Error:+${encodeURIComponent(prompt.substring(0, 50))}`
+    throw error
+  }
+}
+
+/**
+ * Generate AI Video with OpenAI Sora
+ */
+export async function generateAIVideo(
+  prompt: string,
+  options: {
+    duration?: number
+    quality?: string
+    aspectRatio?: string
+  } = {}
+): Promise<string> {
+  const apiKeys = getAPIKeys()
+
+  try {
+    const apiKey = apiKeys.openai
+    if (!apiKey) {
+      throw new Error('OpenAI API key not configured. Please add it in Settings.')
+    }
+
+    // Sora API endpoint (placeholder - actual endpoint may differ)
+    const response = await fetchWithRetry('https://api.openai.com/v1/videos/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sora-1.0',
+        prompt: prompt,
+        duration: options.duration || 10,
+        resolution: options.quality || '1080p',
+        aspect_ratio: options.aspectRatio || '16:9',
+      }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error?.message || `Sora Video Generation failed: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // Return video URL from response
+    return data.data?.[0]?.url || data.url || ''
+
+  } catch (error: any) {
+    console.error('AI Video Generation Error:', error)
+    throw error
   }
 }
 
