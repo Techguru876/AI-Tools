@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { generateTTS, searchStockMedia, batchProcess } from '../../utils/studioUtils'
+import { generateTTS, searchStockMedia, batchProcess, parseRSSFeed, getTrendingNews, RSSItem } from '../../utils/studioUtils'
 import './NewsStudio.css'
 
 interface NewsStory {
@@ -38,9 +38,69 @@ export default function NewsStudio() {
   ] as const
 
   const handleImportRSS = async () => {
-    if (!rssFeedUrl) return
-    // TODO: Implement RSS feed import
-    alert('RSS import coming soon! Please add stories manually for now.')
+    if (!rssFeedUrl) {
+      alert('Please enter an RSS feed URL')
+      return
+    }
+
+    try {
+      setIsProcessing(true)
+      const rssItems = await parseRSSFeed(rssFeedUrl)
+
+      if (rssItems.length === 0) {
+        alert('No stories found in RSS feed')
+        return
+      }
+
+      // Convert RSS items to stories
+      const newStories: NewsStory[] = rssItems.map(item => ({
+        id: `story-${Date.now()}-${Math.random()}`,
+        title: item.title,
+        content: item.description || item.content,
+        source: item.source,
+        category: 'tech', // Default category
+        status: 'pending'
+      }))
+
+      setStories([...stories, ...newStories])
+      setRssFeedUrl('')
+      alert(`Successfully imported ${newStories.length} stories from RSS feed`)
+
+    } catch (error: any) {
+      alert(`RSS Import Error: ${error.message}`)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleLoadTrending = async () => {
+    try {
+      setIsProcessing(true)
+      const category = selectedCategory === 'all' ? undefined : selectedCategory
+      const trendingItems = await getTrendingNews(category)
+
+      if (trendingItems.length === 0) {
+        alert('No trending stories found')
+        return
+      }
+
+      const newStories: NewsStory[] = trendingItems.slice(0, 10).map(item => ({
+        id: `story-${Date.now()}-${Math.random()}`,
+        title: item.title,
+        content: item.description || item.content,
+        source: item.source,
+        category: category || 'tech',
+        status: 'pending'
+      }))
+
+      setStories([...stories, ...newStories])
+      alert(`Loaded ${newStories.length} trending stories`)
+
+    } catch (error: any) {
+      alert(`Error loading trending news: ${error.message}`)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const handleAddStory = () => {
@@ -156,8 +216,11 @@ export default function NewsStudio() {
               value={rssFeedUrl}
               onChange={e => setRssFeedUrl(e.target.value)}
             />
-            <button className="import-btn" onClick={handleImportRSS}>
+            <button className="import-btn" onClick={handleImportRSS} disabled={isProcessing}>
               📡 Import from RSS
+            </button>
+            <button className="import-btn" onClick={handleLoadTrending} disabled={isProcessing} style={{ marginTop: '10px', background: '#00bcd4' }}>
+              🔥 Load Trending Stories
             </button>
             <div className="divider">or</div>
             <button className="add-single-btn" onClick={handleAddStory}>

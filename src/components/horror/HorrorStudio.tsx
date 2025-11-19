@@ -215,7 +215,7 @@ export default function HorrorStudio() {
 
   const handleSearchVisuals = async (_sceneId: string) => {
     if (!visualSearchQuery.trim()) return
-    const results = await searchStockMedia(visualSearchQuery, 'image', 'pixabay')
+    const results = await searchStockMedia(visualSearchQuery, 'image', 12, 'pixabay')
     setVisualSearchResults(results)
   }
 

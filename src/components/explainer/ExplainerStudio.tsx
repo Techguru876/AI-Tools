@@ -173,7 +173,7 @@ export default function ExplainerStudio() {
   const handleSearchBRoll = async () => {
     if (!searchQuery.trim()) return
 
-    const results = await searchStockMedia(searchQuery, 'video', 'pixabay')
+    const results = await searchStockMedia(searchQuery, 'video', 12, 'pixabay')
     setSearchResults(results)
   }
 
