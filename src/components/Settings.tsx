@@ -253,11 +253,98 @@ export default function Settings({ onClose }: SettingsProps) {
             <div className="settings-section">
               <h3>General Settings</h3>
               <p className="section-description">
-                Coming soon: Theme, language, autosave, and more preferences
+                Configure application preferences and behavior
               </p>
-              <div className="coming-soon-placeholder">
-                <span className="placeholder-icon">🚧</span>
-                <p>Additional settings will be available in future updates</p>
+
+              <div className="settings-group">
+                <h4>Appearance</h4>
+                <div className="setting-item">
+                  <label htmlFor="theme-select">Theme</label>
+                  <select id="theme-select" className="setting-select" defaultValue="dark">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                    <option value="auto">Auto (System)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>Language & Region</h4>
+                <div className="setting-item">
+                  <label htmlFor="language-select">Language</label>
+                  <select id="language-select" className="setting-select" defaultValue="en">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>Autosave & Backups</h4>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" defaultChecked />
+                    <span>Enable autosave</span>
+                  </label>
+                  <p className="setting-hint">Automatically save your work every 5 minutes</p>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="autosave-interval">Autosave interval (minutes)</label>
+                  <input
+                    id="autosave-interval"
+                    type="number"
+                    className="setting-input"
+                    defaultValue="5"
+                    min="1"
+                    max="60"
+                  />
+                </div>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" defaultChecked />
+                    <span>Create backup before export</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>Performance</h4>
+                <div className="setting-item">
+                  <label htmlFor="preview-quality">Preview quality</label>
+                  <select id="preview-quality" className="setting-select" defaultValue="medium">
+                    <option value="low">Low (Faster)</option>
+                    <option value="medium">Medium (Balanced)</option>
+                    <option value="high">High (Best Quality)</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" defaultChecked />
+                    <span>Enable hardware acceleration</span>
+                  </label>
+                  <p className="setting-hint">Use GPU for faster rendering (recommended)</p>
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>Privacy</h4>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" />
+                    <span>Send anonymous usage statistics</span>
+                  </label>
+                  <p className="setting-hint">Help us improve InfinityStudio</p>
+                </div>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" defaultChecked />
+                    <span>Save project history locally</span>
+                  </label>
+                </div>
               </div>
             </div>
           )}
@@ -266,11 +353,156 @@ export default function Settings({ onClose }: SettingsProps) {
             <div className="settings-section">
               <h3>Export Settings</h3>
               <p className="section-description">
-                Coming soon: Default export presets, quality settings, watermarks
+                Configure default export options and branding
               </p>
-              <div className="coming-soon-placeholder">
-                <span className="placeholder-icon">🚧</span>
-                <p>Export configuration will be available in future updates</p>
+
+              <div className="settings-group">
+                <h4>Default Export Preset</h4>
+                <div className="setting-item">
+                  <label htmlFor="default-preset">Platform preset</label>
+                  <select id="default-preset" className="setting-select" defaultValue="youtube-hd">
+                    <option value="youtube-hd">YouTube HD (1080p)</option>
+                    <option value="youtube-4k">YouTube 4K (2160p)</option>
+                    <option value="tiktok">TikTok (1080p 9:16)</option>
+                    <option value="instagram-feed">Instagram Feed (1080p 1:1)</option>
+                    <option value="instagram-reels">Instagram Reels (1080p 9:16)</option>
+                    <option value="twitter">Twitter/X (720p)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>Video Quality</h4>
+                <div className="setting-item">
+                  <label htmlFor="video-quality">Quality</label>
+                  <select id="video-quality" className="setting-select" defaultValue="1080p">
+                    <option value="720p">720p HD</option>
+                    <option value="1080p">1080p Full HD</option>
+                    <option value="4k">4K Ultra HD</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="framerate">Frame rate</label>
+                  <select id="framerate" className="setting-select" defaultValue="30">
+                    <option value="24">24 fps (Cinematic)</option>
+                    <option value="30">30 fps (Standard)</option>
+                    <option value="60">60 fps (Smooth)</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="bitrate">Bitrate</label>
+                  <select id="bitrate" className="setting-select" defaultValue="8">
+                    <option value="5">5 Mbps (Good)</option>
+                    <option value="8">8 Mbps (Better)</option>
+                    <option value="15">15 Mbps (Best)</option>
+                    <option value="40">40 Mbps (Maximum)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>Watermark & Branding</h4>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" />
+                    <span>Add watermark to exports</span>
+                  </label>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="watermark-text">Watermark text</label>
+                  <input
+                    id="watermark-text"
+                    type="text"
+                    className="setting-input"
+                    placeholder="Your Brand Name"
+                  />
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="watermark-position">Watermark position</label>
+                  <select id="watermark-position" className="setting-select" defaultValue="bottom-right">
+                    <option value="top-left">Top Left</option>
+                    <option value="top-right">Top Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="center">Center</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="watermark-opacity">Watermark opacity</label>
+                  <input
+                    id="watermark-opacity"
+                    type="range"
+                    min="0"
+                    max="100"
+                    defaultValue="50"
+                    className="setting-range"
+                  />
+                  <span className="range-value">50%</span>
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>Intro & Outro</h4>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" />
+                    <span>Add intro to all videos</span>
+                  </label>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="intro-duration">Intro duration (seconds)</label>
+                  <input
+                    id="intro-duration"
+                    type="number"
+                    className="setting-input"
+                    defaultValue="3"
+                    min="1"
+                    max="10"
+                  />
+                </div>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" />
+                    <span>Add outro to all videos</span>
+                  </label>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="outro-duration">Outro duration (seconds)</label>
+                  <input
+                    id="outro-duration"
+                    type="number"
+                    className="setting-input"
+                    defaultValue="5"
+                    min="1"
+                    max="15"
+                  />
+                </div>
+              </div>
+
+              <div className="settings-group">
+                <h4>File Management</h4>
+                <div className="setting-item">
+                  <label htmlFor="export-format">Export format</label>
+                  <select id="export-format" className="setting-select" defaultValue="mp4">
+                    <option value="mp4">MP4 (H.264)</option>
+                    <option value="webm">WebM (VP9)</option>
+                    <option value="mov">MOV (QuickTime)</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <label htmlFor="naming-convention">File naming</label>
+                  <select id="naming-convention" className="setting-select" defaultValue="project-date">
+                    <option value="project-date">ProjectName_YYYY-MM-DD</option>
+                    <option value="date-project">YYYY-MM-DD_ProjectName</option>
+                    <option value="custom">Custom Template</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <label className="checkbox-label">
+                    <input type="checkbox" defaultChecked />
+                    <span>Auto-organize exports by date</span>
+                  </label>
+                </div>
               </div>
             </div>
           )}
