@@ -300,6 +300,48 @@ html {
   background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)) 100%);
 }
 
+/* Reduced motion support for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable reveal animations */
+  .reveal-on-scroll {
+    animation: none;
+    opacity: 1;
+  }
+
+  .stagger-children > * {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Disable skeleton shimmer */
+  .skeleton {
+    animation: none;
+  }
+
+  /* Disable hover transforms */
+  .interactive-card {
+    transform: none !important;
+  }
+}
+
+/* Skip to content link for accessibility */
+.skip-link {
+  @apply absolute left-0 top-0 z-50 -translate-y-full transform bg-primary px-4 py-2 text-primary-foreground transition-transform;
+}
+
+.skip-link:focus {
+  @apply translate-y-0;
+}
+
 /* Safe area insets for mobile */
 @supports (padding: max(0px)) {
   .safe-top {

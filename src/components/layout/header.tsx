@@ -21,7 +21,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center space-x-6 md:flex">
+        <nav id="navigation" className="hidden items-center space-x-6 md:flex">
           <Link href="/news" className="text-sm font-medium transition-colors hover:text-primary">
             News
           </Link>
