@@ -9,6 +9,7 @@
 
 import { useState } from 'react'
 import { useLofiStore, SceneElement, MusicTrack } from '../../stores/lofiStore'
+import { generateAIImage, searchStockMedia } from '../../utils/studioUtils'
 import './AssetLibrary.css'
 
 type AssetSource = 'local' | 'suno' | 'pixabay' | 'unsplash' | 'leonardo' | 'openai'
@@ -24,6 +25,8 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
   const [selectedSource, setSelectedSource] = useState<AssetSource>('local')
   const [searchQuery, setSearchQuery] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [stockMedia, setStockMedia] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
 
   // Asset type configurations
   const assetTypes: Array<{ id: AssetType; label: string; icon: string }> = [
@@ -127,15 +130,75 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
     })
   }
 
+  // Handle stock media search
+  const handleStockSearch = async () => {
+    if (!searchQuery.trim()) {
+      alert('Please enter a search query')
+      return
+    }
+
+    setIsSearching(true)
+    setStockMedia([])
+
+    try {
+      const results = await searchStockMedia(
+        searchQuery,
+        'image',
+        12,
+        selectedSource as 'pixabay' | 'unsplash' | 'pexels'
+      )
+      setStockMedia(results)
+
+      if (results.length === 0) {
+        alert('No results found. Try a different search term.')
+      }
+    } catch (error: any) {
+      console.error('Stock search failed:', error)
+      alert(`Search failed: ${error.message}`)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Handle using stock image
+  const handleUseStockImage = (item: any) => {
+    const element: SceneElement = {
+      id: crypto.randomUUID(),
+      name: `${selectedType} from ${selectedSource}`,
+      element_type:
+        selectedType === 'background'
+          ? 'Background'
+          : selectedType === 'character'
+          ? 'Character'
+          : selectedType === 'prop'
+          ? 'Prop'
+          : 'Overlay',
+      x: 400,
+      y: 300,
+      scale: 1.0,
+      rotation: 0,
+      opacity: 1.0,
+      z_index: 0,
+      source: { type: 'Stock', url: item.url, provider: item.provider, author: item.author },
+      animations: [],
+    }
+
+    addElement(element)
+    alert(`Added stock image from ${item.provider} by ${item.author}`)
+  }
+
   // Handle AI generation
   const handleGenerate = async () => {
+    if (!searchQuery.trim()) {
+      alert('Please enter a description for the image to generate')
+      return
+    }
+
     setIsGenerating(true)
 
     try {
-      // In real implementation, would call API
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const imageUrl = await generateAIImage(searchQuery, '1024x1024')
 
-      // Mock generated asset
       const element: SceneElement = {
         id: crypto.randomUUID(),
         name: `Generated ${selectedType}`,
@@ -153,11 +216,15 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
         rotation: 0,
         opacity: 1.0,
         z_index: 0,
-        source: { type: 'Generated', prompt: searchQuery },
+        source: { type: 'Generated', prompt: searchQuery, url: imageUrl },
         animations: [],
       }
 
       addElement(element)
+      alert('Image generated successfully! Added to scene.')
+    } catch (error: any) {
+      console.error('AI generation failed:', error)
+      alert(`Image generation failed: ${error.message}`)
     } finally {
       setIsGenerating(false)
     }
@@ -282,24 +349,47 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
             <div className="stock-search-box">
               <input
                 type="text"
-                placeholder="Search images..."
+                placeholder="Search images... (e.g., 'lofi study room', 'anime girl', 'rainy window')"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleStockSearch()}
               />
-              <button onClick={() => {}}>Search</button>
+              <button onClick={handleStockSearch} disabled={isSearching || !searchQuery.trim()}>
+                {isSearching ? '🔍 Searching...' : '🔍 Search'}
+              </button>
             </div>
 
+            {stockMedia.length === 0 && !isSearching && (
+              <div className="empty-state">
+                <p>🔍 Enter a search query to find stock images</p>
+                <p style={{ fontSize: '13px', color: '#7a7a90' }}>
+                  Try: "cozy room", "night sky", "coffee shop", "anime character"
+                </p>
+              </div>
+            )}
+
+            {isSearching && (
+              <div className="loading-state">
+                <div className="spinner"></div>
+                <p>Searching {selectedSource}...</p>
+              </div>
+            )}
+
             <div className="stock-grid">
-              {/* Mock stock images */}
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="stock-item">
-                  <div className="stock-thumbnail">
+              {stockMedia.map((item, i) => (
+                <div key={item.id || i} className="stock-item">
+                  <div
+                    className="stock-thumbnail"
+                    style={{ backgroundImage: `url(${item.thumbnail})` }}
+                  >
                     <div className="stock-overlay">
-                      <button className="use-button">Use Image</button>
+                      <button className="use-button" onClick={() => handleUseStockImage(item)}>
+                        ✓ Use Image
+                      </button>
                     </div>
                   </div>
                   <div className="stock-info">
-                    <span>by Photographer {i + 1}</span>
+                    <span>by {item.author || 'Unknown'}</span>
                   </div>
                 </div>
               ))}

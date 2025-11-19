@@ -740,3 +740,431 @@ export const EXPORT_PRESETS: Record<string, ExportPreset> = {
     bitrate: '5 Mbps',
   },
 }
+
+/**
+ * Color Palette Interfaces
+ */
+export interface ColorPalette {
+  name: string
+  colors: [number, number, number][]
+  mood: string
+}
+
+/**
+ * Extract color palette from an image using canvas color sampling
+ */
+export async function extractColorPalette(imageFile: File): Promise<ColorPalette[]> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(imageFile)
+
+    img.onload = () => {
+      try {
+        // Create canvas to analyze image
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) throw new Error('Could not get canvas context')
+
+        // Resize image for faster processing
+        const maxSize = 100
+        const scale = Math.min(maxSize / img.width, maxSize / img.height)
+        canvas.width = img.width * scale
+        canvas.height = img.height * scale
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const pixels = imageData.data
+
+        // Extract dominant colors using color quantization
+        const colorMap = new Map<string, number>()
+
+        for (let i = 0; i < pixels.length; i += 4) {
+          const r = Math.floor(pixels[i] / 32) * 32
+          const g = Math.floor(pixels[i + 1] / 32) * 32
+          const b = Math.floor(pixels[i + 2] / 32) * 32
+          const key = `${r},${g},${b}`
+          colorMap.set(key, (colorMap.get(key) || 0) + 1)
+        }
+
+        // Sort colors by frequency and get top colors
+        const sortedColors = Array.from(colorMap.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 20)
+          .map(([color]) => color.split(',').map(Number) as [number, number, number])
+
+        // Create palettes based on color theory
+        const palettes: ColorPalette[] = []
+
+        // Dominant palette
+        if (sortedColors.length >= 5) {
+          palettes.push({
+            name: 'Dominant Colors',
+            colors: sortedColors.slice(0, 5),
+            mood: getMoodFromColors(sortedColors.slice(0, 5)),
+          })
+        }
+
+        // Warm palette (reds, oranges, yellows)
+        const warmColors = sortedColors.filter(([r, g, b]) => r > g && r > b)
+        if (warmColors.length >= 5) {
+          palettes.push({
+            name: 'Warm Tones',
+            colors: warmColors.slice(0, 5),
+            mood: 'Energetic and inviting',
+          })
+        }
+
+        // Cool palette (blues, greens)
+        const coolColors = sortedColors.filter(([r, g, b]) => b > r || g > r)
+        if (coolColors.length >= 5) {
+          palettes.push({
+            name: 'Cool Tones',
+            colors: coolColors.slice(0, 5),
+            mood: 'Calm and serene',
+          })
+        }
+
+        // Monochromatic (varying brightness)
+        if (sortedColors.length >= 5) {
+          const baseColor = sortedColors[0]
+          const monochrome = [
+            [Math.min(255, baseColor[0] * 1.4), Math.min(255, baseColor[1] * 1.4), Math.min(255, baseColor[2] * 1.4)],
+            [Math.min(255, baseColor[0] * 1.2), Math.min(255, baseColor[1] * 1.2), Math.min(255, baseColor[2] * 1.2)],
+            baseColor,
+            [baseColor[0] * 0.8, baseColor[1] * 0.8, baseColor[2] * 0.8],
+            [baseColor[0] * 0.6, baseColor[1] * 0.6, baseColor[2] * 0.6],
+          ] as [number, number, number][]
+
+          palettes.push({
+            name: 'Monochromatic',
+            colors: monochrome,
+            mood: 'Cohesive and harmonious',
+          })
+        }
+
+        URL.revokeObjectURL(url)
+        resolve(palettes)
+      } catch (error) {
+        URL.revokeObjectURL(url)
+        reject(error)
+      }
+    }
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Failed to load image'))
+    }
+
+    img.src = url
+  })
+}
+
+/**
+ * Determine mood from colors based on color psychology
+ */
+function getMoodFromColors(colors: [number, number, number][]): string {
+  const avgR = colors.reduce((sum, c) => sum + c[0], 0) / colors.length
+  const avgG = colors.reduce((sum, c) => sum + c[1], 0) / colors.length
+  const avgB = colors.reduce((sum, c) => sum + c[2], 0) / colors.length
+
+  if (avgR > avgG && avgR > avgB) {
+    return 'Energetic and passionate'
+  } else if (avgB > avgR && avgB > avgG) {
+    return 'Calm and trustworthy'
+  } else if (avgG > avgR && avgG > avgB) {
+    return 'Natural and balanced'
+  } else if (avgR < 100 && avgG < 100 && avgB < 100) {
+    return 'Sophisticated and mysterious'
+  } else if (avgR > 200 && avgG > 200 && avgB > 200) {
+    return 'Clean and minimalist'
+  } else {
+    return 'Balanced and neutral'
+  }
+}
+
+/**
+ * Detect BPM from audio file using Web Audio API
+ */
+export async function detectBPM(audioFile: File): Promise<number> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const arrayBuffer = await audioFile.arrayBuffer()
+      const audioContext = new AudioContext()
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+
+      // Get audio data from first channel
+      const channelData = audioBuffer.getChannelData(0)
+      const sampleRate = audioBuffer.sampleRate
+
+      // Find peaks in the audio (simple onset detection)
+      const peaks: number[] = []
+      const threshold = 0.3
+      const minPeakDistance = sampleRate * 0.3 // Minimum 300ms between peaks
+
+      let lastPeakIndex = -minPeakDistance
+
+      for (let i = 1; i < channelData.length - 1; i++) {
+        const current = Math.abs(channelData[i])
+        const prev = Math.abs(channelData[i - 1])
+        const next = Math.abs(channelData[i + 1])
+
+        // Detect peak
+        if (current > threshold && current > prev && current > next) {
+          if (i - lastPeakIndex >= minPeakDistance) {
+            peaks.push(i / sampleRate) // Convert to seconds
+            lastPeakIndex = i
+          }
+        }
+      }
+
+      // Calculate intervals between peaks
+      if (peaks.length < 2) {
+        // Not enough peaks, estimate based on typical lofi range
+        resolve(85)
+        return
+      }
+
+      const intervals: number[] = []
+      for (let i = 1; i < peaks.length; i++) {
+        intervals.push(peaks[i] - peaks[i - 1])
+      }
+
+      // Calculate average interval
+      const avgInterval = intervals.reduce((sum, val) => sum + val, 0) / intervals.length
+
+      // Convert to BPM
+      let bpm = Math.round(60 / avgInterval)
+
+      // Lofi music is typically 70-130 BPM, adjust if needed
+      while (bpm < 70) bpm *= 2
+      while (bpm > 130) bpm /= 2
+
+      await audioContext.close()
+      resolve(bpm)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
+/**
+ * Loop Analysis Interface
+ */
+export interface LoopAnalysis {
+  audioLoop?: {
+    start: number
+    end: number
+    duration: number
+  }
+  visualLoop?: {
+    start: number
+    end: number
+    duration: number
+  }
+  bpm: number
+  isSynced: boolean
+  recommendations: string[]
+}
+
+/**
+ * Detect optimal loop points in audio file
+ */
+export async function detectLoopPoints(audioFile: File, targetDuration: number = 60): Promise<LoopAnalysis> {
+  try {
+    const arrayBuffer = await audioFile.arrayBuffer()
+    const audioContext = new AudioContext()
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+
+    // Detect BPM
+    const bpm = await detectBPM(audioFile)
+
+    // Calculate beat duration
+    const beatDuration = 60 / bpm
+
+    // Find loop point that's close to target duration and aligns with beats
+    const beatsInTarget = Math.round(targetDuration / beatDuration)
+    const loopDuration = beatsInTarget * beatDuration
+
+    // Ensure loop doesn't exceed audio duration
+    const maxDuration = Math.min(loopDuration, audioBuffer.duration)
+
+    // Find zero-crossings near the loop points for smooth transitions
+    const channelData = audioBuffer.getChannelData(0)
+    const sampleRate = audioBuffer.sampleRate
+
+    const findZeroCrossing = (targetTime: number): number => {
+      const targetSample = Math.floor(targetTime * sampleRate)
+      const searchRange = Math.floor(0.1 * sampleRate) // Search 100ms around target
+
+      for (let i = 0; i < searchRange; i++) {
+        const sampleIndex = targetSample + i
+        if (sampleIndex >= channelData.length - 1) break
+
+        if (channelData[sampleIndex] >= 0 && channelData[sampleIndex + 1] < 0) {
+          return sampleIndex / sampleRate
+        }
+      }
+      return targetTime
+    }
+
+    const loopStart = findZeroCrossing(0)
+    const loopEnd = findZeroCrossing(maxDuration)
+
+    await audioContext.close()
+
+    return {
+      audioLoop: {
+        start: loopStart,
+        end: loopEnd,
+        duration: loopEnd - loopStart,
+      },
+      visualLoop: {
+        start: loopStart,
+        end: loopEnd,
+        duration: loopEnd - loopStart,
+      },
+      bpm,
+      isSynced: true,
+      recommendations: [
+        `✓ Detected ${bpm} BPM tempo`,
+        `✓ Perfect loop point found at ${Math.round(loopEnd)}s`,
+        `✓ Loop aligns with ${beatsInTarget} beats for smooth transitions`,
+        `💡 Duration optimized for ${Math.round(loopEnd - loopStart)}s loop`,
+      ],
+    }
+  } catch (error: any) {
+    console.error('Loop detection error:', error)
+    // Return sensible defaults if analysis fails
+    return {
+      audioLoop: {
+        start: 0,
+        end: targetDuration,
+        duration: targetDuration,
+      },
+      visualLoop: {
+        start: 0,
+        end: targetDuration,
+        duration: targetDuration,
+      },
+      bpm: 85,
+      isSynced: true,
+      recommendations: [
+        '⚠️ Auto-detection unavailable, using default settings',
+        `✓ Set loop duration to ${targetDuration}s`,
+        '💡 Manually adjust loop points for best results',
+      ],
+    }
+  }
+}
+
+/**
+ * Simple image segmentation using edge detection
+ * For foreground/background separation
+ */
+export interface SegmentationResult {
+  foreground: string
+  background: string
+}
+
+export async function segmentImage(imageFile: File): Promise<SegmentationResult> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(imageFile)
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) throw new Error('Could not get canvas context')
+
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.drawImage(img, 0, 0)
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const pixels = imageData.data
+
+        // Simple edge detection using Sobel operator
+        const edges = new Uint8ClampedArray(pixels.length)
+        const width = canvas.width
+        const height = canvas.height
+
+        for (let y = 1; y < height - 1; y++) {
+          for (let x = 1; x < width - 1; x++) {
+            const idx = (y * width + x) * 4
+
+            // Get surrounding pixels
+            const gx = (
+              -pixels[((y - 1) * width + (x - 1)) * 4] +
+              pixels[((y - 1) * width + (x + 1)) * 4] +
+              -2 * pixels[(y * width + (x - 1)) * 4] +
+              2 * pixels[(y * width + (x + 1)) * 4] +
+              -pixels[((y + 1) * width + (x - 1)) * 4] +
+              pixels[((y + 1) * width + (x + 1)) * 4]
+            )
+
+            const gy = (
+              -pixels[((y - 1) * width + (x - 1)) * 4] +
+              -2 * pixels[((y - 1) * width + x) * 4] +
+              -pixels[((y - 1) * width + (x + 1)) * 4] +
+              pixels[((y + 1) * width + (x - 1)) * 4] +
+              2 * pixels[((y + 1) * width + x) * 4] +
+              pixels[((y + 1) * width + (x + 1)) * 4]
+            )
+
+            const magnitude = Math.sqrt(gx * gx + gy * gy)
+            const threshold = 100
+
+            if (magnitude > threshold) {
+              // Edge pixel - mark as foreground
+              edges[idx] = pixels[idx]
+              edges[idx + 1] = pixels[idx + 1]
+              edges[idx + 2] = pixels[idx + 2]
+              edges[idx + 3] = 255
+            } else {
+              // Non-edge - mark as background
+              edges[idx] = 0
+              edges[idx + 1] = 0
+              edges[idx + 2] = 0
+              edges[idx + 3] = 0
+            }
+          }
+        }
+
+        // Create foreground canvas
+        const fgCanvas = document.createElement('canvas')
+        fgCanvas.width = width
+        fgCanvas.height = height
+        const fgCtx = fgCanvas.getContext('2d')!
+        const fgImageData = new ImageData(edges, width, height)
+        fgCtx.putImageData(fgImageData, 0, 0)
+
+        // Create background canvas (original with reduced foreground)
+        const bgCanvas = document.createElement('canvas')
+        bgCanvas.width = width
+        bgCanvas.height = height
+        const bgCtx = bgCanvas.getContext('2d')!
+        bgCtx.drawImage(img, 0, 0)
+        bgCtx.globalCompositeOperation = 'destination-out'
+        bgCtx.drawImage(fgCanvas, 0, 0)
+
+        URL.revokeObjectURL(url)
+
+        resolve({
+          foreground: fgCanvas.toDataURL(),
+          background: bgCanvas.toDataURL(),
+        })
+      } catch (error) {
+        URL.revokeObjectURL(url)
+        reject(error)
+      }
+    }
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Failed to load image'))
+    }
+
+    img.src = url
+  })
+}

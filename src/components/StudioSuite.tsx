@@ -117,8 +117,6 @@ export default function StudioSuite({ onSwitchToProMode }: StudioSuiteProps = {}
       setTimeout(() => {
         onSwitchToProMode()
       }, 1500)
-    } else {
-      alert('Pro Mode transition is not available in this context.')
     }
   }
 

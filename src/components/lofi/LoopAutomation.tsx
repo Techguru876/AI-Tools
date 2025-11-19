@@ -10,6 +10,7 @@
 
 import { useState } from 'react'
 import { useLofiStore } from '../../stores/lofiStore'
+import { detectLoopPoints as detectLoopPointsUtil } from '../../utils/studioUtils'
 import './LoopAutomation.css'
 
 interface LoopPoints {
@@ -39,50 +40,53 @@ export default function LoopAutomation() {
 
   // Analyze loop points
   const handleAnalyze = async () => {
+    if (!currentScene?.music_track) {
+      alert('Please add music to the scene first')
+      return
+    }
+
     setIsAnalyzing(true)
 
     try {
-      // In real implementation, would call Rust backend:
-      // const result = await invoke('detect_loop_points', {
-      //   audioPath: currentScene.music_track?.file_path,
-      //   duration: currentScene.loop_settings.duration
-      // })
+      // Create a File object from the music track URL if needed
+      // For now, we'll assume the music track has an associated file
+      // In a real implementation, you'd fetch the audio file
 
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // Since we don't have direct access to the File object in the scene,
+      // we'll need to fetch it first
+      const response = await fetch(currentScene.music_track.file_path)
+      const blob = await response.blob()
+      const audioFile = new File([blob], 'audio.mp3', { type: 'audio/mpeg' })
 
-      // Mock analysis
-      const mockAnalysis: LoopAnalysis = {
-        audioLoop: {
-          start: 0,
-          end: 60,
-          duration: 60,
-        },
-        visualLoop: {
-          start: 0,
-          end: 60,
-          duration: 60,
-        },
+      const analysis = await detectLoopPointsUtil(
+        audioFile,
+        currentScene.loop_settings?.duration || 60
+      )
+
+      setLoopAnalysis(analysis)
+      if (analysis.audioLoop) {
+        setAudioLoopStart(analysis.audioLoop.start)
+        setAudioLoopEnd(analysis.audioLoop.end)
+      }
+      if (analysis.visualLoop) {
+        setVisualLoopStart(analysis.visualLoop.start)
+        setVisualLoopEnd(analysis.visualLoop.end)
+      }
+    } catch (error: any) {
+      console.error('Loop analysis failed:', error)
+      alert(`Loop analysis failed: ${error.message}. Using default loop points.`)
+
+      // Set default values if analysis fails
+      const defaultDuration = currentScene.loop_settings?.duration || 60
+      setLoopAnalysis({
+        audioLoop: { start: 0, end: defaultDuration, duration: defaultDuration },
+        visualLoop: { start: 0, end: defaultDuration, duration: defaultDuration },
         bpm: 85,
         isSynced: true,
-        recommendations: [
-          '✓ Perfect loop detected at 60 seconds',
-          '✓ Audio and visual are in sync',
-          '💡 Consider extending to 120 seconds for more variety',
-          '🎵 Music tempo (85 BPM) matches perfectly with visual animations',
-        ],
-      }
-
-      setLoopAnalysis(mockAnalysis)
-      if (mockAnalysis.audioLoop) {
-        setAudioLoopStart(mockAnalysis.audioLoop.start)
-        setAudioLoopEnd(mockAnalysis.audioLoop.end)
-      }
-      if (mockAnalysis.visualLoop) {
-        setVisualLoopStart(mockAnalysis.visualLoop.start)
-        setVisualLoopEnd(mockAnalysis.visualLoop.end)
-      }
-    } catch (error) {
-      console.error('Loop analysis failed:', error)
+        recommendations: ['⚠️ Using default loop settings'],
+      })
+      setAudioLoopEnd(defaultDuration)
+      setVisualLoopEnd(defaultDuration)
     } finally {
       setIsAnalyzing(false)
     }

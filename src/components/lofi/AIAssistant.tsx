@@ -10,6 +10,7 @@
 
 import { useState } from 'react'
 import { useLofiStore, ColorPalette } from '../../stores/lofiStore'
+import { extractColorPalette, detectBPM, segmentImage, SegmentationResult } from '../../utils/studioUtils'
 import './AIAssistant.css'
 
 type AITool =
@@ -51,19 +52,11 @@ export default function AIAssistant() {
     setSelectedImage(URL.createObjectURL(imageFile))
 
     try {
-      // In real implementation, would call Rust backend:
-      // const result = await invoke('segment_image', { imagePath: imageFile.path })
-
-      // Simulate AI processing
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Mock result
-      setSegmentationResult({
-        foreground: URL.createObjectURL(imageFile),
-        background: URL.createObjectURL(imageFile),
-      })
+      const result = await segmentImage(imageFile)
+      setSegmentationResult(result)
     } catch (error) {
       console.error('Segmentation failed:', error)
+      alert('Image segmentation failed. Please try another image.')
     } finally {
       setIsProcessing(false)
     }
@@ -75,62 +68,11 @@ export default function AIAssistant() {
     setPaletteSource(URL.createObjectURL(imageFile))
 
     try {
-      // In real implementation:
-      // const palettes = await invoke('suggest_palettes', { imagePath: imageFile.path })
-
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Mock palettes
-      const mockPalettes: ColorPalette[] = [
-        {
-          name: 'Warm Sunset',
-          colors: [
-            [255, 183, 77],
-            [255, 138, 101],
-            [239, 83, 80],
-            [179, 136, 255],
-            [96, 125, 139],
-          ],
-          mood: 'Cozy and warm',
-        },
-        {
-          name: 'Ocean Breeze',
-          colors: [
-            [77, 182, 172],
-            [38, 166, 154],
-            [0, 150, 136],
-            [0, 121, 107],
-            [0, 77, 64],
-          ],
-          mood: 'Calm and refreshing',
-        },
-        {
-          name: 'Night City',
-          colors: [
-            [121, 134, 203],
-            [94, 96, 206],
-            [63, 81, 181],
-            [48, 63, 159],
-            [26, 35, 126],
-          ],
-          mood: 'Urban and mysterious',
-        },
-        {
-          name: 'Forest Glow',
-          colors: [
-            [129, 199, 132],
-            [102, 187, 106],
-            [76, 175, 80],
-            [67, 160, 71],
-            [56, 142, 60],
-          ],
-          mood: 'Natural and peaceful',
-        },
-      ]
-
-      setGeneratedPalettes(mockPalettes)
+      const palettes = await extractColorPalette(imageFile)
+      setGeneratedPalettes(palettes)
     } catch (error) {
       console.error('Palette generation failed:', error)
+      alert('Color palette extraction failed. Please try another image.')
     } finally {
       setIsProcessing(false)
     }
@@ -142,16 +84,11 @@ export default function AIAssistant() {
     setSelectedAudio(URL.createObjectURL(audioFile))
 
     try {
-      // In real implementation:
-      // const bpm = await invoke('detect_bpm', { audioPath: audioFile.path })
-
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Mock BPM
-      const mockBPM = Math.floor(Math.random() * 60) + 70 // 70-130 BPM
-      setDetectedBPM(mockBPM)
+      const bpm = await detectBPM(audioFile)
+      setDetectedBPM(bpm)
     } catch (error) {
       console.error('BPM detection failed:', error)
+      alert('BPM detection failed. Please try another audio file.')
     } finally {
       setIsProcessing(false)
     }

@@ -133,7 +133,7 @@ export default function GuidedWizard() {
     setSelectedAnimations([])
   }
 
-  // Mock templates for wizard
+  // Quick start templates for wizard
   const quickTemplates: LofiTemplate[] = [
     {
       id: 'wizard-cozy',
