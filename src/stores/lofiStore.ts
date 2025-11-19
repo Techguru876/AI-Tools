@@ -5,6 +5,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { exportVideoClientSide, exportSceneAsImage, ExportProgress } from '../utils/videoExport'
 
 // Scene element types
 export interface SceneElement {
@@ -514,9 +515,46 @@ export const useLofiStore = create<LofiStoreState>()(
       toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
       toggleGuides: () => set((state) => ({ showGuides: !state.showGuides })),
 
-      exportScene: async (_format: 'video' | 'gif' | 'frames') => {
-        // Would call Rust backend for actual export
-        return '/path/to/exported/file'
+      exportScene: async (format: 'video' | 'gif' | 'frames') => {
+        const scene = get().currentScene
+        if (!scene) {
+          throw new Error('No scene to export')
+        }
+
+        // Get canvas element
+        const canvasElement = document.querySelector('canvas') as HTMLCanvasElement
+        if (!canvasElement) {
+          throw new Error('Canvas not found')
+        }
+
+        try {
+          if (format === 'video') {
+            // Export as video using client-side rendering
+            const duration = 60 // Default 60 seconds
+            const audioUrl = scene.audio?.url || null
+
+            const progress = (update: ExportProgress) => {
+              console.log(`Export ${update.stage}: ${update.progress}% - ${update.message}`)
+            }
+
+            const resultUrl = await exportVideoClientSide(canvasElement, audioUrl, duration, {
+              preset: 'youtube-hd',
+              onProgress: progress,
+            })
+
+            return resultUrl
+          } else if (format === 'gif' || format === 'frames') {
+            // Export as image
+            const imageFormat = format === 'gif' ? 'png' : 'png'
+            const resultUrl = await exportSceneAsImage(canvasElement, imageFormat)
+            return resultUrl
+          }
+
+          throw new Error(`Unsupported export format: ${format}`)
+        } catch (error: any) {
+          console.error('Export failed:', error)
+          throw new Error(`Export failed: ${error.message}`)
+        }
       },
     }),
     {

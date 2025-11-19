@@ -6,6 +6,7 @@
 
 import { useState } from 'react'
 import { useLofiStore } from '../../stores/lofiStore'
+import { useToast } from '../common/ToastContainer'
 import './ExportAutomation.css'
 
 type ExportPlatform = 'youtube' | 'tiktok' | 'instagram' | 'twitter' | 'custom'
@@ -31,6 +32,7 @@ interface ExportPreset {
 
 export default function ExportAutomation() {
   const { currentScene, exportScene } = useLofiStore()
+  const { success, error: showError } = useToast()
   const [selectedPreset, setSelectedPreset] = useState<ExportPreset | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const [exportProgress, setExportProgress] = useState(0)
@@ -176,15 +178,15 @@ export default function ExportAutomation() {
 
       // Show success message
       setTimeout(() => {
-        alert(`Export complete! Saved to: ${result}`)
+        success('Export complete! Video downloaded successfully.')
         setIsExporting(false)
         setExportProgress(0)
       }, 500)
-    } catch (error) {
-      console.error('Export failed:', error)
+    } catch (err: any) {
+      console.error('Export failed:', err)
       setIsExporting(false)
       setExportProgress(0)
-      alert('Export failed. Please try again.')
+      showError(err.message || 'Export failed. Please try again.')
     }
   }
 
