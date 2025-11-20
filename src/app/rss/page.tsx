@@ -1,14 +1,10 @@
-import type { Metadata } from 'next'
+'use client'
+
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 import { Rss } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
-export const metadata: Metadata = {
-  title: 'RSS Feeds | TechFrontier',
-  description: 'Subscribe to TechFrontier RSS feeds to stay updated with the latest tech news, reviews, and articles.',
-}
 
 export default function RSSPage() {
   const feeds = [
