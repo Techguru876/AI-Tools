@@ -6,6 +6,7 @@
 
 import { useState } from 'react'
 import { useLofiStore, LofiTemplate, MusicTrack } from '../../stores/lofiStore'
+import { DEFAULT_TEMPLATES } from './defaultTemplates'
 import './GuidedWizard.css'
 
 type WizardStep = 'welcome' | 'choose-start' | 'customize' | 'add-music' | 'add-animations' | 'preview' | 'export' | 'complete'
@@ -133,69 +134,8 @@ export default function GuidedWizard() {
     setSelectedAnimations([])
   }
 
-  // Quick start templates for wizard
-  const quickTemplates: LofiTemplate[] = [
-    {
-      id: 'wizard-cozy',
-      name: 'Cozy Study Room',
-      description: 'Perfect for study beats',
-      category: 'CozyRoom',
-      thumbnail: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      scene: {
-        id: 'scene-wizard-1',
-        name: 'Cozy Study Room',
-        characters: [],
-        props: [],
-        overlays: [],
-        loop_settings: { duration: 60, auto_sync: true },
-        created_at: new Date().toISOString(),
-        modified_at: new Date().toISOString(),
-      },
-      customization_options: [],
-      tags: ['cozy', 'study', 'warm'],
-      popularity: 1500,
-    },
-    {
-      id: 'wizard-rain',
-      name: 'Rainy Window',
-      description: 'Chill rainy vibes',
-      category: 'RainyWindow',
-      thumbnail: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-      scene: {
-        id: 'scene-wizard-2',
-        name: 'Rainy Window',
-        characters: [],
-        props: [],
-        overlays: [],
-        loop_settings: { duration: 60, auto_sync: true },
-        created_at: new Date().toISOString(),
-        modified_at: new Date().toISOString(),
-      },
-      customization_options: [],
-      tags: ['rain', 'chill', 'relaxing'],
-      popularity: 2000,
-    },
-    {
-      id: 'wizard-city',
-      name: 'City Nights',
-      description: 'Urban lofi atmosphere',
-      category: 'Cityscape',
-      thumbnail: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
-      scene: {
-        id: 'scene-wizard-3',
-        name: 'City Nights',
-        characters: [],
-        props: [],
-        overlays: [],
-        loop_settings: { duration: 60, auto_sync: true },
-        created_at: new Date().toISOString(),
-        modified_at: new Date().toISOString(),
-      },
-      customization_options: [],
-      tags: ['city', 'urban', 'night'],
-      popularity: 1800,
-    },
-  ]
+  // Quick start templates for wizard - use first 3 default templates
+  const quickTemplates: LofiTemplate[] = DEFAULT_TEMPLATES.slice(0, 3)
 
   // Progress indicator
   const getProgress = () => {
