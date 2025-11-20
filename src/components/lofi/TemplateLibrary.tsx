@@ -14,6 +14,19 @@ interface TemplateLibraryProps {
   onClose?: () => void
 }
 
+// Helper function to get default thumbnail gradient for categories
+function getDefaultThumbnail(category: TemplateCategory): string {
+  const gradients: Record<TemplateCategory, string> = {
+    CozyRoom: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    RainyWindow: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+    Cityscape: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+    NatureScene: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
+    SpaceTheme: 'linear-gradient(135deg, #141e30 0%, #243b55 100%)',
+    Custom: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  }
+  return gradients[category] || gradients.Custom
+}
+
 export default function TemplateLibrary({ onClose }: TemplateLibraryProps) {
   const { templates, applyTemplate, favoriteTemplates } = useLofiStore()
   const { success, error: showError } = useToast()
