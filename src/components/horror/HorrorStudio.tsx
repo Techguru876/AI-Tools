@@ -44,6 +44,8 @@ export default function HorrorStudio() {
   const [showVisualSearch, setShowVisualSearch] = useState<string | null>(null)
   const [visualSearchQuery, setVisualSearchQuery] = useState('')
   const [visualSearchResults, setVisualSearchResults] = useState<any[]>([])
+  const [playingVoice, setPlayingVoice] = useState<string | null>(null)
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null)
 
   const subGenres = [
     { id: 'haunted-house', name: 'Haunted House', icon: '🏚️', color: '#8b4513' },
@@ -98,6 +100,83 @@ export default function HorrorStudio() {
   //   { id: 'gothic', name: 'Gothic' },
   //   { id: 'vhs-retro', name: 'VHS Retro' },
   // ]
+
+  // Play voice sample using Web Speech API or fallback
+  const handlePlayVoiceSample = async (voiceId: string) => {
+    // Stop current audio if playing
+    if (currentAudio) {
+      currentAudio.pause()
+      currentAudio.currentTime = 0
+      setCurrentAudio(null)
+      if (playingVoice === voiceId) {
+        setPlayingVoice(null)
+        return
+      }
+    }
+
+    setPlayingVoice(voiceId)
+
+    // Sample text for each voice type
+    const sampleTexts: Record<string, string> = {
+      'eerie-male': 'The door creaked open slowly, revealing nothing but darkness within.',
+      'eerie-female': 'She whispered my name from somewhere in the shadows.',
+      'monster': 'It watched me from the corner, breathing heavily.',
+      'whisper': 'Can you hear them? They are getting closer.',
+      'child-ghost': 'Will you play with me? I have been alone for so long.',
+      'old-narrator': 'This tale begins on a dark and stormy night, many years ago.',
+      'demon': 'Your soul belongs to me now.',
+      'victim': 'Help me! Please, someone help me!'
+    }
+
+    const text = sampleTexts[voiceId] || 'This is a sample of the horror narration voice.'
+
+    try {
+      // Use Web Speech API for quick demo
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text)
+
+        // Configure voice characteristics based on type
+        switch(voiceId) {
+          case 'eerie-male':
+          case 'old-narrator':
+          case 'demon':
+            utterance.pitch = 0.7
+            utterance.rate = 0.8
+            break
+          case 'eerie-female':
+          case 'child-ghost':
+            utterance.pitch = 1.3
+            utterance.rate = 0.9
+            break
+          case 'monster':
+            utterance.pitch = 0.4
+            utterance.rate = 0.7
+            break
+          case 'whisper':
+            utterance.pitch = 0.9
+            utterance.rate = 0.6
+            utterance.volume = 0.5
+            break
+          case 'victim':
+            utterance.pitch = 1.4
+            utterance.rate = 1.3
+            break
+        }
+
+        utterance.onend = () => {
+          setPlayingVoice(null)
+        }
+
+        window.speechSynthesis.speak(utterance)
+      } else {
+        console.warn('Speech synthesis not supported')
+        setPlayingVoice(null)
+      }
+    } catch (error) {
+      console.error('Error playing voice sample:', error)
+      setPlayingVoice(null)
+    }
+  }
 
   const handleCreateProject = () => {
     const newProject: HorrorProject = {
@@ -342,7 +421,16 @@ export default function HorrorStudio() {
                     <div className="voice-name">{voice.name}</div>
                     <div className="voice-desc">{voice.desc}</div>
                   </div>
-                  <button className="sample-btn">{voice.sample}</button>
+                  <button
+                    className="sample-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handlePlayVoiceSample(voice.id)
+                    }}
+                    title={playingVoice === voice.id ? "Stop playing" : "Play sample"}
+                  >
+                    {playingVoice === voice.id ? '⏸️' : '🎧'}
+                  </button>
                 </div>
               ))}
             </div>
