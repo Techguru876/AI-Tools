@@ -10,11 +10,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'AI Tech Blog - Latest Tech News, Reviews & Guides',
-    template: '%s | AI Tech Blog',
+    default: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
+    template: '%s | TechFrontier',
   },
   description:
-    'Your premier destination for AI-powered tech news, in-depth product reviews, buying guides, and expert analysis on the latest gadgets and technology trends.',
+    'TechFrontier is your premier destination for AI-powered tech news, in-depth product reviews, buying guides, and expert analysis on emerging technology, AI, gadgets, and innovation.',
   keywords: [
     'technology',
     'tech news',
@@ -22,35 +22,39 @@ export const metadata: Metadata = {
     'reviews',
     'buying guides',
     'AI',
+    'artificial intelligence',
+    'machine learning',
     'smartphones',
     'laptops',
+    'innovation',
+    'emerging tech',
   ],
-  authors: [{ name: 'AI Tech Blog' }],
-  creator: 'AI Tech Blog',
+  authors: [{ name: 'TechFrontier' }],
+  creator: 'TechFrontier',
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: process.env.NEXT_PUBLIC_APP_URL,
-    siteName: 'AI Tech Blog',
-    title: 'AI Tech Blog - Latest Tech News, Reviews & Guides',
+    siteName: 'TechFrontier',
+    title: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
     description:
-      'Your premier destination for AI-powered tech news, in-depth product reviews, and expert analysis.',
+      'Your premier destination for AI-powered tech news, in-depth product reviews, and expert analysis at the edge of innovation.',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'AI Tech Blog',
+        alt: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Tech Blog - Latest Tech News, Reviews & Guides',
+    title: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
     description:
-      'Your premier destination for AI-powered tech news, in-depth product reviews, and expert analysis.',
+      'Your premier destination for AI-powered tech news, in-depth product reviews, and expert analysis at the edge of innovation.',
     images: ['/og-image.png'],
-    creator: '@aitechblog',
+    creator: '@techfrontier',
   },
   robots: {
     index: true,

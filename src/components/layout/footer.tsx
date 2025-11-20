@@ -21,20 +21,18 @@ const footerSections = [
     title: 'Company',
     links: [
       { label: 'About Us', href: '/about' },
-      { label: 'Contact', href: '/contact' },
-      { label: 'Careers', href: '/careers' },
+      { label: 'Our Team', href: '/our-team' },
       { label: 'Advertise', href: '/advertise' },
-      { label: 'Press', href: '/press' },
+      { label: 'Contact', href: '/contact' },
     ],
   },
   {
     title: 'Legal',
     links: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
-      { label: 'Cookie Policy', href: '/cookies' },
-      { label: 'Accessibility', href: '/accessibility' },
-      { label: 'Licensing', href: '/licensing' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms-of-service' },
+      { label: 'Cookie Policy', href: '/cookie-policy' },
+      { label: 'Affiliate Disclosure', href: '/affiliate-disclosure' },
     ],
   },
   {
@@ -91,13 +89,16 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <Link href="/" className="mb-4 inline-flex items-center space-x-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <span className="text-xl font-bold text-primary-foreground">AI</span>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-teal-500">
+                <span className="text-lg font-bold text-white">TF</span>
               </div>
-              <span className="text-xl font-bold">Tech Blog</span>
+              <span className="text-xl font-bold">TechFrontier</span>
             </Link>
+            <p className="mb-2 text-xs italic text-muted-foreground">
+              Exploring Tomorrow&apos;s Tech, Today
+            </p>
             <p className="mb-4 text-sm text-muted-foreground">
-              Your premier destination for AI-powered tech news, in-depth reviews, and expert analysis.
+              Your premier destination for AI-powered tech news, in-depth reviews, and expert analysis at the edge of innovation.
             </p>
 
             {/* Social Links */}
@@ -143,7 +144,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-sm text-muted-foreground md:flex-row">
           <p>
-            © {new Date().getFullYear()} AI Tech Blog. All rights reserved.
+            © {new Date().getFullYear()} TechFrontier. All rights reserved.
           </p>
           <p className="text-center md:text-right">
             Built with Next.js • Powered by AI
