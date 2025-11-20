@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Facebook, Twitter, Instagram, Youtube, Linkedin, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useTheme } from 'next-themes'
 
 const footerSections = [
   {
@@ -56,6 +58,8 @@ const socialLinks = [
 ]
 
 export function Footer() {
+  const { resolvedTheme } = useTheme()
+
   return (
     <footer className="border-t bg-muted/30">
       <div className="container py-12">
@@ -89,8 +93,14 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <Link href="/" className="mb-4 inline-flex items-center space-x-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-teal-500">
-                <span className="text-lg font-bold text-white">TF</span>
+              <div className="relative h-10 w-10 flex-shrink-0">
+                <Image
+                  src={resolvedTheme === 'dark' ? '/logos/header/tech_frontier_white.svg' : '/logos/header/tech_frontier.svg'}
+                  alt="TechFrontier"
+                  width={40}
+                  height={40}
+                  className="h-10 w-10"
+                />
               </div>
               <span className="text-xl font-bold">TechFrontier</span>
             </Link>

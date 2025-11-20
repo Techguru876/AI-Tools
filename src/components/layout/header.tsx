@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Search, Menu, User, X } from 'lucide-react'
 import { useState } from 'react'
 import { SearchDialog } from '@/components/search-dialog'
+import { useTheme } from 'next-themes'
 
 // Primary navigation categories
 const primaryNav = [
@@ -20,15 +22,23 @@ const primaryNav = [
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const { resolvedTheme } = useTheme()
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          {/* Logo - Replace the placeholder with actual TechFrontier logo image */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-teal-500">
-              <span className="text-lg font-bold text-white">TF</span>
+          {/* TechFrontier Logo */}
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="relative h-10 w-10 flex-shrink-0">
+              <Image
+                src={resolvedTheme === 'dark' ? '/logos/header/tech_frontier_white.svg' : '/logos/header/tech_frontier.svg'}
+                alt="TechFrontier"
+                width={40}
+                height={40}
+                className="h-10 w-10"
+                priority
+              />
             </div>
             <div className="hidden flex-col sm:flex">
               <span className="text-xl font-bold leading-tight">TechFrontier</span>
