@@ -4,9 +4,10 @@
  * Categories: Cozy Room, Rainy Window, Cityscape, Nature Scene, Space Theme
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLofiStore, LofiTemplate, TemplateCategory } from '../../stores/lofiStore'
 import { DEFAULT_TEMPLATES } from './defaultTemplates'
+import { useToast } from '../common/ToastContainer'
 import './TemplateLibrary.css'
 
 interface TemplateLibraryProps {
@@ -15,10 +16,18 @@ interface TemplateLibraryProps {
 
 export default function TemplateLibrary({ onClose }: TemplateLibraryProps) {
   const { templates, applyTemplate, favoriteTemplates } = useLofiStore()
+  const { success, error: showError } = useToast()
   const [selectedCategory, setSelectedCategory] = useState<TemplateCategory | 'All'>('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'name' | 'popularity'>('popularity')
   const [selectedTemplate, setSelectedTemplate] = useState<LofiTemplate | null>(null)
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[TemplateLibrary] DEFAULT_TEMPLATES count:', DEFAULT_TEMPLATES.length)
+    console.log('[TemplateLibrary] Store templates count:', templates.length)
+    console.log('[TemplateLibrary] DEFAULT_TEMPLATES:', DEFAULT_TEMPLATES)
+  }, [templates])
 
   // Template categories with icons
   const categories: Array<{ id: TemplateCategory | 'All'; label: string; icon: string }> = [
@@ -47,8 +56,15 @@ export default function TemplateLibrary({ onClose }: TemplateLibraryProps) {
     })
 
   const handleApplyTemplate = (template: LofiTemplate) => {
-    applyTemplate(template)
-    if (onClose) onClose()
+    try {
+      console.log('[TemplateLibrary] Applying template:', template.name, template)
+      applyTemplate(template)
+      success(`Template "${template.name}" applied successfully!`)
+      if (onClose) onClose()
+    } catch (err: any) {
+      console.error('[TemplateLibrary] Error applying template:', err)
+      showError(`Failed to apply template: ${err.message}`)
+    }
   }
 
   const handlePreview = (template: LofiTemplate) => {
@@ -62,6 +78,10 @@ export default function TemplateLibrary({ onClose }: TemplateLibraryProps) {
         <div className="header-left">
           <h2>📚 Template Library</h2>
           <p>Choose a professionally designed template to get started</p>
+          <p style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
+            Showing {filteredTemplates.length} of {allTemplates.length} templates (
+            {DEFAULT_TEMPLATES.length} default + {templates.length} custom)
+          </p>
         </div>
         <div className="header-right">
           {onClose && (
