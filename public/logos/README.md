@@ -1,22 +1,60 @@
 # TechFrontier Logo Assets
 
-This directory contains the TechFrontier brand logo assets.
+This directory contains the TechFrontier brand logo assets organized by use case.
 
-## Logo Files Structure
-
-Place your TechFrontier logo files in this directory with the following naming convention:
+## Directory Structure
 
 ```
 /public/logos/
-├── tf-logo-colored.svg         # Colored gradient version (for dark backgrounds)
-├── tf-logo-colored.png         # PNG version (multiple sizes if needed)
-├── tf-logo-blue-green.svg      # Blue-green version (for light backgrounds)
-├── tf-logo-blue-green.png      # PNG version
-├── tf-logo-monochrome.svg      # Monochrome version (for print)
-├── tf-logo-monochrome.png      # PNG version
-├── tf-monogram.svg             # "TF" circular monogram for favicon
-└── tf-monogram.png             # PNG version
+├── header/          # Logos for website header/footer (SVG preferred)
+├── social/          # Social media preview images (PNG/JPG)
+├── favicon/         # Browser favicon files (PNG/ICO)
+└── brand/           # Full brand assets and variants
 ```
+
+## Recommended File Organization
+
+### `/public/logos/header/` - Website Header & Navigation
+Place your scalable logos here (SVG preferred):
+- `tf-logo-gradient.svg` - Primary gradient logo (blue-to-teal)
+- `tf-logo-light.svg` - Dark logo for light mode backgrounds
+- `tf-logo-dark.svg` - Light/gradient logo for dark mode backgrounds
+
+**Size**: 40x40px base size minimum (SVG scales perfectly)
+
+### `/public/logos/social/` - Social Media Previews
+Place social sharing images here:
+- `og-image.png` - **1200x630px** - OpenGraph/Twitter card (CRITICAL)
+  - Should include TechFrontier logo + slogan
+  - Gradient background with good contrast
+- `og-image.jpg` - Alternative format if needed
+- `tf-social-square.png` - 512x512px - Square profile image
+
+**Important**: Copy `og-image.png` to `/public/og-image.png` (root level)
+
+### `/public/logos/favicon/` - Browser Icons
+Place all favicon sizes here:
+- `favicon.ico` - 32x32px ICO format
+- `favicon-16x16.png` - 16x16px PNG
+- `favicon-32x32.png` - 32x32px PNG
+- `apple-touch-icon.png` - 180x180px for iOS home screen
+- `android-chrome-192x192.png` - 192x192px for Android
+- `android-chrome-512x512.png` - 512x512px for Android splash
+
+**Important**: Copy these files to `/public/` root:
+- `favicon.ico`
+- `favicon-16x16.png`
+- `favicon-32x32.png`
+- `apple-touch-icon.png`
+
+### `/public/logos/brand/` - Full Brand Assets
+Place comprehensive brand assets here:
+- `tf-full-logo-light.svg` - Full logo with text for light backgrounds
+- `tf-full-logo-dark.svg` - Full logo with text for dark backgrounds
+- `tf-monogram.svg` - Just "TF" circular logo
+- `tf-monogram-light.png` - 512x512px PNG version
+- `tf-monogram-dark.png` - 512x512px PNG version
+- Any additional variants (JPG for print/email, etc.)
 
 ## Logo Usage Guidelines
 
