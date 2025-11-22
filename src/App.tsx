@@ -28,7 +28,7 @@ function App() {
     // Initialize application
     async function init() {
       try {
-        logger.systemEvent('Application initializing', 'pending')
+        logger.systemEvent('Application initializing')
 
         // Get system information
         const info = await invoke('get_system_info')

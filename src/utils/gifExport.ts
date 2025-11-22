@@ -157,7 +157,7 @@ export async function exportAsGIF(
 
     // Read output GIF
     const gifData = await ffmpeg.readFile('output.gif')
-    const gifBlob = new Blob([gifData], { type: 'image/gif' })
+    const gifBlob = new Blob([gifData as BlobPart], { type: 'image/gif' })
     const gifUrl = URL.createObjectURL(gifBlob)
 
     // Cleanup FFmpeg virtual filesystem

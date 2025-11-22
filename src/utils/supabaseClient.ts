@@ -6,8 +6,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // Environment variables (configure in .env file)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || ''
+const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || ''
 
 // Check if Supabase is configured
 export const isSupabaseConfigured = (): boolean => {

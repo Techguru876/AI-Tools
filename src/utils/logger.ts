@@ -109,6 +109,8 @@ class Logger {
       error?: Error | string
     }
   ): LogEntry {
+    const { error: errorOption, ...restOptions } = options || {}
+
     const entry: LogEntry = {
       id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date().toISOString(),
@@ -117,18 +119,18 @@ class Logger {
       action,
       sessionId: this.sessionId,
       userId: this.userId,
-      ...options,
+      ...restOptions,
     }
 
     // Format error if provided
-    if (options?.error) {
-      if (typeof options.error === 'string') {
-        entry.error = { message: options.error }
+    if (errorOption) {
+      if (typeof errorOption === 'string') {
+        entry.error = { message: errorOption }
       } else {
         entry.error = {
-          message: options.error.message,
-          stack: options.error.stack,
-          code: (options.error as any).code,
+          message: errorOption.message,
+          stack: errorOption.stack,
+          code: (errorOption as any).code,
         }
       }
     }

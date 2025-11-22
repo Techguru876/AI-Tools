@@ -3,7 +3,7 @@
  * Developer/Debug console for viewing application logs
  */
 
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useLogViewer, useCriticalErrorMonitor } from '../../hooks/useLogger'
 import { LogEntry, LogFilter, LogLevel, LogCategory } from '../../utils/logger'
 import './LogsPanel.css'
