@@ -846,6 +846,116 @@ export function setupIpcHandlers() {
     }
   });
 
+  // ============================================================================
+  // Phase 6: Analytics & Scheduling IPC Handlers
+  // ============================================================================
+
+  // Analytics: Get cost summary
+  ipcMain.handle('analytics:cost-summary', async (event, startDate?: number, endDate?: number) => {
+    try {
+      // Placeholder - in production, would call AnalyticsService
+      return {
+        total_cost: 125.50,
+        costs_by_service: {
+          openai: 85.30,
+          elevenlabs: 32.20,
+          youtube: 8.00,
+        },
+        costs_by_day: [],
+        costs_by_operation: {},
+      };
+    } catch (error: any) {
+      console.error('Error getting cost summary:', error);
+      throw error;
+    }
+  });
+
+  // Analytics: Get performance stats
+  ipcMain.handle('analytics:performance-stats', async (event, startDate?: number, endDate?: number) => {
+    try {
+      // Placeholder - in production, would call AnalyticsService
+      return {
+        total_operations: 1250,
+        successful_operations: 1187,
+        failed_operations: 63,
+        average_duration_ms: 3200,
+        cache_hit_rate: 0.68,
+        operations_by_type: {},
+        operations_by_day: [],
+      };
+    } catch (error: any) {
+      console.error('Error getting performance stats:', error);
+      throw error;
+    }
+  });
+
+  // Analytics: Get generation stats
+  ipcMain.handle('analytics:generation-stats', async (event, startDate?: number, endDate?: number) => {
+    try {
+      // Placeholder - in production, would call AnalyticsService
+      return {
+        total_scripts: 320,
+        total_voice_files: 298,
+        total_images: 412,
+        total_videos: 145,
+        total_uploads: 75,
+        success_rate: 94.96,
+        average_script_length: 850,
+        average_video_duration: 180,
+      };
+    } catch (error: any) {
+      console.error('Error getting generation stats:', error);
+      throw error;
+    }
+  });
+
+  // Scheduling: Create scheduled job
+  ipcMain.handle('scheduling:create-job', async (event, job: any) => {
+    try {
+      // Placeholder - in production, would call SchedulingService
+      console.log('Creating scheduled job:', job);
+      return { id: Date.now(), ...job };
+    } catch (error: any) {
+      console.error('Error creating scheduled job:', error);
+      throw error;
+    }
+  });
+
+  // Scheduling: Get all jobs
+  ipcMain.handle('scheduling:get-jobs', async (event, filter?: any) => {
+    try {
+      // Placeholder - in production, would call SchedulingService
+      return [];
+    } catch (error: any) {
+      console.error('Error getting scheduled jobs:', error);
+      throw error;
+    }
+  });
+
+  // Scheduling: Update job
+  ipcMain.handle('scheduling:update-job', async (event, id: number, updates: any) => {
+    try {
+      // Placeholder - in production, would call SchedulingService
+      console.log('Updating scheduled job:', id, updates);
+      return true;
+    } catch (error: any) {
+      console.error('Error updating scheduled job:', error);
+      throw error;
+    }
+  });
+
+  // Scheduling: Delete job
+  ipcMain.handle('scheduling:delete-job', async (event, id: number) => {
+    try {
+      // Placeholder - in production, would call SchedulingService
+      console.log('Deleting scheduled job:', id);
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting scheduled job:', error);
+      throw error;
+    }
+  });
+
   // Initialize AI services on startup if keys exist
   initAIServices();
 }
