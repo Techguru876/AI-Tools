@@ -14,10 +14,12 @@ import ProductivityStudio from './productivity/ProductivityStudio'
 import HorrorStudio from './horror/HorrorStudio'
 import NewsStudio from './news/NewsStudio'
 import MemeStudio from './meme/MemeStudio'
+import ContentForgeStudio from './contentforge/ContentForgeStudio'
 import Settings from './Settings'
 import './StudioSuite.css'
 
 export type StudioType =
+  | 'contentforge'
   | 'lofi'
   | 'quotes'
   | 'explainer'
@@ -41,11 +43,18 @@ interface StudioSuiteProps {
 }
 
 export default function StudioSuite({ onSwitchToProMode }: StudioSuiteProps = {}) {
-  const [activeStudio, setActiveStudio] = useState<StudioType>('lofi')
+  const [activeStudio, setActiveStudio] = useState<StudioType>('contentforge')
   const [showProTransition, setShowProTransition] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
   const studios: Studio[] = [
+    {
+      id: 'contentforge',
+      name: 'ContentForge',
+      icon: '🚀',
+      description: 'AI content generation & automation',
+      color: '#667eea',
+    },
     {
       id: 'lofi',
       name: 'Lofi Studio',
@@ -160,6 +169,7 @@ export default function StudioSuite({ onSwitchToProMode }: StudioSuiteProps = {}
 
       {/* Studio Content */}
       <div className="studio-content">
+        {activeStudio === 'contentforge' && <ContentForgeStudio />}
         {activeStudio === 'lofi' && <LofiStudio />}
         {activeStudio === 'quotes' && <QuotesStudio />}
         {activeStudio === 'explainer' && <ExplainerStudio />}

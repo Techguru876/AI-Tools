@@ -9,12 +9,55 @@ const export_service_1 = require("./services/export-service");
 const TemplateEngine_1 = require("./services/templates/TemplateEngine");
 const BatchProcessor_1 = require("./services/batch/BatchProcessor");
 const lofi_template_1 = require("./services/templates/lofi-template");
+const horror_template_1 = require("./services/templates/horror-template");
+const APIKeyManager_1 = require("./services/config/APIKeyManager");
+const ScriptGenerator_1 = require("./services/content-generation/ScriptGenerator");
+const VoiceGenerator_1 = require("./services/content-generation/VoiceGenerator");
+const ImageGenerator_1 = require("./services/content-generation/ImageGenerator");
+const MetadataGenerator_1 = require("./services/youtube/MetadataGenerator");
+const YouTubeAPI_1 = require("./services/youtube/YouTubeAPI");
+const OpenAIProvider_1 = require("./services/content-generation/providers/OpenAIProvider");
+const ElevenLabsProvider_1 = require("./services/content-generation/providers/ElevenLabsProvider");
 const projectService = new project_service_1.ProjectService();
 const assetService = new asset_service_1.AssetService();
 const timelineService = new timeline_service_1.TimelineService();
 const exportService = new export_service_1.ExportService();
 const templateEngine = new TemplateEngine_1.TemplateEngine();
 const batchProcessor = new BatchProcessor_1.BatchProcessor(2); // Max 2 concurrent jobs
+// AI Services - Initialize lazily when API keys are set
+const apiKeyManager = new APIKeyManager_1.APIKeyManager();
+let scriptGenerator = null;
+let voiceGenerator = null;
+let imageGenerator = null;
+let metadataGenerator = null;
+let youtubeAPI = null;
+let openaiProvider = null;
+let elevenLabsProvider = null;
+// Helper to initialize AI services when keys are available
+function initAIServices() {
+    const openAIKey = apiKeyManager.getOpenAIKey();
+    const elevenLabsKey = apiKeyManager.getElevenLabsKey();
+    const youtubeCredentials = apiKeyManager.getYouTubeCredentials();
+    if (openAIKey && !scriptGenerator) {
+        openaiProvider = new OpenAIProvider_1.OpenAIProvider(openAIKey);
+        scriptGenerator = new ScriptGenerator_1.ScriptGenerator(openAIKey);
+        imageGenerator = new ImageGenerator_1.ImageGenerator(openAIKey);
+        metadataGenerator = new MetadataGenerator_1.MetadataGenerator(openAIKey);
+    }
+    if ((openAIKey || elevenLabsKey) && !voiceGenerator) {
+        voiceGenerator = new VoiceGenerator_1.VoiceGenerator(openAIKey, elevenLabsKey);
+    }
+    if (elevenLabsKey && !elevenLabsProvider) {
+        elevenLabsProvider = new ElevenLabsProvider_1.ElevenLabsProvider(elevenLabsKey);
+    }
+    if (youtubeCredentials && youtubeCredentials.clientId && youtubeCredentials.clientSecret && youtubeCredentials.refreshToken && !youtubeAPI) {
+        youtubeAPI = new YouTubeAPI_1.YouTubeAPI({
+            clientId: youtubeCredentials.clientId,
+            clientSecret: youtubeCredentials.clientSecret,
+            refreshToken: youtubeCredentials.refreshToken,
+        });
+    }
+}
 function setupIpcHandlers() {
     // Project handlers
     electron_1.ipcMain.handle('project:create', async (_event, name) => {
@@ -332,7 +375,9 @@ function setupIpcHandlers() {
         try {
             // Initialize built-in templates
             const lofiTemplate = (0, lofi_template_1.createLofiTemplate)();
+            const horrorTemplate = (0, horror_template_1.createHorrorTemplate)();
             templateEngine.saveTemplate(lofiTemplate);
+            templateEngine.saveTemplate(horrorTemplate);
             return { success: true };
         }
         catch (error) {
@@ -449,5 +494,345 @@ function setupIpcHandlers() {
         const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
         mainWindow?.webContents.send('batch:queue-empty');
     });
+    // ==================== AI SERVICES (ContentForge) ====================
+    // API Key Management
+    electron_1.ipcMain.handle('contentforge:api-keys:set-openai', async (_event, apiKey) => {
+        try {
+            apiKeyManager.setOpenAIKey(apiKey);
+            initAIServices(); // Re-initialize services with new key
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error setting OpenAI key:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:api-keys:set-elevenlabs', async (_event, apiKey) => {
+        try {
+            apiKeyManager.setElevenLabsKey(apiKey);
+            initAIServices();
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error setting ElevenLabs key:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:api-keys:set-youtube', async (_event, credentials) => {
+        try {
+            apiKeyManager.setYouTubeCredentials(credentials);
+            initAIServices();
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error setting YouTube credentials:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:api-keys:validate', async () => {
+        try {
+            return apiKeyManager.validateKeys();
+        }
+        catch (error) {
+            console.error('Error validating API keys:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:api-keys:clear', async (_event, service) => {
+        try {
+            if (service) {
+                apiKeyManager.clearKey(service);
+            }
+            else {
+                apiKeyManager.clearAllKeys();
+            }
+            // Reset AI services
+            scriptGenerator = null;
+            voiceGenerator = null;
+            imageGenerator = null;
+            metadataGenerator = null;
+            youtubeAPI = null;
+            openaiProvider = null;
+            elevenLabsProvider = null;
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error clearing API keys:', error);
+            throw error;
+        }
+    });
+    // Script Generation
+    electron_1.ipcMain.handle('contentforge:script:horror', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!scriptGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await scriptGenerator.generateHorrorStory(options);
+        }
+        catch (error) {
+            console.error('Error generating horror script:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:script:lofi', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!scriptGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await scriptGenerator.generateLofiDescription(options);
+        }
+        catch (error) {
+            console.error('Error generating lofi script:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:script:explainer', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!scriptGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await scriptGenerator.generateExplainerScript(options);
+        }
+        catch (error) {
+            console.error('Error generating explainer script:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:script:motivational', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!scriptGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await scriptGenerator.generateMotivationalScript(options);
+        }
+        catch (error) {
+            console.error('Error generating motivational script:', error);
+            throw error;
+        }
+    });
+    // Voice Generation
+    electron_1.ipcMain.handle('contentforge:voice:generate', async (_event, text, filename, options) => {
+        try {
+            initAIServices();
+            if (!voiceGenerator)
+                throw new Error('Voice generation API keys not configured');
+            return await voiceGenerator.generateNarration(text, filename, options);
+        }
+        catch (error) {
+            console.error('Error generating voice:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:voice:list-voices', async (_event, provider) => {
+        try {
+            initAIServices();
+            if (provider === 'elevenlabs') {
+                if (!elevenLabsProvider)
+                    throw new Error('ElevenLabs API key not configured');
+                return await elevenLabsProvider.listVoices();
+            }
+            else {
+                // OpenAI has fixed voices
+                return [
+                    { id: 'alloy', name: 'Alloy' },
+                    { id: 'echo', name: 'Echo' },
+                    { id: 'fable', name: 'Fable' },
+                    { id: 'onyx', name: 'Onyx' },
+                    { id: 'nova', name: 'Nova' },
+                    { id: 'shimmer', name: 'Shimmer' },
+                ];
+            }
+        }
+        catch (error) {
+            console.error('Error listing voices:', error);
+            throw error;
+        }
+    });
+    // Image Generation
+    electron_1.ipcMain.handle('contentforge:image:generate', async (_event, prompt, options) => {
+        try {
+            initAIServices();
+            if (!imageGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await imageGenerator.generate(prompt, options);
+        }
+        catch (error) {
+            console.error('Error generating image:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:image:horror-scene', async (_event, description, options) => {
+        try {
+            initAIServices();
+            if (!imageGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await imageGenerator.generateHorrorScene(description, options);
+        }
+        catch (error) {
+            console.error('Error generating horror scene:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:image:lofi-background', async (_event, description, options) => {
+        try {
+            initAIServices();
+            if (!imageGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await imageGenerator.generateLofiBackground(description, options);
+        }
+        catch (error) {
+            console.error('Error generating lofi background:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:image:batch', async (_event, prompts) => {
+        try {
+            initAIServices();
+            if (!imageGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await imageGenerator.generateBatch(prompts);
+        }
+        catch (error) {
+            console.error('Error generating batch images:', error);
+            throw error;
+        }
+    });
+    // YouTube Integration
+    electron_1.ipcMain.handle('contentforge:youtube:upload', async (_event, videoPath, metadata) => {
+        try {
+            initAIServices();
+            if (!youtubeAPI)
+                throw new Error('YouTube credentials not configured');
+            return await youtubeAPI.uploadVideo(videoPath, metadata);
+        }
+        catch (error) {
+            console.error('Error uploading to YouTube:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:youtube:metadata:generate', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!metadataGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await metadataGenerator.generateFullMetadata(options);
+        }
+        catch (error) {
+            console.error('Error generating metadata:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:youtube:metadata:title', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!metadataGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await metadataGenerator.generateTitle(options);
+        }
+        catch (error) {
+            console.error('Error generating title:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:youtube:metadata:description', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!metadataGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await metadataGenerator.generateDescription(options);
+        }
+        catch (error) {
+            console.error('Error generating description:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:youtube:metadata:tags', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!metadataGenerator)
+                throw new Error('OpenAI API key not configured');
+            return await metadataGenerator.generateTags(options);
+        }
+        catch (error) {
+            console.error('Error generating tags:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:youtube:playlists', async () => {
+        try {
+            initAIServices();
+            if (!youtubeAPI)
+                throw new Error('YouTube credentials not configured');
+            return await youtubeAPI.listPlaylists();
+        }
+        catch (error) {
+            console.error('Error listing playlists:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:youtube:create-playlist', async (_event, options) => {
+        try {
+            initAIServices();
+            if (!youtubeAPI)
+                throw new Error('YouTube credentials not configured');
+            return await youtubeAPI.createPlaylist(options);
+        }
+        catch (error) {
+            console.error('Error creating playlist:', error);
+            throw error;
+        }
+    });
+    // Cost Tracking
+    electron_1.ipcMain.handle('contentforge:cost:stats', async () => {
+        try {
+            const stats = {};
+            if (scriptGenerator) {
+                stats.scriptGeneration = scriptGenerator.getCostStats();
+            }
+            if (voiceGenerator) {
+                stats.voiceGeneration = voiceGenerator.getCostStats();
+            }
+            if (imageGenerator) {
+                stats.imageGeneration = imageGenerator.getCostStats();
+            }
+            if (metadataGenerator) {
+                stats.metadataGeneration = metadataGenerator.getCostStats();
+            }
+            return stats;
+        }
+        catch (error) {
+            console.error('Error getting cost stats:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:cache:stats', async () => {
+        try {
+            const stats = {};
+            if (scriptGenerator) {
+                stats.scriptGeneration = scriptGenerator.getCacheStats();
+            }
+            if (metadataGenerator) {
+                stats.metadataGeneration = metadataGenerator.getCacheStats();
+            }
+            return stats;
+        }
+        catch (error) {
+            console.error('Error getting cache stats:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('contentforge:cache:clear', async (_event, type) => {
+        try {
+            // Cache clearing would be implemented here
+            // For now, just return success
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error clearing cache:', error);
+            throw error;
+        }
+    });
+    // Initialize AI services on startup if keys exist
+    initAIServices();
 }
 //# sourceMappingURL=ipc-handlers.js.map

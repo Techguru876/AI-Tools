@@ -105,6 +105,45 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onBatchQueueEmpty: (callback: () => void) => {
     ipcRenderer.on('batch:queue-empty', () => callback());
   },
+
+  // ==================== AI SERVICES (ContentForge) ====================
+
+  // API Key Management
+  cfSetOpenAIKey: (apiKey: string) => ipcRenderer.invoke('contentforge:api-keys:set-openai', apiKey),
+  cfSetElevenLabsKey: (apiKey: string) => ipcRenderer.invoke('contentforge:api-keys:set-elevenlabs', apiKey),
+  cfSetYouTubeCredentials: (credentials: any) => ipcRenderer.invoke('contentforge:api-keys:set-youtube', credentials),
+  cfValidateAPIKeys: () => ipcRenderer.invoke('contentforge:api-keys:validate'),
+  cfClearAPIKeys: (service?: string) => ipcRenderer.invoke('contentforge:api-keys:clear', service),
+
+  // Script Generation
+  cfGenerateHorrorScript: (options: any) => ipcRenderer.invoke('contentforge:script:horror', options),
+  cfGenerateLofiScript: (options: any) => ipcRenderer.invoke('contentforge:script:lofi', options),
+  cfGenerateExplainerScript: (options: any) => ipcRenderer.invoke('contentforge:script:explainer', options),
+  cfGenerateMotivationalScript: (options: any) => ipcRenderer.invoke('contentforge:script:motivational', options),
+
+  // Voice Generation
+  cfGenerateVoice: (text: string, filename: string, options?: any) => ipcRenderer.invoke('contentforge:voice:generate', text, filename, options),
+  cfListVoices: (provider: 'elevenlabs' | 'openai') => ipcRenderer.invoke('contentforge:voice:list-voices', provider),
+
+  // Image Generation
+  cfGenerateImage: (prompt: string, options?: any) => ipcRenderer.invoke('contentforge:image:generate', prompt, options),
+  cfGenerateHorrorScene: (description: string, options?: any) => ipcRenderer.invoke('contentforge:image:horror-scene', description, options),
+  cfGenerateLofiBackground: (description: string, options?: any) => ipcRenderer.invoke('contentforge:image:lofi-background', description, options),
+  cfGenerateBatchImages: (prompts: any[]) => ipcRenderer.invoke('contentforge:image:batch', prompts),
+
+  // YouTube Integration
+  cfUploadToYouTube: (videoPath: string, metadata: any) => ipcRenderer.invoke('contentforge:youtube:upload', videoPath, metadata),
+  cfGenerateYouTubeMetadata: (options: any) => ipcRenderer.invoke('contentforge:youtube:metadata:generate', options),
+  cfGenerateYouTubeTitle: (options: any) => ipcRenderer.invoke('contentforge:youtube:metadata:title', options),
+  cfGenerateYouTubeDescription: (options: any) => ipcRenderer.invoke('contentforge:youtube:metadata:description', options),
+  cfGenerateYouTubeTags: (options: any) => ipcRenderer.invoke('contentforge:youtube:metadata:tags', options),
+  cfListYouTubePlaylists: () => ipcRenderer.invoke('contentforge:youtube:playlists'),
+  cfCreateYouTubePlaylist: (options: any) => ipcRenderer.invoke('contentforge:youtube:create-playlist', options),
+
+  // Cost & Cache Tracking
+  cfGetCostStats: () => ipcRenderer.invoke('contentforge:cost:stats'),
+  cfGetCacheStats: () => ipcRenderer.invoke('contentforge:cache:stats'),
+  cfClearCache: (type?: string) => ipcRenderer.invoke('contentforge:cache:clear', type),
 });
 
 // Also expose app info

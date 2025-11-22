@@ -294,6 +294,203 @@ export const batch = {
 };
 
 /**
+ * ContentForge AI Services
+ */
+export const contentforge = {
+  // API Key Management
+  apiKeys: {
+    setOpenAI: async (apiKey: string) => {
+      return getAPI().cfSetOpenAIKey(apiKey);
+    },
+
+    setElevenLabs: async (apiKey: string) => {
+      return getAPI().cfSetElevenLabsKey(apiKey);
+    },
+
+    setYouTube: async (credentials: any) => {
+      return getAPI().cfSetYouTubeCredentials(credentials);
+    },
+
+    validate: async () => {
+      return getAPI().cfValidateAPIKeys();
+    },
+
+    clear: async (service?: string) => {
+      return getAPI().cfClearAPIKeys(service);
+    },
+  },
+
+  // Script Generation
+  script: {
+    horror: async (options: {
+      duration: number;
+      theme?: string;
+      setting?: string;
+      pov?: 'first' | 'third';
+    }) => {
+      return getAPI().cfGenerateHorrorScript(options);
+    },
+
+    lofi: async (options: {
+      trackName: string;
+      mood?: string;
+      tags?: string[];
+    }) => {
+      return getAPI().cfGenerateLofiScript(options);
+    },
+
+    explainer: async (options: {
+      topic: string;
+      duration: number;
+      targetAudience?: string;
+      style?: string;
+    }) => {
+      return getAPI().cfGenerateExplainerScript(options);
+    },
+
+    motivational: async (options: {
+      theme: string;
+      count?: number;
+    }) => {
+      return getAPI().cfGenerateMotivationalScript(options);
+    },
+  },
+
+  // Voice Generation
+  voice: {
+    generate: async (text: string, filename: string, options?: {
+      provider?: 'elevenlabs' | 'openai' | 'auto';
+      voiceId?: string;
+      quality?: 'standard' | 'high';
+    }) => {
+      return getAPI().cfGenerateVoice(text, filename, options);
+    },
+
+    listVoices: async (provider: 'elevenlabs' | 'openai') => {
+      return getAPI().cfListVoices(provider);
+    },
+  },
+
+  // Image Generation
+  image: {
+    generate: async (prompt: string, options?: {
+      filename?: string;
+      size?: '1024x1024' | '1792x1024' | '1024x1792';
+      quality?: 'standard' | 'hd';
+      style?: string;
+    }) => {
+      return getAPI().cfGenerateImage(prompt, options);
+    },
+
+    horrorScene: async (description: string, options?: {
+      filename?: string;
+      intensity?: 'subtle' | 'moderate' | 'extreme';
+    }) => {
+      return getAPI().cfGenerateHorrorScene(description, options);
+    },
+
+    lofiBackground: async (description: string, options?: {
+      filename?: string;
+      mood?: 'chill' | 'cozy' | 'dreamy' | 'nostalgic';
+    }) => {
+      return getAPI().cfGenerateLofiBackground(description, options);
+    },
+
+    batch: async (prompts: Array<{
+      prompt: string;
+      filename?: string;
+      style?: string;
+    }>) => {
+      return getAPI().cfGenerateBatchImages(prompts);
+    },
+  },
+
+  // YouTube Integration
+  youtube: {
+    upload: async (videoPath: string, metadata: {
+      title: string;
+      description: string;
+      tags: string[];
+      categoryId?: string;
+      privacyStatus?: 'public' | 'private' | 'unlisted';
+      thumbnailPath?: string;
+      playlistId?: string;
+    }) => {
+      return getAPI().cfUploadToYouTube(videoPath, metadata);
+    },
+
+    metadata: {
+      generate: async (options: {
+        niche: string;
+        topic: string;
+        script?: string;
+        duration?: number;
+        style?: 'clickbait' | 'professional' | 'casual';
+      }) => {
+        return getAPI().cfGenerateYouTubeMetadata(options);
+      },
+
+      title: async (options: {
+        niche: string;
+        topic: string;
+        style?: 'clickbait' | 'professional' | 'casual';
+        maxLength?: number;
+      }) => {
+        return getAPI().cfGenerateYouTubeTitle(options);
+      },
+
+      description: async (options: {
+        niche: string;
+        topic: string;
+        script?: string;
+        duration?: number;
+        keywords?: string[];
+      }) => {
+        return getAPI().cfGenerateYouTubeDescription(options);
+      },
+
+      tags: async (options: {
+        niche: string;
+        topic: string;
+        title?: string;
+        maxTags?: number;
+      }) => {
+        return getAPI().cfGenerateYouTubeTags(options);
+      },
+    },
+
+    playlists: {
+      list: async () => {
+        return getAPI().cfListYouTubePlaylists();
+      },
+
+      create: async (options: {
+        title: string;
+        description?: string;
+        privacyStatus?: 'public' | 'private' | 'unlisted';
+      }) => {
+        return getAPI().cfCreateYouTubePlaylist(options);
+      },
+    },
+  },
+
+  // Cost & Cache Tracking
+  tracking: {
+    getCostStats: async () => {
+      return getAPI().cfGetCostStats();
+    },
+
+    getCacheStats: async () => {
+      return getAPI().cfGetCacheStats();
+    },
+
+    clearCache: async (type?: string) => {
+      return getAPI().cfClearCache(type);
+    },
+  },
+};
+
+/**
  * App Info
  */
 export const getAppInfo = () => {

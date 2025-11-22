@@ -1,100 +1,132 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var electron_1 = require("electron");
+const electron_1 = require("electron");
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     // Project management
-    createProject: function (name) { return electron_1.ipcRenderer.invoke('project:create', name); },
-    openProject: function (path) { return electron_1.ipcRenderer.invoke('project:open', path); },
-    saveProject: function (data) { return electron_1.ipcRenderer.invoke('project:save', data); },
-    listProjects: function () { return electron_1.ipcRenderer.invoke('project:list'); },
+    createProject: (name) => electron_1.ipcRenderer.invoke('project:create', name),
+    openProject: (path) => electron_1.ipcRenderer.invoke('project:open', path),
+    saveProject: (data) => electron_1.ipcRenderer.invoke('project:save', data),
+    listProjects: () => electron_1.ipcRenderer.invoke('project:list'),
     // Asset management
-    importAsset: function (path) { return electron_1.ipcRenderer.invoke('asset:import', path); },
-    generateProxy: function (assetId) { return electron_1.ipcRenderer.invoke('asset:generate-proxy', assetId); },
-    listAssets: function () { return electron_1.ipcRenderer.invoke('asset:list'); },
-    getAsset: function (assetId) { return electron_1.ipcRenderer.invoke('asset:get', assetId); },
-    deleteAsset: function (assetId) { return electron_1.ipcRenderer.invoke('asset:delete', assetId); },
+    importAsset: (path) => electron_1.ipcRenderer.invoke('asset:import', path),
+    generateProxy: (assetId) => electron_1.ipcRenderer.invoke('asset:generate-proxy', assetId),
+    listAssets: () => electron_1.ipcRenderer.invoke('asset:list'),
+    getAsset: (assetId) => electron_1.ipcRenderer.invoke('asset:get', assetId),
+    deleteAsset: (assetId) => electron_1.ipcRenderer.invoke('asset:delete', assetId),
     // Timeline operations
-    addClipToTimeline: function (clip) { return electron_1.ipcRenderer.invoke('timeline:add-clip', clip); },
-    removeClip: function (clipId) { return electron_1.ipcRenderer.invoke('timeline:remove-clip', clipId); },
-    updateClip: function (clipId, updates) { return electron_1.ipcRenderer.invoke('timeline:update-clip', clipId, updates); },
-    getTimeline: function () { return electron_1.ipcRenderer.invoke('timeline:get'); },
+    addClipToTimeline: (clip) => electron_1.ipcRenderer.invoke('timeline:add-clip', clip),
+    removeClip: (clipId) => electron_1.ipcRenderer.invoke('timeline:remove-clip', clipId),
+    updateClip: (clipId, updates) => electron_1.ipcRenderer.invoke('timeline:update-clip', clipId, updates),
+    getTimeline: () => electron_1.ipcRenderer.invoke('timeline:get'),
     // Video processing
-    getFrameAtTime: function (time) { return electron_1.ipcRenderer.invoke('video:get-frame', time); },
-    startPreview: function () { return electron_1.ipcRenderer.invoke('video:start-preview'); },
-    stopPreview: function () { return electron_1.ipcRenderer.invoke('video:stop-preview'); },
-    seekPreview: function (time) { return electron_1.ipcRenderer.invoke('video:seek', time); },
+    getFrameAtTime: (time) => electron_1.ipcRenderer.invoke('video:get-frame', time),
+    startPreview: () => electron_1.ipcRenderer.invoke('video:start-preview'),
+    stopPreview: () => electron_1.ipcRenderer.invoke('video:stop-preview'),
+    seekPreview: (time) => electron_1.ipcRenderer.invoke('video:seek', time),
     // Image processing
-    processImage: function (assetId, operations) { return electron_1.ipcRenderer.invoke('image:process', assetId, operations); },
-    generateThumbnail: function (assetId) { return electron_1.ipcRenderer.invoke('image:thumbnail', assetId); },
+    processImage: (assetId, operations) => electron_1.ipcRenderer.invoke('image:process', assetId, operations),
+    generateThumbnail: (assetId) => electron_1.ipcRenderer.invoke('image:thumbnail', assetId),
     // Export
-    exportVideo: function (config) { return electron_1.ipcRenderer.invoke('export:video', config); },
-    exportImage: function (config) { return electron_1.ipcRenderer.invoke('export:image', config); },
-    exportGIF: function (config) { return electron_1.ipcRenderer.invoke('export:gif', config); },
+    exportVideo: (config) => electron_1.ipcRenderer.invoke('export:video', config),
+    exportImage: (config) => electron_1.ipcRenderer.invoke('export:image', config),
+    exportGIF: (config) => electron_1.ipcRenderer.invoke('export:gif', config),
     // File dialogs
-    openFile: function (options) { return electron_1.ipcRenderer.invoke('dialog:open-file', options); },
-    saveFile: function (options) { return electron_1.ipcRenderer.invoke('dialog:save-file', options); },
-    openDirectory: function () { return electron_1.ipcRenderer.invoke('dialog:open-directory'); },
+    openFile: (options) => electron_1.ipcRenderer.invoke('dialog:open-file', options),
+    saveFile: (options) => electron_1.ipcRenderer.invoke('dialog:save-file', options),
+    openDirectory: () => electron_1.ipcRenderer.invoke('dialog:open-directory'),
     // Events (one-way communication from main to renderer)
-    onFrameReady: function (callback) {
-        electron_1.ipcRenderer.on('frame-ready', function (_event, framePath) { return callback(framePath); });
+    onFrameReady: (callback) => {
+        electron_1.ipcRenderer.on('frame-ready', (_event, framePath) => callback(framePath));
     },
-    onExportProgress: function (callback) {
-        electron_1.ipcRenderer.on('export-progress', function (_event, progress, stage) { return callback(progress, stage); });
+    onExportProgress: (callback) => {
+        electron_1.ipcRenderer.on('export-progress', (_event, progress, stage) => callback(progress, stage));
     },
-    onAssetProcessed: function (callback) {
-        electron_1.ipcRenderer.on('asset-processed', function (_event, assetId, status) { return callback(assetId, status); });
+    onAssetProcessed: (callback) => {
+        electron_1.ipcRenderer.on('asset-processed', (_event, assetId, status) => callback(assetId, status));
     },
-    onError: function (callback) {
-        electron_1.ipcRenderer.on('error', function (_event, error) { return callback(error); });
+    onError: (callback) => {
+        electron_1.ipcRenderer.on('error', (_event, error) => callback(error));
     },
     // Remove event listeners
-    removeFrameReadyListener: function () {
+    removeFrameReadyListener: () => {
         electron_1.ipcRenderer.removeAllListeners('frame-ready');
     },
-    removeExportProgressListener: function () {
+    removeExportProgressListener: () => {
         electron_1.ipcRenderer.removeAllListeners('export-progress');
     },
     // Template management (ContentForge)
-    listTemplates: function (niche) { return electron_1.ipcRenderer.invoke('template:list', niche); },
-    getTemplate: function (templateId) { return electron_1.ipcRenderer.invoke('template:get', templateId); },
-    saveTemplate: function (template) { return electron_1.ipcRenderer.invoke('template:save', template); },
-    deleteTemplate: function (templateId) { return electron_1.ipcRenderer.invoke('template:delete', templateId); },
-    cloneTemplate: function (templateId, newName) { return electron_1.ipcRenderer.invoke('template:clone', templateId, newName); },
-    resolveTemplate: function (templateId, variables) { return electron_1.ipcRenderer.invoke('template:resolve', templateId, variables); },
-    validateTemplate: function (templateId, variables) { return electron_1.ipcRenderer.invoke('template:validate', templateId, variables); },
-    getTemplateStats: function () { return electron_1.ipcRenderer.invoke('template:stats'); },
-    initBuiltInTemplates: function () { return electron_1.ipcRenderer.invoke('template:init-builtin'); },
+    listTemplates: (niche) => electron_1.ipcRenderer.invoke('template:list', niche),
+    getTemplate: (templateId) => electron_1.ipcRenderer.invoke('template:get', templateId),
+    saveTemplate: (template) => electron_1.ipcRenderer.invoke('template:save', template),
+    deleteTemplate: (templateId) => electron_1.ipcRenderer.invoke('template:delete', templateId),
+    cloneTemplate: (templateId, newName) => electron_1.ipcRenderer.invoke('template:clone', templateId, newName),
+    resolveTemplate: (templateId, variables) => electron_1.ipcRenderer.invoke('template:resolve', templateId, variables),
+    validateTemplate: (templateId, variables) => electron_1.ipcRenderer.invoke('template:validate', templateId, variables),
+    getTemplateStats: () => electron_1.ipcRenderer.invoke('template:stats'),
+    initBuiltInTemplates: () => electron_1.ipcRenderer.invoke('template:init-builtin'),
     // Batch processing (ContentForge)
-    addBatchJob: function (job) { return electron_1.ipcRenderer.invoke('batch:add-job', job); },
-    addBatchJobs: function (jobs) { return electron_1.ipcRenderer.invoke('batch:add-jobs', jobs); },
-    getBatchJob: function (jobId) { return electron_1.ipcRenderer.invoke('batch:get-job', jobId); },
-    listBatchJobs: function (status, limit) { return electron_1.ipcRenderer.invoke('batch:list-jobs', status, limit); },
-    cancelBatchJob: function (jobId) { return electron_1.ipcRenderer.invoke('batch:cancel-job', jobId); },
-    clearFinishedJobs: function () { return electron_1.ipcRenderer.invoke('batch:clear-finished'); },
-    getBatchStats: function () { return electron_1.ipcRenderer.invoke('batch:stats'); },
-    startBatchProcessing: function () { return electron_1.ipcRenderer.invoke('batch:start-processing'); },
-    stopBatchProcessing: function () { return electron_1.ipcRenderer.invoke('batch:stop-processing'); },
+    addBatchJob: (job) => electron_1.ipcRenderer.invoke('batch:add-job', job),
+    addBatchJobs: (jobs) => electron_1.ipcRenderer.invoke('batch:add-jobs', jobs),
+    getBatchJob: (jobId) => electron_1.ipcRenderer.invoke('batch:get-job', jobId),
+    listBatchJobs: (status, limit) => electron_1.ipcRenderer.invoke('batch:list-jobs', status, limit),
+    cancelBatchJob: (jobId) => electron_1.ipcRenderer.invoke('batch:cancel-job', jobId),
+    clearFinishedJobs: () => electron_1.ipcRenderer.invoke('batch:clear-finished'),
+    getBatchStats: () => electron_1.ipcRenderer.invoke('batch:stats'),
+    startBatchProcessing: () => electron_1.ipcRenderer.invoke('batch:start-processing'),
+    stopBatchProcessing: () => electron_1.ipcRenderer.invoke('batch:stop-processing'),
     // Batch events
-    onBatchJobQueued: function (callback) {
-        electron_1.ipcRenderer.on('batch:job-queued', function (_event, job) { return callback(job); });
+    onBatchJobQueued: (callback) => {
+        electron_1.ipcRenderer.on('batch:job-queued', (_event, job) => callback(job));
     },
-    onBatchJobStarted: function (callback) {
-        electron_1.ipcRenderer.on('batch:job-started', function (_event, job) { return callback(job); });
+    onBatchJobStarted: (callback) => {
+        electron_1.ipcRenderer.on('batch:job-started', (_event, job) => callback(job));
     },
-    onBatchJobProgress: function (callback) {
-        electron_1.ipcRenderer.on('batch:job-progress', function (_event, jobId, progress, stage) { return callback(jobId, progress, stage); });
+    onBatchJobProgress: (callback) => {
+        electron_1.ipcRenderer.on('batch:job-progress', (_event, jobId, progress, stage) => callback(jobId, progress, stage));
     },
-    onBatchJobCompleted: function (callback) {
-        electron_1.ipcRenderer.on('batch:job-completed', function (_event, job) { return callback(job); });
+    onBatchJobCompleted: (callback) => {
+        electron_1.ipcRenderer.on('batch:job-completed', (_event, job) => callback(job));
     },
-    onBatchJobFailed: function (callback) {
-        electron_1.ipcRenderer.on('batch:job-failed', function (_event, job, error) { return callback(job, error); });
+    onBatchJobFailed: (callback) => {
+        electron_1.ipcRenderer.on('batch:job-failed', (_event, job, error) => callback(job, error));
     },
-    onBatchQueueEmpty: function (callback) {
-        electron_1.ipcRenderer.on('batch:queue-empty', function () { return callback(); });
+    onBatchQueueEmpty: (callback) => {
+        electron_1.ipcRenderer.on('batch:queue-empty', () => callback());
     },
+    // ==================== AI SERVICES (ContentForge) ====================
+    // API Key Management
+    cfSetOpenAIKey: (apiKey) => electron_1.ipcRenderer.invoke('contentforge:api-keys:set-openai', apiKey),
+    cfSetElevenLabsKey: (apiKey) => electron_1.ipcRenderer.invoke('contentforge:api-keys:set-elevenlabs', apiKey),
+    cfSetYouTubeCredentials: (credentials) => electron_1.ipcRenderer.invoke('contentforge:api-keys:set-youtube', credentials),
+    cfValidateAPIKeys: () => electron_1.ipcRenderer.invoke('contentforge:api-keys:validate'),
+    cfClearAPIKeys: (service) => electron_1.ipcRenderer.invoke('contentforge:api-keys:clear', service),
+    // Script Generation
+    cfGenerateHorrorScript: (options) => electron_1.ipcRenderer.invoke('contentforge:script:horror', options),
+    cfGenerateLofiScript: (options) => electron_1.ipcRenderer.invoke('contentforge:script:lofi', options),
+    cfGenerateExplainerScript: (options) => electron_1.ipcRenderer.invoke('contentforge:script:explainer', options),
+    cfGenerateMotivationalScript: (options) => electron_1.ipcRenderer.invoke('contentforge:script:motivational', options),
+    // Voice Generation
+    cfGenerateVoice: (text, filename, options) => electron_1.ipcRenderer.invoke('contentforge:voice:generate', text, filename, options),
+    cfListVoices: (provider) => electron_1.ipcRenderer.invoke('contentforge:voice:list-voices', provider),
+    // Image Generation
+    cfGenerateImage: (prompt, options) => electron_1.ipcRenderer.invoke('contentforge:image:generate', prompt, options),
+    cfGenerateHorrorScene: (description, options) => electron_1.ipcRenderer.invoke('contentforge:image:horror-scene', description, options),
+    cfGenerateLofiBackground: (description, options) => electron_1.ipcRenderer.invoke('contentforge:image:lofi-background', description, options),
+    cfGenerateBatchImages: (prompts) => electron_1.ipcRenderer.invoke('contentforge:image:batch', prompts),
+    // YouTube Integration
+    cfUploadToYouTube: (videoPath, metadata) => electron_1.ipcRenderer.invoke('contentforge:youtube:upload', videoPath, metadata),
+    cfGenerateYouTubeMetadata: (options) => electron_1.ipcRenderer.invoke('contentforge:youtube:metadata:generate', options),
+    cfGenerateYouTubeTitle: (options) => electron_1.ipcRenderer.invoke('contentforge:youtube:metadata:title', options),
+    cfGenerateYouTubeDescription: (options) => electron_1.ipcRenderer.invoke('contentforge:youtube:metadata:description', options),
+    cfGenerateYouTubeTags: (options) => electron_1.ipcRenderer.invoke('contentforge:youtube:metadata:tags', options),
+    cfListYouTubePlaylists: () => electron_1.ipcRenderer.invoke('contentforge:youtube:playlists'),
+    cfCreateYouTubePlaylist: (options) => electron_1.ipcRenderer.invoke('contentforge:youtube:create-playlist', options),
+    // Cost & Cache Tracking
+    cfGetCostStats: () => electron_1.ipcRenderer.invoke('contentforge:cost:stats'),
+    cfGetCacheStats: () => electron_1.ipcRenderer.invoke('contentforge:cache:stats'),
+    cfClearCache: (type) => electron_1.ipcRenderer.invoke('contentforge:cache:clear', type),
 });
 // Also expose app info
 electron_1.contextBridge.exposeInMainWorld('appInfo', {
@@ -102,3 +134,4 @@ electron_1.contextBridge.exposeInMainWorld('appInfo', {
     version: '1.0.0',
     name: 'ContentForge Studio',
 });
+//# sourceMappingURL=preload.js.map
