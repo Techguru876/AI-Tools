@@ -155,7 +155,7 @@ export class AssetService {
           height: videoStream?.height,
           fps: videoStream ? this.parseFrameRate(videoStream.r_frame_rate || '30/1') : null,
           codec: videoStream?.codec_name,
-          bitrate: parseInt(metadata.format.bit_rate || '0'),
+          bitrate: metadata.format.bit_rate ? parseInt(String(metadata.format.bit_rate)) : 0,
           hasAudio: !!audioStream,
         });
       });
@@ -184,7 +184,7 @@ export class AssetService {
         resolve({
           duration: metadata.format.duration,
           codec: audioStream?.codec_name,
-          bitrate: parseInt(metadata.format.bit_rate || '0'),
+          bitrate: metadata.format.bit_rate ? parseInt(String(metadata.format.bit_rate)) : 0,
           sampleRate: audioStream?.sample_rate,
         });
       });

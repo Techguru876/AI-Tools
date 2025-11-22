@@ -149,7 +149,6 @@ export class ExportService {
   }
 
   async exportImage(config: {
-    canvas?: HTMLCanvasElement;
     imagePath?: string;
     outputPath: string;
     format?: 'png' | 'jpg' | 'webp';
