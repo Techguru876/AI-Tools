@@ -20,7 +20,7 @@ function createWindow() {
             preload: path_1.default.join(__dirname, 'preload.js'),
             webSecurity: true,
         },
-        title: 'PhotoVideo Pro',
+        title: 'ContentForge Studio',
         show: false, // Show after ready-to-show
     });
     // Load app

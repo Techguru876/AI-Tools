@@ -26,7 +26,7 @@ export default function MenuBar({ activeMode, onModeChange }: MenuBarProps) {
 
   const handleOpen = async () => {
     const selected = await open({
-      filters: [{ name: 'PhotoVideo Pro Project', extensions: ['pvp'] }],
+      filters: [{ name: 'ContentForge Studio Project', extensions: ['pvp'] }],
     })
 
     if (selected && typeof selected === 'string') {
@@ -57,7 +57,7 @@ export default function MenuBar({ activeMode, onModeChange }: MenuBarProps) {
     if (!project) return
 
     const selected = await save({
-      filters: [{ name: 'PhotoVideo Pro Project', extensions: ['pvp'] }],
+      filters: [{ name: 'ContentForge Studio Project', extensions: ['pvp'] }],
       defaultPath: `${project.name}.pvp`,
     })
 
@@ -77,7 +77,7 @@ export default function MenuBar({ activeMode, onModeChange }: MenuBarProps) {
 
   return (
     <div className="menu-bar">
-      <div className="menu-logo">PhotoVideo Pro</div>
+      <div className="menu-logo">ContentForge Studio</div>
 
       <div className="menu-items">
         <div className="menu-item">

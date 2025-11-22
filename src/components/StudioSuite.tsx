@@ -38,13 +38,8 @@ interface Studio {
   color: string
 }
 
-interface StudioSuiteProps {
-  onSwitchToProMode?: () => void
-}
-
-export default function StudioSuite({ onSwitchToProMode }: StudioSuiteProps = {}) {
+export default function StudioSuite() {
   const [activeStudio, setActiveStudio] = useState<StudioType>('contentforge')
-  const [showProTransition, setShowProTransition] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 
   const studios: Studio[] = [
@@ -120,29 +115,17 @@ export default function StudioSuite({ onSwitchToProMode }: StudioSuiteProps = {}
     },
   ]
 
-  const handleOpenInProMode = () => {
-    if (onSwitchToProMode) {
-      setShowProTransition(true)
-      setTimeout(() => {
-        onSwitchToProMode()
-      }, 1500)
-    }
-  }
-
   return (
     <div className="studio-suite">
       {/* Header */}
       <div className="studio-suite-header">
         <div className="header-left">
-          <h1>InfinityStudio</h1>
-          <p className="tagline">Create Without Limits</p>
+          <h1>ContentForge Studio</h1>
+          <p className="tagline">AI-Powered Video Content Generation</p>
         </div>
         <div className="header-right">
           <button className="settings-button" onClick={() => setShowSettings(true)}>
             ⚙️ Settings
-          </button>
-          <button className="pro-mode-button" onClick={handleOpenInProMode}>
-            ⚡ Open in Pro Mode
           </button>
         </div>
       </div>
@@ -180,18 +163,6 @@ export default function StudioSuite({ onSwitchToProMode }: StudioSuiteProps = {}
         {activeStudio === 'news' && <NewsStudio />}
         {activeStudio === 'meme' && <MemeStudio />}
       </div>
-
-      {/* Pro Mode Transition */}
-      {showProTransition && (
-        <div className="pro-transition-overlay">
-          <div className="transition-content">
-            <div className="transition-icon">⚡</div>
-            <h2>Upgrading to Pro Mode</h2>
-            <p>Unlocking advanced editing features...</p>
-            <div className="transition-spinner" />
-          </div>
-        </div>
-      )}
 
       {/* Settings Modal */}
       {showSettings && <Settings onClose={() => setShowSettings(false)} />}

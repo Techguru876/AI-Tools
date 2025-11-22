@@ -1,5 +1,5 @@
 /**
- * InfinityStudio Logger
+ * ContentForge Studio Logger
  * Comprehensive logging system for tracking user actions, system events, and errors
  */
 

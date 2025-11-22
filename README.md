@@ -1,91 +1,165 @@
-# PhotoVideo Pro
+# ContentForge Studio
 
-Professional cross-platform photo and video editing application combining the best features of Premiere Pro and Photoshop into a single powerful tool.
+AI-Powered Video Content Generation Platform - Create viral-ready videos for YouTube with genre-specific studios and automated workflows.
 
-## 🌟 Features
+## 🚀 Overview
 
-### Video Editing
-- **Multi-track Timeline**: Edit video, audio, images, graphics, and effects on unlimited tracks
-- **Professional Color Grading**: LUT support, curves, levels, scopes (histogram, waveform, vectorscope)
-- **Motion Graphics**: Fully customizable animated titles and graphics
-- **Advanced Audio**: Multi-channel mixing, VST plugin support, surround sound
-- **AI-Powered Tools**: Auto-reframe, scene detection, auto-captioning, smart tagging
-- **Effects & Transitions**: 90+ GPU-accelerated effects including chroma key, blur, distortion
-- **VR/360 Support**: Edit 360° video with ambisonics audio
+ContentForge Studio is a comprehensive AI-powered content generation platform that helps creators produce high-quality videos for YouTube across 10 specialized genres. Built with Electron, React, and TypeScript, it combines multiple AI services (OpenAI, ElevenLabs) with powerful automation tools to streamline video production.
 
-### Photo Editing
-- **Layer-Based Editing**: Full layer support with blend modes, masks, and smart objects
-- **Advanced Selections**: AI-powered subject, sky, and hair selection tools
-- **Professional Retouching**: Healing brush, clone stamp, content-aware fill
-- **Filters & Adjustments**: Dozens of non-destructive filters and adjustment layers
-- **AI Features**: Generative fill, upscaling, background removal, style transfer
-- **Vector & Text**: Complete vector editing and advanced typography tools
-- **Animation**: Create animated GIFs and motion graphics
+## 🎬 Studio Suite
 
-### Next-Gen Features
-- **Asset Library**: Built-in stock photos, videos, music, and AI-generated assets
-- **Smart Templates**: Pre-made templates for social media, web, and print
-- **Instant Previews**: Real-time preview with GPU acceleration
-- **Cloud Collaboration**: Share projects and work together in real-time
-- **Guided Edits**: Step-by-step tutorials for complex tasks
+ContentForge Studio includes 10 genre-specific mini-apps, each optimized for different content types:
+
+### 🚀 ContentForge Studio (Core)
+Advanced content generation and automation hub with template system, batch processing, and AI integration.
+
+**Features:**
+- Template-based video generation
+- Batch processing queue
+- AI script generation
+- Voice synthesis (ElevenLabs + OpenAI)
+- AI image generation (DALL-E)
+- YouTube automation & metadata generation
+- Cost tracking & caching system
+
+### 🎵 Lofi Studio
+Create ambient lofi music videos with AI-generated visuals and relaxing soundscapes.
+
+**Features:**
+- Lofi music integration
+- AI-generated ambient backgrounds
+- Animated visualizers
+- Mood-based generation (chill, cozy, dreamy, nostalgic)
+
+### 💭 Quotes Studio
+Generate motivational and inspirational quote videos.
+
+**Features:**
+- AI-powered quote generation
+- Typography animation
+- Background music integration
+- Batch quote processing
+
+### 📚 Explainer Studio
+Educational and "Top 10" style videos with professional narration.
+
+**Features:**
+- Topic-based script generation
+- AI narration
+- Visual aids integration
+- Target audience customization
+
+### 🎧 ASMR Studio
+Relaxation and ambient content creation.
+
+**Features:**
+- ASMR sound library
+- Ambient scene generation
+- Trigger combination tools
+
+### 📖 Storytelling Studio
+Audiobooks and narrative content.
+
+**Features:**
+- Story script generation
+- Character voice customization
+- Chapter management
+- Background music mixing
+
+### ⏱️ Productivity Studio (Study)
+Pomodoro timers and study content.
+
+**Features:**
+- Timer configurations
+- Focus music integration
+- Study ambient scenes
+
+### 🎃 Horror Studio
+Horror stories and creepypasta content.
+
+**Features:**
+- Horror script generation
+- Atmospheric scene generation
+- Tension pacing tools
+- POV selection (first/third person)
+
+### 📰 News Studio
+News and trending topic videos.
+
+**Features:**
+- News script templates
+- Breaking news formatting
+- Trending topic integration
+
+### 😂 Meme Studio
+Viral memes and reaction content.
+
+**Features:**
+- Meme template library
+- Trend detection
+- Viral optimization tools
 
 ## 🏗 Architecture
 
-PhotoVideo Pro is built with:
-- **Backend**: Rust (via Tauri) for performance and native OS integration
-- **Frontend**: React + TypeScript + Vite for modern, reactive UI
-- **State Management**: Zustand for predictable state management
-- **Image Processing**: Custom image engine with blend modes and effects
-- **Video Processing**: FFmpeg-based video pipeline with GPU acceleration
-- **AI/ML**: TensorFlow.js and ONNX Runtime for AI features
+**Frontend:**
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite 5.4
+- **Desktop**: Electron 28
+- **State Management**: Zustand
+- **Styling**: CSS Modules + Theme System
+
+**Backend Services:**
+- **Database**: SQLite (better-sqlite3)
+- **AI Integration**: OpenAI GPT-4, DALL-E 3
+- **Voice Synthesis**: ElevenLabs, OpenAI TTS
+- **Video Processing**: FFmpeg
+- **YouTube API**: OAuth2 + Data API v3
 
 ## 📁 Project Structure
 
 ```
-photovideo-pro/
-├── src/                      # Frontend React application
-│   ├── components/           # UI components
-│   │   ├── MenuBar.tsx       # Top menu bar
-│   │   ├── Toolbar.tsx       # Tool palette
-│   │   ├── Canvas.tsx        # Main editing canvas
-│   │   ├── Timeline.tsx      # Video timeline
-│   │   ├── LayersPanel.tsx   # Layer management
-│   │   ├── EffectsPanel.tsx  # Effects browser
-│   │   └── AssetLibrary.tsx  # Asset management
-│   ├── stores/               # State management
-│   │   └── projectStore.ts   # Global project state
-│   ├── styles/               # CSS styling
-│   └── main.tsx              # App entry point
+contentforge-studio/
+├── src/                          # Frontend React application
+│   ├── components/               # UI components
+│   │   ├── StudioSuite.tsx       # Main studio selector
+│   │   ├── contentforge/         # ContentForge core studio
+│   │   ├── lofi/                 # Lofi studio
+│   │   ├── quotes/               # Quotes studio
+│   │   ├── explainer/            # Explainer studio
+│   │   ├── asmr/                 # ASMR studio
+│   │   ├── storytelling/         # Storytelling studio
+│   │   ├── productivity/         # Productivity studio
+│   │   ├── horror/               # Horror studio
+│   │   ├── news/                 # News studio
+│   │   ├── meme/                 # Meme studio
+│   │   ├── Settings.tsx          # App settings
+│   │   └── common/               # Shared components
+│   ├── lib/                      # Libraries
+│   │   └── electron-bridge.ts    # Electron IPC bridge
+│   ├── stores/                   # State management
+│   ├── utils/                    # Utilities
+│   │   └── logger.ts             # Logging system
+│   ├── theme/                    # Theme system
+│   └── main.tsx                  # App entry point
 │
-├── src-tauri/                # Backend Rust application
-│   ├── src/
-│   │   ├── main.rs           # Application entry point
-│   │   ├── commands/         # Tauri command handlers
-│   │   │   ├── mod.rs        # Common types
-│   │   │   ├── video.rs      # Video commands
-│   │   │   ├── image.rs      # Image commands
-│   │   │   ├── color.rs      # Color grading
-│   │   │   ├── effects.rs    # Effects management
-│   │   │   ├── audio.rs      # Audio processing
-│   │   │   ├── ai.rs         # AI/ML features
-│   │   │   └── export.rs     # Export functions
-│   │   ├── video_engine.rs   # Video processing core
-│   │   ├── image_engine.rs   # Image processing core
-│   │   ├── audio_engine.rs   # Audio processing core
-│   │   ├── effects.rs        # Effects library
-│   │   ├── color.rs          # Color processing
-│   │   ├── export.rs         # Export engine
-│   │   ├── project.rs        # Project management
-│   │   ├── ai.rs             # AI/ML models
-│   │   └── utils.rs          # Utility functions
-│   └── Cargo.toml            # Rust dependencies
+├── main/                         # Electron main process
+│   ├── main.ts                   # Application entry
+│   ├── preload.ts                # Preload script
+│   └── services/                 # Backend services
+│       ├── project-service.ts    # Project management
+│       ├── asset-service.ts      # Asset handling
+│       ├── templates/            # Template engine
+│       ├── batch/                # Batch processing
+│       ├── contentforge/         # AI services
+│       │   ├── script-gen.ts     # Script generation
+│       │   ├── voice-gen.ts      # Voice synthesis
+│       │   ├── image-gen.ts      # Image generation
+│       │   └── youtube.ts        # YouTube integration
+│       └── database/             # SQLite management
 │
-├── scripts/                  # Build and setup scripts
-│   ├── setup.js              # Initial setup
-│   ├── build-windows.sh      # Windows build
-│   └── build-macos.sh        # macOS build
-│
-└── package.json              # Node.js dependencies
+├── scripts/                      # Build scripts
+├── package.json                  # Dependencies
+└── vite.config.ts                # Vite configuration
 ```
 
 ## 🚀 Getting Started
@@ -93,11 +167,10 @@ photovideo-pro/
 ### Prerequisites
 
 - **Node.js** 18+ and npm
-- **Rust** 1.70+ (install from https://rustup.rs)
 - **System Dependencies**:
-  - Windows: Visual Studio C++ Build Tools
+  - Windows: Visual Studio C++ Build Tools (for native modules)
   - macOS: Xcode Command Line Tools
-  - Linux: See [Tauri prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites)
+  - Linux: build-essential, python3
 
 ### Installation
 
@@ -112,225 +185,171 @@ cd AI-Tools
 npm install
 ```
 
-3. Run setup script:
+3. Rebuild native modules for Electron:
 ```bash
-npm run setup
+# Windows
+npx @electron/rebuild -v 28.0.0 -w better-sqlite3 -f
+
+# macOS/Linux
+npx @electron/rebuild -v 28.0.0 -w better-sqlite3
 ```
 
 ### Development
 
-Start the development server:
+1. Compile the main process:
+```bash
+npm run compile:main
+```
+
+2. Start the development server:
 ```bash
 npm run dev
 ```
 
 This launches:
 - Frontend dev server on http://localhost:5173
-- Tauri window with hot reload
+- Electron window with hot reload
 
 ### Building
 
-Build for your current platform:
+Build for production:
 ```bash
 npm run build
+npm run electron:build
 ```
 
-Build for specific platforms:
+## 🔑 API Configuration
+
+ContentForge Studio requires API keys for AI features:
+
+1. **OpenAI API Key** (Required)
+   - Used for: Script generation, image generation (DALL-E), TTS
+   - Get it at: https://platform.openai.com/api-keys
+
+2. **ElevenLabs API Key** (Optional)
+   - Used for: High-quality voice synthesis
+   - Get it at: https://elevenlabs.io/
+
+3. **YouTube OAuth2 Credentials** (Optional)
+   - Used for: Video upload automation
+   - Set up at: https://console.cloud.google.com/
+
+Configure API keys in Settings (⚙️ icon in header).
+
+## 📊 Template System
+
+ContentForge uses a powerful template system for video generation:
+
+**Template Features:**
+- Variable substitution (e.g., `{{topic}}`, `{{duration}}`)
+- Conditional sections
+- AI-driven content generation
+- Batch processing support
+- Built-in templates for all genres
+
+**Example Template:**
+```json
+{
+  "id": "horror-story-v1",
+  "name": "Horror Story Template",
+  "niche": "horror",
+  "variables": ["theme", "setting", "duration"],
+  "script": "{{ai:generate_horror_script}}",
+  "voice": "{{ai:voice_synthesis}}",
+  "visuals": "{{ai:generate_scenes}}"
+}
+```
+
+## 🎯 Batch Processing
+
+Generate multiple videos automatically:
+
+1. Create or select a template
+2. Prepare CSV with variables (topic, theme, etc.)
+3. Add to batch queue
+4. Start processing
+5. Monitor progress in real-time
+6. Export completed videos
+
+**Batch Features:**
+- Queue management
+- Progress tracking
+- Error recovery
+- Cost estimation
+- Auto-scheduling
+
+## 📈 Cost Tracking
+
+Monitor AI API usage and costs:
+
+- **OpenAI**: Track GPT-4 tokens, DALL-E images, TTS characters
+- **ElevenLabs**: Track character usage
+- **Caching**: Reduce costs by caching AI responses
+- **Statistics**: View detailed cost breakdowns by service
+
+## 🎨 Theme System
+
+ContentForge features a comprehensive theming system:
+
+- **Professional Dark** (Default)
+- **Midnight Blue**
+- **Sunset Orange**
+- **Forest Green**
+- **Royal Purple**
+- **Neon Cyber**
+
+Each theme is optimized for long editing sessions with reduced eye strain.
+
+## 📝 Logging System
+
+Comprehensive logging for debugging and monitoring:
+
+- **User Actions**: Track all user interactions
+- **System Events**: Monitor app lifecycle
+- **API Calls**: Log all AI service requests
+- **Errors**: Detailed error tracking
+
+Access logs: `Ctrl+Shift+L` or click the 📋 Logs button.
+
+## 🔧 Development
+
+### Main Process Development
+
+The main process (Electron backend) is written in TypeScript and compiled to JavaScript:
+
 ```bash
-# Windows
-npm run build:windows
+# Watch mode for development
+npm run compile:main:watch
 
-# macOS (Apple Silicon)
-npm run build:macos
-
-# macOS (Intel)
-npm run build:macos-intel
+# Build once
+npm run compile:main
 ```
 
-## 📚 Module Documentation
+### Renderer Process Development
 
-### Video Engine (`src-tauri/src/video_engine.rs`)
+The renderer (React frontend) uses Vite for hot module replacement:
 
-The video engine handles all video processing operations:
+```bash
+npm run dev
+```
 
-- **VideoClip**: Represents a video file with metadata
-- **VideoProcessor**: Renders frames with effects applied
-- **TimelineCompositor**: Combines multiple tracks into single output
-- **VideoEncoder**: Exports video with various codecs (H.264, H.265, ProRes)
-- **ProxyGenerator**: Creates low-res proxies for smooth editing
-- **FrameCache**: LRU cache for instant preview
+### Database
 
-Key features:
-- Multi-threaded rendering using Rayon
-- GPU acceleration support (NVENC, QuickSync, VideoToolbox)
-- Real-time preview with frame caching
-- Support for 4K, 8K, and higher resolutions
-
-### Image Engine (`src-tauri/src/image_engine.rs`)
-
-The image engine provides layer-based photo editing:
-
-- **ImageProcessor**: Main compositor for layers
-- **ImageLayer**: Individual layer with transform, opacity, blend mode
-- **Filter**: Image filters (blur, sharpen, stylize, etc.)
-- **Selection**: Selection tools (rectangle, ellipse, magic wand, AI)
-- **RetouchingTools**: Healing, cloning, content-aware fill
-- **Adjustment**: Non-destructive adjustment layers
-
-Supported blend modes:
-- Normal, Multiply, Screen, Overlay, Soft/Hard Light
-- Darken, Lighten, Color Dodge/Burn
-- Difference, Exclusion, and more
-
-### Audio Engine (`src-tauri/src/audio_engine.rs`)
-
-Professional audio processing capabilities:
-
-- **AudioMixer**: Multi-track mixing with volume and pan
-- **AudioEffect**: Effects including EQ, compression, reverb, delay
-- **VSTPlugin**: VST2/VST3 plugin support
-- **WaveformAnalyzer**: Generates waveform data for visualization
-- **AudioLevels**: Real-time level metering (peak, RMS, LUFS)
-
-Features:
-- Up to 128 audio tracks
-- Surround sound support (5.1, 7.1, Atmos)
-- Professional loudness standards (EBU R128, ATSC A/85)
-- Real-time processing with low latency
-
-### Color Module (`src-tauri/src/color.rs`)
-
-Advanced color grading and correction:
-
-- **ColorLUT**: 3D LUT support (.cube format)
-- **ColorCurves**: RGB curves with control points
-- **ColorScopes**: Histogram, waveform, vectorscope, RGB parade
-- **ColorSpace**: Color space conversions (sRGB, Linear, HSL)
-
-Professional color tools:
-- Primary and secondary color correction
-- Color wheels for shadows, midtones, highlights
-- Temperature and tint adjustments
-- Automatic color matching
-
-### Effects Module (`src-tauri/src/effects.rs`)
-
-Extensive effects library:
-
-**Video Effects**:
-- Transform: Scale, Rotate, Position, Crop
-- Blur & Sharpen: Gaussian, Motion, Radial
-- Keying: Chroma Key, Luma Key, Advanced Spill Suppression
-- Distortion: Lens Distortion, Ripple, Wave
-- Stylize: Glow, Posterize, Edge Detect
-
-**Transitions**:
-- Crossfade, Wipe, Slide, Zoom, Spin
-- Iris, Page Turn, Morph
-- Custom transition support
-
-All effects support GPU acceleration when available.
-
-### AI Module (`src-tauri/src/ai.rs`)
-
-AI-powered editing features:
-
-- **ImageSegmentation**: Subject selection, background removal
-- **SuperResolution**: AI upscaling (2x, 4x, 8x)
-- **SceneDetector**: Automatic scene change detection
-- **ObjectDetector**: Detect and track objects
-- **FaceDetector**: Face detection with landmark detection
-- **StyleTransfer**: Artistic style transfer
-- **SpeechRecognition**: Auto-captioning from audio
-- **AutoReframe**: Smart cropping for different aspect ratios
-
-AI models can run on CPU or GPU (CUDA, CoreML, ONNX).
-
-### Export Module (`src-tauri/src/export.rs`)
-
-Multi-format export system:
-
-**Video Formats**:
-- MP4 (H.264, H.265/HEVC)
-- MOV (ProRes 422, ProRes 4444)
-- WebM (VP9, AV1)
-- AVI, MKV
-
-**Image Formats**:
-- PNG, JPEG, TIFF, PSD, WebP, GIF, SVG
-- RAW formats (DNG, CR2, NEF)
-
-**Export Presets**:
-- YouTube (1080p, 4K, 8K)
-- Instagram (Feed, Stories, Reels)
-- TikTok
-- Broadcast (ProRes, DNxHD)
-- Web-optimized
-
-Features:
-- Batch export
-- Hardware acceleration
-- Background rendering
-- Render queue management
-
-## 🎨 UI Components
-
-### Timeline Component
-
-Multi-track video editing timeline:
-- Drag and drop clips
-- Trim, split, ripple edit
-- Keyframe animation
-- Audio waveforms
-- Nested sequences
-
-### Canvas Component
-
-Main editing viewport:
-- Real-time preview
-- Zoom and pan
-- Grid and guides
-- Safe area overlays
-- Multi-monitor support
-
-### Layers Panel
-
-Photoshop-style layer management:
-- Drag to reorder
-- Group layers
-- Layer effects
-- Blend modes
-- Opacity control
-
-### Effects Panel
-
-Browse and apply effects:
-- Categorized effects
-- Search and favorites
-- Drag to apply
-- Real-time preview
-- Custom effect presets
-
-## 🔧 Performance Optimization
-
-PhotoVideo Pro is optimized for speed:
-
-1. **GPU Acceleration**: Effects rendered on GPU when available
-2. **Multi-threading**: CPU-bound tasks use all cores
-3. **Proxy Workflow**: Edit with low-res proxies, export at full quality
-4. **Smart Caching**: Intelligent frame caching for instant scrubbing
-5. **Memory Management**: Efficient memory usage for large projects
-6. **Background Rendering**: Export while continuing to edit
+SQLite database location:
+- **Windows**: `C:\Users\<username>\PhotoVideoPro\projects.db`
+- **macOS**: `~/PhotoVideoPro/projects.db`
+- **Linux**: `~/PhotoVideoPro/projects.db`
 
 ## 🤝 Contributing
 
-This is a demonstration project showcasing a comprehensive architecture for a professional editing application. The codebase provides:
+This is a demonstration project showcasing professional-grade architecture for AI-powered content generation. Contributions welcome!
 
-- Clear module separation
-- Extensive inline documentation
-- TypeScript types for frontend
-- Rust type safety for backend
-- Example implementations for all major features
+**Areas for Contribution:**
+- New studio templates
+- AI prompt optimization
+- Additional AI service integrations
+- Performance improvements
+- Bug fixes
 
 ## 📄 License
 
@@ -338,31 +357,15 @@ MIT License - See LICENSE file for details
 
 ## 🙏 Acknowledgments
 
-This project demonstrates how to combine:
-- Modern web technologies (React, TypeScript)
-- Native performance (Rust, Tauri)
-- Professional video/image processing
-- AI/ML capabilities
-- Cross-platform desktop development
-
-The architecture is designed to be:
-- **Modular**: Each feature is self-contained
-- **Scalable**: Easy to add new features
-- **Performant**: Optimized for real-time editing
-- **Maintainable**: Clear code with documentation
+Built with:
+- **Electron**: Cross-platform desktop framework
+- **React**: UI framework
+- **TypeScript**: Type safety
+- **OpenAI**: GPT-4, DALL-E, TTS
+- **ElevenLabs**: Voice synthesis
+- **FFmpeg**: Video processing
+- **better-sqlite3**: Database management
 
 ---
 
-**Note**: This is a comprehensive foundation for a professional editing application. Full implementation of all features (especially FFmpeg integration, AI models, and VST support) would require additional dependencies and platform-specific configuration.
-
-For production use, you would need to:
-1. Integrate actual FFmpeg for video processing
-2. Add AI/ML model files and runtime
-3. Implement VST host functionality
-4. Add proper error handling and logging
-5. Implement undo/redo system
-6. Add keyboard shortcuts
-7. Optimize memory management
-8. Add crash recovery and auto-save
-
-This codebase provides the complete structure and architecture to build upon.
+**ContentForge Studio** - AI-Powered Video Content Generation

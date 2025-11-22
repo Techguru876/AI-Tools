@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🚀 PhotoVideo Pro - Setup Script\n');
+console.log('🚀 ContentForge Studio - Setup Script\n');
 
 // Create necessary directories
 const directories = [

@@ -1,5 +1,5 @@
 /**
- * Main Entry Point for InfinityStudio
+ * Main Entry Point for ContentForge Studio
  * This initializes the React application and sets up global state management
  */
 
@@ -12,7 +12,7 @@ import ErrorBoundary from './components/common/ErrorBoundary'
 import { ToastProvider } from './components/common/ToastContainer'
 import './styles/index.css'
 
-function InfinityStudio() {
+function ContentForgeStudio() {
   // Pro mode disabled - only using Studio Suite with ContentForge Studio
   // const [mode, setMode] = useState<'studio' | 'pro'>('studio')
 
@@ -34,7 +34,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
       <ToastProvider>
-        <InfinityStudio />
+        <ContentForgeStudio />
       </ToastProvider>
     </ErrorBoundary>
   </React.StrictMode>,

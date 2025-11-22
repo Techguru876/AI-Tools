@@ -337,7 +337,7 @@ export default function Settings({ onClose }: SettingsProps) {
                     <input type="checkbox" />
                     <span>Send anonymous usage statistics</span>
                   </label>
-                  <p className="setting-hint">Help us improve InfinityStudio</p>
+                  <p className="setting-hint">Help us improve ContentForge Studio</p>
                 </div>
                 <div className="setting-item">
                   <label className="checkbox-label">

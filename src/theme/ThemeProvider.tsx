@@ -1,11 +1,11 @@
 /**
- * Theme Provider - InfinityStudio Theming System
+ * Theme Provider - ContentForge Studio Theming System
  * Provides brand colors, vibe modes, and dynamic theming
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
-// InfinityStudio Brand Colors and Themes
+// ContentForge Studio Brand Colors and Themes
 export const themes = {
   // Professional Dark (Default)
   professional: {
@@ -27,7 +27,7 @@ export const themes = {
         tertiary: '#7a7a90',    // Disabled/subtle text
         accent: '#00d9ff',      // Accent text (cyan)
       },
-      // Accent colors (InfinityStudio signature)
+      // Accent colors (ContentForge Studio signature)
       accent: {
         primary: '#00d9ff',     // Cyan - main brand color
         secondary: '#a855f7',   // Purple - secondary brand
