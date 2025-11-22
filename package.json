@@ -1,18 +1,22 @@
 {
-  "name": "infinity-studio",
+  "name": "photovideo-pro",
   "version": "2.0.0",
-  "description": "InfinityStudio - Professional creative suite combining Premiere Pro, Photoshop, After Effects, and Lofi Studio capabilities. Create without limits.",
-  "main": "index.js",
+  "description": "Professional photo and video editing application with native FFmpeg support",
+  "main": "dist-main/main.js",
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tauri build",
-    "build:windows": "tauri build --target x86_64-pc-windows-msvc",
-    "build:macos": "tauri build --target aarch64-apple-darwin",
-    "build:macos-intel": "tauri build --target x86_64-apple-darwin",
-    "frontend:dev": "vite",
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .",
+    "compile:main": "tsc -p main/tsconfig.json",
+    "compile:preload": "tsc main/preload.ts --outDir dist-main",
+    "prebuild": "npm run compile:main && npm run compile:preload",
+    "build": "npm run prebuild && vite build && electron-builder",
+    "build:win": "npm run prebuild && vite build && electron-builder --win",
+    "build:mac": "npm run prebuild && vite build && electron-builder --mac",
+    "build:linux": "npm run prebuild && vite build && electron-builder --linux",
+    "rebuild": "electron-rebuild -f",
     "frontend:build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
     "setup": "node scripts/setup.js",
     "postinstall": "npm run setup"
   },
@@ -20,22 +24,20 @@
     "photo-editing",
     "video-editing",
     "animation",
-    "motion-graphics",
-    "after-effects",
-    "cross-platform",
+    "ffmpeg",
+    "electron",
     "desktop-app",
-    "premiere-pro",
-    "photoshop",
-    "lofi-studio",
-    "streaming",
-    "obs-integration",
-    "tauri",
-    "infinity-studio"
+    "photovideo-pro"
   ],
-  "author": "InfinityStudio Team",
+  "author": "PhotoVideo Pro Team",
   "license": "MIT",
   "dependencies": {
-    "@tauri-apps/api": "^1.5.3",
+    "electron-store": "^8.1.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "sharp": "^0.33.0",
+    "better-sqlite3": "^9.2.2",
+    "uuid": "^9.0.1",
+    "chokidar": "^3.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "fabric": "^5.3.0",
@@ -50,14 +52,19 @@
     "zustand": "^4.4.7",
     "react-colorful": "^5.6.1",
     "react-dropzone": "^14.2.3",
-    "uuid": "^9.0.1",
-    "@ffmpeg/ffmpeg": "^0.12.10",
-    "@ffmpeg/util": "^0.12.1",
     "gl-matrix": "^3.4.3",
     "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.5.9",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0",
+    "cross-env": "^7.0.3",
+    "node-gyp": "^10.0.1",
+    "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/better-sqlite3": "^7.6.8",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@types/color": "^3.0.6",
@@ -70,5 +77,36 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
+  },
+  "build": {
+    "appId": "com.techguru.photovideo-pro",
+    "productName": "PhotoVideo Pro",
+    "files": [
+      "dist/**/*",
+      "dist-main/**/*",
+      "resources/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/ffmpeg",
+        "to": "ffmpeg",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "resources/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "resources/icon.icns",
+      "category": "public.app-category.photography"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "resources/icon.png",
+      "category": "Graphics"
+    }
   }
 }
