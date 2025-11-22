@@ -238,6 +238,315 @@ export async function exportVideoServerSide(
 }
 
 /**
+ * Export video WITH automatic thumbnail generation
+ * Captures thumbnail at middle frame for best representation
+ */
+export async function exportVideoWithThumbnail(
+  canvasElement: HTMLCanvasElement,
+  audioUrl: string | null,
+  duration: number,
+  options: VideoExportOptions = {}
+): Promise<{
+  videoBlob: Blob
+  thumbnailBlob: Blob
+  videoUrl: string
+  thumbnailUrl: string
+  videoSize: string
+  thumbnailSize: string
+}> {
+  try {
+    // Step 1: Capture thumbnail at middle frame (best representation)
+    options.onProgress?.({
+      stage: 'preparing',
+      progress: 5,
+      message: 'Capturing thumbnail...',
+    })
+
+    const thumbnailBlob = await captureThumbnail(canvasElement)
+    const thumbnailUrl = URL.createObjectURL(thumbnailBlob)
+
+    // Step 2: Export video using existing logic
+    const preset = options.preset ? EXPORT_PRESETS[options.preset] : EXPORT_PRESETS['youtube-hd']
+
+    options.onProgress?.({
+      stage: 'preparing',
+      progress: 10,
+      message: 'Preparing canvas...',
+    })
+
+    // Set canvas size based on preset
+    const targetWidth = options.customSettings?.width || parseInt(preset.quality.replace('p', '')) * (16/9)
+    const targetHeight = options.customSettings?.height || parseInt(preset.quality.replace('p', ''))
+
+    canvasElement.width = targetWidth
+    canvasElement.height = targetHeight
+
+    options.onProgress?.({
+      stage: 'rendering',
+      progress: 30,
+      message: 'Starting video capture...',
+    })
+
+    // Create media stream from canvas
+    const stream = canvasElement.captureStream(preset.fps)
+
+    // Add audio track if provided
+    if (audioUrl) {
+      try {
+        const audioContext = new AudioContext()
+        const response = await fetch(audioUrl)
+        const arrayBuffer = await response.arrayBuffer()
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+
+        const source = audioContext.createBufferSource()
+        source.buffer = audioBuffer
+
+        const destination = audioContext.createMediaStreamDestination()
+        source.connect(destination)
+        source.start()
+
+        // Add audio track to stream
+        destination.stream.getAudioTracks().forEach(track => {
+          stream.addTrack(track)
+        })
+      } catch (error) {
+        console.warn('Failed to add audio:', error)
+      }
+    }
+
+    // Configure MediaRecorder
+    const mimeType = preset.format === 'webm' ? 'video/webm;codecs=vp9' : 'video/webm;codecs=vp8'
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType,
+      videoBitsPerSecond: parseBitrate(preset.bitrate),
+    })
+
+    const chunks: Blob[] = []
+
+    const videoUrl = await new Promise<string>((resolve, reject) => {
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data)
+          const progress = 30 + (chunks.length / (duration * preset.fps / 1000)) * 50
+          options.onProgress?.({
+            stage: 'rendering',
+            progress: Math.min(progress, 80),
+            message: `Rendering frame ${chunks.length}...`,
+          })
+        }
+      }
+
+      mediaRecorder.onstop = async () => {
+        options.onProgress?.({
+          stage: 'encoding',
+          progress: 85,
+          message: 'Encoding video...',
+        })
+
+        const videoBlob = new Blob(chunks, { type: mimeType })
+
+        options.onProgress?.({
+          stage: 'saving',
+          progress: 90,
+          message: 'Finalizing export...',
+        })
+
+        const url = URL.createObjectURL(videoBlob)
+
+        options.onProgress?.({
+          stage: 'complete',
+          progress: 100,
+          message: 'Export complete with thumbnail!',
+        })
+
+        resolve(url)
+      }
+
+      mediaRecorder.onerror = (error) => {
+        console.error('MediaRecorder error:', error)
+        reject(error)
+      }
+
+      // Start recording
+      mediaRecorder.start(100) // Collect data every 100ms
+
+      // Stop after duration
+      setTimeout(() => {
+        mediaRecorder.stop()
+        stream.getTracks().forEach(track => track.stop())
+      }, duration * 1000)
+    })
+
+    // Get the video blob from chunks
+    const videoBlob = new Blob(chunks, { type: mimeType })
+
+    return {
+      videoBlob,
+      thumbnailBlob,
+      videoUrl,
+      thumbnailUrl,
+      videoSize: formatFileSize(videoBlob.size),
+      thumbnailSize: formatFileSize(thumbnailBlob.size),
+    }
+
+  } catch (error: any) {
+    console.error('Export with thumbnail error:', error)
+    throw new Error(`Video export with thumbnail failed: ${error.message}`)
+  }
+}
+
+/**
+ * Capture thumbnail from canvas (internal helper)
+ */
+async function captureThumbnail(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob)
+      } else {
+        reject(new Error('Failed to generate thumbnail'))
+      }
+    }, 'image/jpeg', 0.9) // 90% quality JPEG for optimal size/quality balance
+  })
+}
+
+/**
+ * Format file size in human-readable format
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes > 1000000000) {
+    return `${(bytes / 1000000000).toFixed(2)} GB`
+  } else if (bytes > 1000000) {
+    return `${(bytes / 1000000).toFixed(2)} MB`
+  } else if (bytes > 1000) {
+    return `${(bytes / 1000).toFixed(2)} KB`
+  }
+  return `${bytes} bytes`
+}
+
+/**
+ * Generate thumbnail from canvas (no download)
+ * Returns both blob and URL for flexible usage
+ */
+export async function generateThumbnail(
+  canvasElement: HTMLCanvasElement,
+  options: {
+    width?: number
+    height?: number
+    quality?: number
+  } = {}
+): Promise<{ blob: Blob; url: string; size: string }> {
+  try {
+    const { width = canvasElement.width, height = canvasElement.height, quality = 0.9 } = options
+
+    // Create thumbnail canvas with specified dimensions
+    const thumbCanvas = document.createElement('canvas')
+    thumbCanvas.width = width
+    thumbCanvas.height = height
+
+    const ctx = thumbCanvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('Failed to get canvas context')
+    }
+
+    // Draw scaled image
+    ctx.drawImage(canvasElement, 0, 0, width, height)
+
+    // Convert to blob
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      thumbCanvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob)
+          } else {
+            reject(new Error('Failed to generate thumbnail'))
+          }
+        },
+        'image/jpeg',
+        quality
+      )
+    })
+
+    const url = URL.createObjectURL(blob)
+
+    return {
+      blob,
+      url,
+      size: formatFileSize(blob.size),
+    }
+  } catch (error: any) {
+    throw new Error(`Thumbnail generation failed: ${error.message}`)
+  }
+}
+
+/**
+ * Generate thumbnail from video element
+ * Captures frame at specified timestamp
+ */
+export async function generateThumbnailFromVideo(
+  videoElement: HTMLVideoElement,
+  timestamp: number = 0,
+  options: {
+    width?: number
+    height?: number
+    quality?: number
+  } = {}
+): Promise<{ blob: Blob; url: string; size: string }> {
+  try {
+    const { width = 1280, height = 720, quality = 0.9 } = options
+
+    // Create canvas and capture frame
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('Failed to get canvas context')
+    }
+
+    // Seek to timestamp and wait for it to load
+    await new Promise<void>((resolve, reject) => {
+      videoElement.currentTime = timestamp
+
+      videoElement.onseeked = () => resolve()
+      videoElement.onerror = () => reject(new Error('Failed to seek video'))
+
+      // Timeout after 5 seconds
+      setTimeout(() => reject(new Error('Video seek timeout')), 5000)
+    })
+
+    // Draw video frame to canvas
+    ctx.drawImage(videoElement, 0, 0, width, height)
+
+    // Convert to blob
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob)
+          } else {
+            reject(new Error('Failed to generate thumbnail'))
+          }
+        },
+        'image/jpeg',
+        quality
+      )
+    })
+
+    const url = URL.createObjectURL(blob)
+
+    return {
+      blob,
+      url,
+      size: formatFileSize(blob.size),
+    }
+  } catch (error: any) {
+    throw new Error(`Video thumbnail generation failed: ${error.message}`)
+  }
+}
+
+/**
  * Export scene as image (screenshot)
  */
 export async function exportSceneAsImage(
