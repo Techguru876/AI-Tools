@@ -1,11 +1,13 @@
 /**
  * Video Export and Rendering Utilities
  * Handles video composition, rendering, and export for all studios
+ * Supports MP4, WebM, and GIF formats
  */
 
 import { invoke } from '@tauri-apps/api/tauri'
 import { save } from '@tauri-apps/api/dialog'
 import { ExportPreset, EXPORT_PRESETS } from './studioUtils'
+import { exportAsGIF, estimateGIFSize, getOptimalGIFSettings, GIFExportOptions } from './gifExport'
 
 export interface ExportProgress {
   stage: 'preparing' | 'rendering' | 'encoding' | 'saving' | 'complete'
@@ -620,3 +622,101 @@ export function estimateFileSize(duration: number, preset: ExportPreset): string
   }
   return `${sizeBytes.toFixed(0)} bytes`
 }
+
+/**
+ * Export animation as GIF
+ * Wrapper around gifExport.ts for easy integration
+ */
+export async function exportAnimationAsGIF(
+  canvasElement: HTMLCanvasElement,
+  duration: number,
+  renderFrame: (timestamp: number) => void | Promise<void>,
+  options: GIFExportOptions & {
+    autoDownload?: boolean
+    filename?: string
+  } = {}
+): Promise<{ blob: Blob; url: string; size: string }> {
+  try {
+    const { autoDownload = false, filename = `animation-${Date.now()}.gif`, ...gifOptions } = options
+
+    // Export as GIF
+    const result = await exportAsGIF(canvasElement, duration, renderFrame, gifOptions)
+
+    // Auto-download if requested
+    if (autoDownload) {
+      const a = document.createElement('a')
+      a.href = result.url
+      a.download = filename
+      a.click()
+    }
+
+    return {
+      blob: result.blob,
+      url: result.url,
+      size: result.size,
+    }
+  } catch (error: any) {
+    throw new Error(`GIF export failed: ${error.message}`)
+  }
+}
+
+/**
+ * Export with format selection (MP4, WebM, or GIF)
+ */
+export async function exportWithFormat(
+  format: 'mp4' | 'webm' | 'gif',
+  canvasElement: HTMLCanvasElement,
+  audioUrl: string | null,
+  duration: number,
+  renderFrame: (timestamp: number) => void | Promise<void>,
+  options: VideoExportOptions & GIFExportOptions = {}
+): Promise<{ blob: Blob; url: string; size: string; format: string }> {
+  try {
+    if (format === 'gif') {
+      // Export as GIF
+      const gifResult = await exportAsGIF(canvasElement, duration, renderFrame, {
+        width: options.customSettings?.width || 480,
+        height: options.customSettings?.height || 270,
+        fps: options.customSettings?.fps || 15,
+        quality: 'medium',
+        loop: true,
+        onProgress: (progress) => {
+          options.onProgress?.({
+            stage: 'encoding',
+            progress,
+            message: `Encoding GIF... ${progress.toFixed(0)}%`,
+          })
+        },
+      })
+
+      return {
+        blob: gifResult.blob,
+        url: gifResult.url,
+        size: gifResult.size,
+        format: 'gif',
+      }
+    } else {
+      // Export as video (MP4/WebM)
+      const videoUrl = await exportVideoClientSide(canvasElement, audioUrl, duration, {
+        ...options,
+        preset: format === 'mp4' ? 'youtube-hd' : undefined,
+      })
+
+      // Get blob from URL
+      const response = await fetch(videoUrl)
+      const blob = await response.blob()
+
+      return {
+        blob,
+        url: videoUrl,
+        size: formatFileSize(blob.size),
+        format,
+      }
+    }
+  } catch (error: any) {
+    throw new Error(`Export failed: ${error.message}`)
+  }
+}
+
+// Re-export GIF utilities for convenience
+export { estimateGIFSize, getOptimalGIFSettings } from './gifExport'
