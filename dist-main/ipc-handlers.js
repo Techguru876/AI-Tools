@@ -6,10 +6,15 @@ const project_service_1 = require("./services/project-service");
 const asset_service_1 = require("./services/asset-service");
 const timeline_service_1 = require("./services/timeline-service");
 const export_service_1 = require("./services/export-service");
+const TemplateEngine_1 = require("./services/templates/TemplateEngine");
+const BatchProcessor_1 = require("./services/batch/BatchProcessor");
+const lofi_template_1 = require("./services/templates/lofi-template");
 const projectService = new project_service_1.ProjectService();
 const assetService = new asset_service_1.AssetService();
 const timelineService = new timeline_service_1.TimelineService();
 const exportService = new export_service_1.ExportService();
+const templateEngine = new TemplateEngine_1.TemplateEngine();
+const batchProcessor = new BatchProcessor_1.BatchProcessor(2); // Max 2 concurrent jobs
 function setupIpcHandlers() {
     // Project handlers
     electron_1.ipcMain.handle('project:create', async (_event, name) => {
@@ -241,6 +246,208 @@ function setupIpcHandlers() {
             properties: ['openDirectory'],
         });
         return result.filePaths[0];
+    });
+    // Template handlers
+    electron_1.ipcMain.handle('template:list', async (_event, niche) => {
+        try {
+            return templateEngine.listTemplates(niche);
+        }
+        catch (error) {
+            console.error('Error listing templates:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:get', async (_event, templateId) => {
+        try {
+            return templateEngine.getTemplate(templateId);
+        }
+        catch (error) {
+            console.error('Error getting template:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:save', async (_event, template) => {
+        try {
+            templateEngine.saveTemplate(template);
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error saving template:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:delete', async (_event, templateId) => {
+        try {
+            templateEngine.deleteTemplate(templateId);
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error deleting template:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:clone', async (_event, templateId, newName) => {
+        try {
+            return templateEngine.cloneTemplate(templateId, newName);
+        }
+        catch (error) {
+            console.error('Error cloning template:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:resolve', async (_event, templateId, variables) => {
+        try {
+            const template = templateEngine.getTemplate(templateId);
+            if (!template)
+                throw new Error('Template not found');
+            return templateEngine.resolveVariables(template, variables);
+        }
+        catch (error) {
+            console.error('Error resolving template:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:validate', async (_event, templateId, variables) => {
+        try {
+            const template = templateEngine.getTemplate(templateId);
+            if (!template)
+                throw new Error('Template not found');
+            return templateEngine.validateVariables(template, variables);
+        }
+        catch (error) {
+            console.error('Error validating template:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:stats', async () => {
+        try {
+            return templateEngine.getStats();
+        }
+        catch (error) {
+            console.error('Error getting template stats:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('template:init-builtin', async () => {
+        try {
+            // Initialize built-in templates
+            const lofiTemplate = (0, lofi_template_1.createLofiTemplate)();
+            templateEngine.saveTemplate(lofiTemplate);
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error initializing built-in templates:', error);
+            throw error;
+        }
+    });
+    // Batch processing handlers
+    electron_1.ipcMain.handle('batch:add-job', async (_event, job) => {
+        try {
+            return batchProcessor.addJob(job);
+        }
+        catch (error) {
+            console.error('Error adding batch job:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:add-jobs', async (_event, jobs) => {
+        try {
+            return batchProcessor.addBatchJobs(jobs);
+        }
+        catch (error) {
+            console.error('Error adding batch jobs:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:get-job', async (_event, jobId) => {
+        try {
+            return batchProcessor.getJob(jobId);
+        }
+        catch (error) {
+            console.error('Error getting batch job:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:list-jobs', async (_event, status, limit) => {
+        try {
+            return batchProcessor.listJobs(status, limit);
+        }
+        catch (error) {
+            console.error('Error listing batch jobs:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:cancel-job', async (_event, jobId) => {
+        try {
+            return batchProcessor.cancelJob(jobId);
+        }
+        catch (error) {
+            console.error('Error cancelling batch job:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:clear-finished', async () => {
+        try {
+            return batchProcessor.clearFinishedJobs();
+        }
+        catch (error) {
+            console.error('Error clearing finished jobs:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:stats', async () => {
+        try {
+            return batchProcessor.getStats();
+        }
+        catch (error) {
+            console.error('Error getting batch stats:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:start-processing', async () => {
+        try {
+            // Processing starts automatically, this is just a manual trigger
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error starting batch processing:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('batch:stop-processing', async () => {
+        try {
+            batchProcessor.stopProcessing();
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error stopping batch processing:', error);
+            throw error;
+        }
+    });
+    // Setup batch processor event forwarding to renderer
+    batchProcessor.on('job-queued', (job) => {
+        const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+        mainWindow?.webContents.send('batch:job-queued', job);
+    });
+    batchProcessor.on('job-started', (job) => {
+        const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+        mainWindow?.webContents.send('batch:job-started', job);
+    });
+    batchProcessor.on('job-progress', (jobId, progress, stage) => {
+        const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+        mainWindow?.webContents.send('batch:job-progress', jobId, progress, stage);
+    });
+    batchProcessor.on('job-completed', (job) => {
+        const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+        mainWindow?.webContents.send('batch:job-completed', job);
+    });
+    batchProcessor.on('job-failed', (job, error) => {
+        const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+        mainWindow?.webContents.send('batch:job-failed', job, error.message);
+    });
+    batchProcessor.on('queue-empty', () => {
+        const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+        mainWindow?.webContents.send('batch:queue-empty');
     });
 }
 //# sourceMappingURL=ipc-handlers.js.map

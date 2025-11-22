@@ -1,7 +1,7 @@
 {
-  "name": "photovideo-pro",
-  "version": "2.0.0",
-  "description": "Professional photo and video editing application with native FFmpeg support",
+  "name": "contentforge-studio",
+  "version": "1.0.0",
+  "description": "Automated YouTube content generation system for faceless channels - Lofi, Horror Stories, Explainers & More",
   "main": "dist-main/main.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
@@ -21,15 +21,17 @@
     "postinstall": "npm run setup"
   },
   "keywords": [
-    "photo-editing",
-    "video-editing",
-    "animation",
+    "youtube-automation",
+    "content-generation",
+    "faceless-youtube",
+    "lofi-generator",
+    "horror-stories",
+    "video-automation",
     "ffmpeg",
     "electron",
-    "desktop-app",
-    "photovideo-pro"
+    "ai-content"
   ],
-  "author": "PhotoVideo Pro Team",
+  "author": "ContentForge Team",
   "license": "MIT",
   "dependencies": {
     "electron-store": "^8.1.0",
@@ -79,8 +81,8 @@
     "vite": "^5.0.8"
   },
   "build": {
-    "appId": "com.techguru.photovideo-pro",
-    "productName": "PhotoVideo Pro",
+    "appId": "com.techguru.contentforge-studio",
+    "productName": "ContentForge Studio",
     "files": [
       "dist/**/*",
       "dist-main/**/*",

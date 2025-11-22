@@ -177,11 +177,128 @@ export const events = {
 };
 
 /**
+ * Template Management (ContentForge)
+ */
+export const templates = {
+  list: async (niche?: string) => {
+    return getAPI().listTemplates(niche);
+  },
+
+  get: async (templateId: string) => {
+    return getAPI().getTemplate(templateId);
+  },
+
+  save: async (template: any) => {
+    return getAPI().saveTemplate(template);
+  },
+
+  delete: async (templateId: string) => {
+    return getAPI().deleteTemplate(templateId);
+  },
+
+  clone: async (templateId: string, newName: string) => {
+    return getAPI().cloneTemplate(templateId, newName);
+  },
+
+  resolve: async (templateId: string, variables: Record<string, any>) => {
+    return getAPI().resolveTemplate(templateId, variables);
+  },
+
+  validate: async (templateId: string, variables: Record<string, any>) => {
+    return getAPI().validateTemplate(templateId, variables);
+  },
+
+  getStats: async () => {
+    return getAPI().getTemplateStats();
+  },
+
+  initBuiltIn: async () => {
+    return getAPI().initBuiltInTemplates();
+  },
+};
+
+/**
+ * Batch Processing (ContentForge)
+ */
+export const batch = {
+  addJob: async (job: {
+    templateId: string;
+    variables: Record<string, any>;
+    outputPath: string;
+    metadata?: any;
+  }) => {
+    return getAPI().addBatchJob(job);
+  },
+
+  addJobs: async (jobs: Array<{
+    templateId: string;
+    variables: Record<string, any>;
+    outputPath: string;
+    metadata?: any;
+  }>) => {
+    return getAPI().addBatchJobs(jobs);
+  },
+
+  getJob: async (jobId: string) => {
+    return getAPI().getBatchJob(jobId);
+  },
+
+  listJobs: async (status?: string, limit?: number) => {
+    return getAPI().listBatchJobs(status, limit);
+  },
+
+  cancelJob: async (jobId: string) => {
+    return getAPI().cancelBatchJob(jobId);
+  },
+
+  clearFinished: async () => {
+    return getAPI().clearFinishedJobs();
+  },
+
+  getStats: async () => {
+    return getAPI().getBatchStats();
+  },
+
+  startProcessing: async () => {
+    return getAPI().startBatchProcessing();
+  },
+
+  stopProcessing: async () => {
+    return getAPI().stopBatchProcessing();
+  },
+
+  // Event listeners
+  onJobQueued: (callback: (job: any) => void) => {
+    getAPI().onBatchJobQueued(callback);
+  },
+
+  onJobStarted: (callback: (job: any) => void) => {
+    getAPI().onBatchJobStarted(callback);
+  },
+
+  onJobProgress: (callback: (jobId: string, progress: number, stage: string) => void) => {
+    getAPI().onBatchJobProgress(callback);
+  },
+
+  onJobCompleted: (callback: (job: any) => void) => {
+    getAPI().onBatchJobCompleted(callback);
+  },
+
+  onJobFailed: (callback: (job: any, error: string) => void) => {
+    getAPI().onBatchJobFailed(callback);
+  },
+
+  onQueueEmpty: (callback: () => void) => {
+    getAPI().onBatchQueueEmpty(callback);
+  },
+};
+
+/**
  * App Info
  */
 export const getAppInfo = () => {
   if (!isElectron()) {
-    return { platform: 'web', version: '2.0.0' };
+    return { platform: 'web', version: '1.0.0', name: 'ContentForge Studio' };
   }
   return window.appInfo;
 };

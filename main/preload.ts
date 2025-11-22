@@ -63,10 +63,53 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removeExportProgressListener: () => {
     ipcRenderer.removeAllListeners('export-progress');
   },
+
+  // Template management (ContentForge)
+  listTemplates: (niche?: string) => ipcRenderer.invoke('template:list', niche),
+  getTemplate: (templateId: string) => ipcRenderer.invoke('template:get', templateId),
+  saveTemplate: (template: any) => ipcRenderer.invoke('template:save', template),
+  deleteTemplate: (templateId: string) => ipcRenderer.invoke('template:delete', templateId),
+  cloneTemplate: (templateId: string, newName: string) => ipcRenderer.invoke('template:clone', templateId, newName),
+  resolveTemplate: (templateId: string, variables: any) => ipcRenderer.invoke('template:resolve', templateId, variables),
+  validateTemplate: (templateId: string, variables: any) => ipcRenderer.invoke('template:validate', templateId, variables),
+  getTemplateStats: () => ipcRenderer.invoke('template:stats'),
+  initBuiltInTemplates: () => ipcRenderer.invoke('template:init-builtin'),
+
+  // Batch processing (ContentForge)
+  addBatchJob: (job: any) => ipcRenderer.invoke('batch:add-job', job),
+  addBatchJobs: (jobs: any[]) => ipcRenderer.invoke('batch:add-jobs', jobs),
+  getBatchJob: (jobId: string) => ipcRenderer.invoke('batch:get-job', jobId),
+  listBatchJobs: (status?: string, limit?: number) => ipcRenderer.invoke('batch:list-jobs', status, limit),
+  cancelBatchJob: (jobId: string) => ipcRenderer.invoke('batch:cancel-job', jobId),
+  clearFinishedJobs: () => ipcRenderer.invoke('batch:clear-finished'),
+  getBatchStats: () => ipcRenderer.invoke('batch:stats'),
+  startBatchProcessing: () => ipcRenderer.invoke('batch:start-processing'),
+  stopBatchProcessing: () => ipcRenderer.invoke('batch:stop-processing'),
+
+  // Batch events
+  onBatchJobQueued: (callback: (job: any) => void) => {
+    ipcRenderer.on('batch:job-queued', (_event, job) => callback(job));
+  },
+  onBatchJobStarted: (callback: (job: any) => void) => {
+    ipcRenderer.on('batch:job-started', (_event, job) => callback(job));
+  },
+  onBatchJobProgress: (callback: (jobId: string, progress: number, stage: string) => void) => {
+    ipcRenderer.on('batch:job-progress', (_event, jobId, progress, stage) => callback(jobId, progress, stage));
+  },
+  onBatchJobCompleted: (callback: (job: any) => void) => {
+    ipcRenderer.on('batch:job-completed', (_event, job) => callback(job));
+  },
+  onBatchJobFailed: (callback: (job: any, error: string) => void) => {
+    ipcRenderer.on('batch:job-failed', (_event, job, error) => callback(job, error));
+  },
+  onBatchQueueEmpty: (callback: () => void) => {
+    ipcRenderer.on('batch:queue-empty', () => callback());
+  },
 });
 
 // Also expose app info
 contextBridge.exposeInMainWorld('appInfo', {
   platform: process.platform,
-  version: process.env.npm_package_version || '2.0.0',
+  version: '1.0.0',
+  name: 'ContentForge Studio',
 });

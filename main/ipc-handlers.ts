@@ -3,11 +3,16 @@ import { ProjectService } from './services/project-service';
 import { AssetService } from './services/asset-service';
 import { TimelineService } from './services/timeline-service';
 import { ExportService } from './services/export-service';
+import { TemplateEngine } from './services/templates/TemplateEngine';
+import { BatchProcessor } from './services/batch/BatchProcessor';
+import { createLofiTemplate } from './services/templates/lofi-template';
 
 const projectService = new ProjectService();
 const assetService = new AssetService();
 const timelineService = new TimelineService();
 const exportService = new ExportService();
+const templateEngine = new TemplateEngine();
+const batchProcessor = new BatchProcessor(2); // Max 2 concurrent jobs
 
 export function setupIpcHandlers() {
   // Project handlers
@@ -242,5 +247,211 @@ export function setupIpcHandlers() {
       properties: ['openDirectory'],
     });
     return result.filePaths[0];
+  });
+
+  // Template handlers
+  ipcMain.handle('template:list', async (_event, niche?: string) => {
+    try {
+      return templateEngine.listTemplates(niche);
+    } catch (error: any) {
+      console.error('Error listing templates:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:get', async (_event, templateId: string) => {
+    try {
+      return templateEngine.getTemplate(templateId);
+    } catch (error: any) {
+      console.error('Error getting template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:save', async (_event, template: any) => {
+    try {
+      templateEngine.saveTemplate(template);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error saving template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:delete', async (_event, templateId: string) => {
+    try {
+      templateEngine.deleteTemplate(templateId);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error deleting template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:clone', async (_event, templateId: string, newName: string) => {
+    try {
+      return templateEngine.cloneTemplate(templateId, newName);
+    } catch (error: any) {
+      console.error('Error cloning template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:resolve', async (_event, templateId: string, variables: any) => {
+    try {
+      const template = templateEngine.getTemplate(templateId);
+      if (!template) throw new Error('Template not found');
+      return templateEngine.resolveVariables(template, variables);
+    } catch (error: any) {
+      console.error('Error resolving template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:validate', async (_event, templateId: string, variables: any) => {
+    try {
+      const template = templateEngine.getTemplate(templateId);
+      if (!template) throw new Error('Template not found');
+      return templateEngine.validateVariables(template, variables);
+    } catch (error: any) {
+      console.error('Error validating template:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:stats', async () => {
+    try {
+      return templateEngine.getStats();
+    } catch (error: any) {
+      console.error('Error getting template stats:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('template:init-builtin', async () => {
+    try {
+      // Initialize built-in templates
+      const lofiTemplate = createLofiTemplate();
+      templateEngine.saveTemplate(lofiTemplate);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error initializing built-in templates:', error);
+      throw error;
+    }
+  });
+
+  // Batch processing handlers
+  ipcMain.handle('batch:add-job', async (_event, job: any) => {
+    try {
+      return batchProcessor.addJob(job);
+    } catch (error: any) {
+      console.error('Error adding batch job:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:add-jobs', async (_event, jobs: any[]) => {
+    try {
+      return batchProcessor.addBatchJobs(jobs);
+    } catch (error: any) {
+      console.error('Error adding batch jobs:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:get-job', async (_event, jobId: string) => {
+    try {
+      return batchProcessor.getJob(jobId);
+    } catch (error: any) {
+      console.error('Error getting batch job:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:list-jobs', async (_event, status?: string, limit?: number) => {
+    try {
+      return batchProcessor.listJobs(status as any, limit);
+    } catch (error: any) {
+      console.error('Error listing batch jobs:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:cancel-job', async (_event, jobId: string) => {
+    try {
+      return batchProcessor.cancelJob(jobId);
+    } catch (error: any) {
+      console.error('Error cancelling batch job:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:clear-finished', async () => {
+    try {
+      return batchProcessor.clearFinishedJobs();
+    } catch (error: any) {
+      console.error('Error clearing finished jobs:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:stats', async () => {
+    try {
+      return batchProcessor.getStats();
+    } catch (error: any) {
+      console.error('Error getting batch stats:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:start-processing', async () => {
+    try {
+      // Processing starts automatically, this is just a manual trigger
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error starting batch processing:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('batch:stop-processing', async () => {
+    try {
+      batchProcessor.stopProcessing();
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error stopping batch processing:', error);
+      throw error;
+    }
+  });
+
+  // Setup batch processor event forwarding to renderer
+  batchProcessor.on('job-queued', (job) => {
+    const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+    mainWindow?.webContents.send('batch:job-queued', job);
+  });
+
+  batchProcessor.on('job-started', (job) => {
+    const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+    mainWindow?.webContents.send('batch:job-started', job);
+  });
+
+  batchProcessor.on('job-progress', (jobId, progress, stage) => {
+    const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+    mainWindow?.webContents.send('batch:job-progress', jobId, progress, stage);
+  });
+
+  batchProcessor.on('job-completed', (job) => {
+    const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+    mainWindow?.webContents.send('batch:job-completed', job);
+  });
+
+  batchProcessor.on('job-failed', (job, error) => {
+    const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+    mainWindow?.webContents.send('batch:job-failed', job, error.message);
+  });
+
+  batchProcessor.on('queue-empty', () => {
+    const mainWindow = require('electron').BrowserWindow.getAllWindows()[0];
+    mainWindow?.webContents.send('batch:queue-empty');
   });
 }

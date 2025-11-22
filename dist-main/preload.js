@@ -56,9 +56,49 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     removeExportProgressListener: function () {
         electron_1.ipcRenderer.removeAllListeners('export-progress');
     },
+    // Template management (ContentForge)
+    listTemplates: function (niche) { return electron_1.ipcRenderer.invoke('template:list', niche); },
+    getTemplate: function (templateId) { return electron_1.ipcRenderer.invoke('template:get', templateId); },
+    saveTemplate: function (template) { return electron_1.ipcRenderer.invoke('template:save', template); },
+    deleteTemplate: function (templateId) { return electron_1.ipcRenderer.invoke('template:delete', templateId); },
+    cloneTemplate: function (templateId, newName) { return electron_1.ipcRenderer.invoke('template:clone', templateId, newName); },
+    resolveTemplate: function (templateId, variables) { return electron_1.ipcRenderer.invoke('template:resolve', templateId, variables); },
+    validateTemplate: function (templateId, variables) { return electron_1.ipcRenderer.invoke('template:validate', templateId, variables); },
+    getTemplateStats: function () { return electron_1.ipcRenderer.invoke('template:stats'); },
+    initBuiltInTemplates: function () { return electron_1.ipcRenderer.invoke('template:init-builtin'); },
+    // Batch processing (ContentForge)
+    addBatchJob: function (job) { return electron_1.ipcRenderer.invoke('batch:add-job', job); },
+    addBatchJobs: function (jobs) { return electron_1.ipcRenderer.invoke('batch:add-jobs', jobs); },
+    getBatchJob: function (jobId) { return electron_1.ipcRenderer.invoke('batch:get-job', jobId); },
+    listBatchJobs: function (status, limit) { return electron_1.ipcRenderer.invoke('batch:list-jobs', status, limit); },
+    cancelBatchJob: function (jobId) { return electron_1.ipcRenderer.invoke('batch:cancel-job', jobId); },
+    clearFinishedJobs: function () { return electron_1.ipcRenderer.invoke('batch:clear-finished'); },
+    getBatchStats: function () { return electron_1.ipcRenderer.invoke('batch:stats'); },
+    startBatchProcessing: function () { return electron_1.ipcRenderer.invoke('batch:start-processing'); },
+    stopBatchProcessing: function () { return electron_1.ipcRenderer.invoke('batch:stop-processing'); },
+    // Batch events
+    onBatchJobQueued: function (callback) {
+        electron_1.ipcRenderer.on('batch:job-queued', function (_event, job) { return callback(job); });
+    },
+    onBatchJobStarted: function (callback) {
+        electron_1.ipcRenderer.on('batch:job-started', function (_event, job) { return callback(job); });
+    },
+    onBatchJobProgress: function (callback) {
+        electron_1.ipcRenderer.on('batch:job-progress', function (_event, jobId, progress, stage) { return callback(jobId, progress, stage); });
+    },
+    onBatchJobCompleted: function (callback) {
+        electron_1.ipcRenderer.on('batch:job-completed', function (_event, job) { return callback(job); });
+    },
+    onBatchJobFailed: function (callback) {
+        electron_1.ipcRenderer.on('batch:job-failed', function (_event, job, error) { return callback(job, error); });
+    },
+    onBatchQueueEmpty: function (callback) {
+        electron_1.ipcRenderer.on('batch:queue-empty', function () { return callback(); });
+    },
 });
 // Also expose app info
 electron_1.contextBridge.exposeInMainWorld('appInfo', {
     platform: process.platform,
-    version: process.env.npm_package_version || '2.0.0',
+    version: '1.0.0',
+    name: 'ContentForge Studio',
 });
