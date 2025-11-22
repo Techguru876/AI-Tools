@@ -7,6 +7,13 @@ import { useState } from 'react'
 import { generateTTS, searchStockMedia, batchProcess } from '../../utils/studioUtils'
 import './HorrorStudio.css'
 
+interface SFXPlacement {
+  id: string
+  sfxId: string
+  timestamp: number // In seconds
+  volume: number // 0-1
+}
+
 interface Scene {
   id: string
   order: number
@@ -15,10 +22,12 @@ interface Scene {
   visualUrl?: string
   voiceId: string
   emotion: 'eerie' | 'panicked' | 'calm' | 'whisper' | 'intense'
-  sfxIds: string[]
+  sfxIds: string[] // Deprecated - use sfxPlacements
+  sfxPlacements: SFXPlacement[] // Timeline-based SFX placement
   animations: string[]
   duration: number
   status: 'pending' | 'ready'
+  voiceAudioUrl?: string // Generated TTS audio URL
 }
 
 interface HorrorProject {
@@ -46,6 +55,8 @@ export default function HorrorStudio() {
   const [visualSearchResults, setVisualSearchResults] = useState<any[]>([])
   const [playingVoice, setPlayingVoice] = useState<string | null>(null)
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null)
+  const [showSFXTimeline, setShowSFXTimeline] = useState<string | null>(null) // sceneId for timeline editor
+  const [selectedSFXForPlacement, setSelectedSFXForPlacement] = useState<string | null>(null)
 
   const subGenres = [
     { id: 'haunted-house', name: 'Haunted House', icon: '🏚️', color: '#8b4513' },
@@ -222,6 +233,7 @@ export default function HorrorStudio() {
         voiceId: selectedVoice,
         emotion: detectEmotion(text),
         sfxIds: detectedSfx,
+        sfxPlacements: [], // Will be populated in timeline UI
         animations: [],
         duration,
         status: 'pending'
@@ -328,6 +340,60 @@ export default function HorrorStudio() {
     project.status = 'ready'
     setProjects([...projects])
     setIsProcessing(false)
+  }
+
+  // SFX Timeline Placement Functions
+  const handleAddSFXPlacement = (projectId: string, sceneId: string, sfxId: string, timestamp: number, volume: number = 0.8) => {
+    setProjects(projects.map(p => {
+      if (p.id === projectId) {
+        p.scenes = p.scenes.map(s => {
+          if (s.id === sceneId) {
+            const newPlacement: SFXPlacement = {
+              id: `sfx-placement-${Date.now()}`,
+              sfxId,
+              timestamp,
+              volume
+            }
+            return { ...s, sfxPlacements: [...s.sfxPlacements, newPlacement] }
+          }
+          return s
+        })
+      }
+      return p
+    }))
+  }
+
+  const handleRemoveSFXPlacement = (projectId: string, sceneId: string, placementId: string) => {
+    setProjects(projects.map(p => {
+      if (p.id === projectId) {
+        p.scenes = p.scenes.map(s => {
+          if (s.id === sceneId) {
+            return { ...s, sfxPlacements: s.sfxPlacements.filter(sfx => sfx.id !== placementId) }
+          }
+          return s
+        })
+      }
+      return p
+    }))
+  }
+
+  const handleUpdateSFXPlacement = (projectId: string, sceneId: string, placementId: string, updates: Partial<SFXPlacement>) => {
+    setProjects(projects.map(p => {
+      if (p.id === projectId) {
+        p.scenes = p.scenes.map(s => {
+          if (s.id === sceneId) {
+            return {
+              ...s,
+              sfxPlacements: s.sfxPlacements.map(sfx =>
+                sfx.id === placementId ? { ...sfx, ...updates } : sfx
+              )
+            }
+          }
+          return s
+        })
+      }
+      return p
+    }))
   }
 
   const handleDeleteScene = (projectId: string, sceneId: string) => {
@@ -539,20 +605,132 @@ export default function HorrorStudio() {
                                   </select>
                                 </div>
 
-                                {/* SFX Selection */}
+                                {/* SFX Timeline Placement */}
                                 <div className="sfx-section">
-                                  <label>Sound Effects:</label>
-                                  <div className="sfx-grid">
-                                    {sfxLibrary.slice(0, 6).map(sfx => (
-                                      <button
-                                        key={sfx.id}
-                                        className={`sfx-chip ${scene.sfxIds.includes(sfx.id) ? 'active' : ''}`}
-                                        onClick={() => handleToggleSfx(project.id, scene.id, sfx.id)}
-                                      >
-                                        {sfx.name}
-                                      </button>
-                                    ))}
+                                  <div className="sfx-header">
+                                    <label>Sound Effects: ({scene.sfxPlacements.length} placed)</label>
+                                    <button
+                                      className="timeline-btn"
+                                      onClick={() => setShowSFXTimeline(showSFXTimeline === scene.id ? null : scene.id)}
+                                    >
+                                      {showSFXTimeline === scene.id ? '🔼 Hide Timeline' : '🎬 Timeline Editor'}
+                                    </button>
                                   </div>
+
+                                  {showSFXTimeline === scene.id ? (
+                                    <div className="sfx-timeline-editor">
+                                      {/* SFX Library */}
+                                      <div className="sfx-library-panel">
+                                        <h4>SFX Library</h4>
+                                        <div className="sfx-grid">
+                                          {sfxLibrary.map(sfx => (
+                                            <button
+                                              key={sfx.id}
+                                              className={`sfx-chip ${selectedSFXForPlacement === sfx.id ? 'selected' : ''}`}
+                                              onClick={() => setSelectedSFXForPlacement(sfx.id)}
+                                              title={sfx.keywords.join(', ')}
+                                            >
+                                              {sfx.name}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
+
+                                      {/* Timeline */}
+                                      <div className="sfx-timeline">
+                                        <h4>Timeline ({scene.duration}s)</h4>
+                                        {selectedSFXForPlacement && (
+                                          <div className="placement-instructions">
+                                            Click on the timeline to place "{sfxLibrary.find(s => s.id === selectedSFXForPlacement)?.name}"
+                                          </div>
+                                        )}
+
+                                        {/* Timeline ruler */}
+                                        <div className="timeline-ruler">
+                                          {Array.from({ length: Math.ceil(scene.duration / 5) + 1 }, (_, i) => (
+                                            <div key={i} className="ruler-mark">
+                                              <span className="ruler-time">{i * 5}s</span>
+                                            </div>
+                                          ))}
+                                        </div>
+
+                                        {/* Timeline track */}
+                                        <div
+                                          className="timeline-track"
+                                          onClick={(e) => {
+                                            if (!selectedSFXForPlacement || !selectedProject) return
+                                            const rect = e.currentTarget.getBoundingClientRect()
+                                            const clickX = e.clientX - rect.left
+                                            const percentage = clickX / rect.width
+                                            const timestamp = Math.max(0, Math.min(scene.duration, percentage * scene.duration))
+                                            handleAddSFXPlacement(selectedProject, scene.id, selectedSFXForPlacement, timestamp)
+                                          }}
+                                        >
+                                          {scene.sfxPlacements.map(placement => {
+                                            const sfx = sfxLibrary.find(s => s.id === placement.sfxId)
+                                            const position = (placement.timestamp / scene.duration) * 100
+                                            return (
+                                              <div
+                                                key={placement.id}
+                                                className="sfx-marker"
+                                                style={{ left: `${position}%` }}
+                                                title={`${sfx?.name} at ${placement.timestamp.toFixed(1)}s`}
+                                              >
+                                                <div className="marker-icon">🔊</div>
+                                                <div className="marker-label">{sfx?.name}</div>
+                                                <button
+                                                  className="remove-marker"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    if (selectedProject) {
+                                                      handleRemoveSFXPlacement(selectedProject, scene.id, placement.id)
+                                                    }
+                                                  }}
+                                                >
+                                                  ×
+                                                </button>
+                                                {/* Volume slider */}
+                                                <input
+                                                  type="range"
+                                                  className="volume-slider"
+                                                  min="0"
+                                                  max="1"
+                                                  step="0.1"
+                                                  value={placement.volume}
+                                                  onChange={(e) => {
+                                                    e.stopPropagation()
+                                                    if (selectedProject) {
+                                                      handleUpdateSFXPlacement(selectedProject, scene.id, placement.id, {
+                                                        volume: parseFloat(e.target.value)
+                                                      })
+                                                    }
+                                                  }}
+                                                  onClick={(e) => e.stopPropagation()}
+                                                />
+                                              </div>
+                                            )
+                                          })}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="sfx-preview">
+                                      {scene.sfxPlacements.length === 0 ? (
+                                        <p className="no-sfx-message">No SFX placed. Open Timeline Editor to add sound effects.</p>
+                                      ) : (
+                                        <div className="sfx-placements-list">
+                                          {scene.sfxPlacements.map(placement => {
+                                            const sfx = sfxLibrary.find(s => s.id === placement.sfxId)
+                                            return (
+                                              <span key={placement.id} className="sfx-badge">
+                                                {sfx?.name} @ {placement.timestamp.toFixed(1)}s
+                                              </span>
+                                            )
+                                          })}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* Animation Effects */}
@@ -574,7 +752,7 @@ export default function HorrorStudio() {
                                 <div className="scene-meta">
                                   <span>~{scene.duration}s</span>
                                   <span>•</span>
-                                  <span>{scene.sfxIds.length} SFX</span>
+                                  <span>{scene.sfxPlacements.length} SFX</span>
                                   <span>•</span>
                                   <span>{scene.animations.length} FX</span>
                                   {scene.status === 'ready' && <span className="ready-badge">✓ Ready</span>}
