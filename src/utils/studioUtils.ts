@@ -4,6 +4,7 @@
  */
 
 import { fetchWithRetry } from './apiRetry'
+import { logger } from './logger'
 
 // API Configuration
 export interface APIConfig {
@@ -65,7 +66,12 @@ export async function generateTTS(
   onWarning?: (message: string) => void,
   onError?: (message: string) => void
 ): Promise<string> {
+  const startTime = Date.now()
   const apiKeys = getAPIKeys()
+
+  logger.info('audio', 'TTS generation started', {
+    details: { provider: config.provider, textLength: text.length }
+  })
 
   try {
     if (config.provider === 'openai') {
