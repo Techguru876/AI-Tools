@@ -74,15 +74,24 @@ export class TemplateEngine {
   constructor() {
     this.appDataPath = path.join(os.homedir(), 'ContentForge');
     this.templatesDir = path.join(this.appDataPath, 'templates');
+
+    // Ensure directories exist BEFORE creating database (synchronously)
+    this.ensureDirectoriesSync();
+
     this.db = new Database(path.join(this.appDataPath, 'contentforge.db'));
 
     this.initDatabase();
-    this.ensureDirectories();
   }
 
-  private async ensureDirectories() {
+  private ensureDirectoriesSync() {
     try {
-      await fs.mkdir(this.templatesDir, { recursive: true });
+      const fsSync = require('fs');
+      if (!fsSync.existsSync(this.appDataPath)) {
+        fsSync.mkdirSync(this.appDataPath, { recursive: true });
+      }
+      if (!fsSync.existsSync(this.templatesDir)) {
+        fsSync.mkdirSync(this.templatesDir, { recursive: true });
+      }
     } catch (error) {
       console.error('Error creating templates directory:', error);
     }

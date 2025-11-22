@@ -7,7 +7,6 @@ exports.TemplateEngine = void 0;
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
 const path_1 = __importDefault(require("path"));
 const os_1 = __importDefault(require("os"));
-const promises_1 = __importDefault(require("fs/promises"));
 /**
  * Template Engine
  * Core system for managing video templates with variable substitution
@@ -16,13 +15,20 @@ class TemplateEngine {
     constructor() {
         this.appDataPath = path_1.default.join(os_1.default.homedir(), 'ContentForge');
         this.templatesDir = path_1.default.join(this.appDataPath, 'templates');
+        // Ensure directories exist BEFORE creating database (synchronously)
+        this.ensureDirectoriesSync();
         this.db = new better_sqlite3_1.default(path_1.default.join(this.appDataPath, 'contentforge.db'));
         this.initDatabase();
-        this.ensureDirectories();
     }
-    async ensureDirectories() {
+    ensureDirectoriesSync() {
         try {
-            await promises_1.default.mkdir(this.templatesDir, { recursive: true });
+            const fsSync = require('fs');
+            if (!fsSync.existsSync(this.appDataPath)) {
+                fsSync.mkdirSync(this.appDataPath, { recursive: true });
+            }
+            if (!fsSync.existsSync(this.templatesDir)) {
+                fsSync.mkdirSync(this.templatesDir, { recursive: true });
+            }
         }
         catch (error) {
             console.error('Error creating templates directory:', error);

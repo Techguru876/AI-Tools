@@ -14,16 +14,23 @@ export class ProjectService {
     this.appDataPath = path.join(os.homedir(), 'PhotoVideoPro');
     this.projectsDir = path.join(this.appDataPath, 'projects');
 
+    // Ensure directories exist BEFORE creating database (synchronously)
+    this.ensureDirectoriesSync();
+
     // Initialize database
     this.db = new Database(path.join(this.appDataPath, 'projects.db'));
     this.initDatabase();
-    this.ensureDirectories();
   }
 
-  private async ensureDirectories() {
+  private ensureDirectoriesSync() {
     try {
-      await fs.mkdir(this.appDataPath, { recursive: true });
-      await fs.mkdir(this.projectsDir, { recursive: true });
+      const fsSync = require('fs');
+      if (!fsSync.existsSync(this.appDataPath)) {
+        fsSync.mkdirSync(this.appDataPath, { recursive: true });
+      }
+      if (!fsSync.existsSync(this.projectsDir)) {
+        fsSync.mkdirSync(this.projectsDir, { recursive: true });
+      }
     } catch (error) {
       console.error('Error creating directories:', error);
     }

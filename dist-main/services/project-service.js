@@ -14,15 +14,21 @@ class ProjectService {
         // Initialize app data directory
         this.appDataPath = path_1.default.join(os_1.default.homedir(), 'PhotoVideoPro');
         this.projectsDir = path_1.default.join(this.appDataPath, 'projects');
+        // Ensure directories exist BEFORE creating database (synchronously)
+        this.ensureDirectoriesSync();
         // Initialize database
         this.db = new better_sqlite3_1.default(path_1.default.join(this.appDataPath, 'projects.db'));
         this.initDatabase();
-        this.ensureDirectories();
     }
-    async ensureDirectories() {
+    ensureDirectoriesSync() {
         try {
-            await promises_1.default.mkdir(this.appDataPath, { recursive: true });
-            await promises_1.default.mkdir(this.projectsDir, { recursive: true });
+            const fsSync = require('fs');
+            if (!fsSync.existsSync(this.appDataPath)) {
+                fsSync.mkdirSync(this.appDataPath, { recursive: true });
+            }
+            if (!fsSync.existsSync(this.projectsDir)) {
+                fsSync.mkdirSync(this.projectsDir, { recursive: true });
+            }
         }
         catch (error) {
             console.error('Error creating directories:', error);
