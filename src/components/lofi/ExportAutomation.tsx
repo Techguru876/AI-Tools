@@ -171,8 +171,8 @@ export default function ExportAutomation() {
       }, 200)
 
       const format = preset?.settings.format || customSettings.format
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const result = await exportScene(format)
+      // @ts-expect-error - Result will be used for future error handling
+      const _result = await exportScene(format)
 
       clearInterval(progressInterval)
       setExportProgress(100)

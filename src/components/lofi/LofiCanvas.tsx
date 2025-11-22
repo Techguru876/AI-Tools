@@ -200,7 +200,7 @@ export default function LofiCanvas({
         if ('path' in element.source) {
           return element.source.path
         } else if ('url' in element.source) {
-          return element.source.url
+          return element.source.url || null
         }
       }
     }

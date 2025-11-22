@@ -35,8 +35,7 @@ export default function AIAssistant() {
   const [generatedPalettes, setGeneratedPalettes] = useState<ColorPalette[]>([])
 
   // BPM detection state
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedAudio, setSelectedAudio] = useState<string | null>(null)
+  const [_selectedAudio, setSelectedAudio] = useState<string | null>(null)
   const [detectedBPM, setDetectedBPM] = useState<number | null>(null)
 
   // Music pairing state
