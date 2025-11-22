@@ -1,6 +1,12 @@
-# AI Tech Blog Platform
+# Job Application Automation System
 
-A comprehensive, AI-automated tech blog platform in the style of Gizmodo, featuring automated content generation, editorial management, monetization, and advanced user experience.
+A full-stack automated job application system built with FastAPI (Python) and React. This intelligent platform helps job seekers manage resumes, discover opportunities, and automate the application process.
+
+---
+
+> **Note:** This repository also contains an AI Tech Blog Platform project. The job application system is in the `backend/` and `frontend/` directories.
+
+---
 
 ## Features
 
