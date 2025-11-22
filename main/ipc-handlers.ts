@@ -7,6 +7,11 @@ import { TemplateEngine } from './services/templates/TemplateEngine';
 import { BatchProcessor } from './services/batch/BatchProcessor';
 import { createLofiTemplate } from './services/templates/lofi-template';
 import { createHorrorTemplate } from './services/templates/horror-template';
+import { createExplainerTemplate } from './services/templates/explainer-template';
+import { createMotivationalTemplate } from './services/templates/motivational-template';
+import { createNewsTemplate } from './services/templates/news-template';
+import { createFunFactsTemplate } from './services/templates/funfacts-template';
+import { createProductReviewTemplate } from './services/templates/product-review-template';
 import { APIKeyManager } from './services/config/APIKeyManager';
 import { ScriptGenerator } from './services/content-generation/ScriptGenerator';
 import { VoiceGenerator } from './services/content-generation/VoiceGenerator';
@@ -379,12 +384,23 @@ export function setupIpcHandlers() {
 
   ipcMain.handle('template:init-builtin', async () => {
     try {
-      // Initialize built-in templates
-      const lofiTemplate = createLofiTemplate();
-      const horrorTemplate = createHorrorTemplate();
-      templateEngine.saveTemplate(lofiTemplate);
-      templateEngine.saveTemplate(horrorTemplate);
-      return { success: true };
+      // Initialize all built-in templates
+      const templates = [
+        createLofiTemplate(),
+        createHorrorTemplate(),
+        createExplainerTemplate(),
+        createMotivationalTemplate(),
+        createNewsTemplate(),
+        createFunFactsTemplate(),
+        createProductReviewTemplate(),
+      ];
+
+      for (const template of templates) {
+        templateEngine.saveTemplate(template);
+        console.log(`✓ Initialized template: ${template.name}`);
+      }
+
+      return { success: true, count: templates.length };
     } catch (error: any) {
       console.error('Error initializing built-in templates:', error);
       throw error;

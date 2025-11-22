@@ -10,6 +10,11 @@ const TemplateEngine_1 = require("./services/templates/TemplateEngine");
 const BatchProcessor_1 = require("./services/batch/BatchProcessor");
 const lofi_template_1 = require("./services/templates/lofi-template");
 const horror_template_1 = require("./services/templates/horror-template");
+const explainer_template_1 = require("./services/templates/explainer-template");
+const motivational_template_1 = require("./services/templates/motivational-template");
+const news_template_1 = require("./services/templates/news-template");
+const funfacts_template_1 = require("./services/templates/funfacts-template");
+const product_review_template_1 = require("./services/templates/product-review-template");
 const APIKeyManager_1 = require("./services/config/APIKeyManager");
 const ScriptGenerator_1 = require("./services/content-generation/ScriptGenerator");
 const VoiceGenerator_1 = require("./services/content-generation/VoiceGenerator");
@@ -373,12 +378,21 @@ function setupIpcHandlers() {
     });
     electron_1.ipcMain.handle('template:init-builtin', async () => {
         try {
-            // Initialize built-in templates
-            const lofiTemplate = (0, lofi_template_1.createLofiTemplate)();
-            const horrorTemplate = (0, horror_template_1.createHorrorTemplate)();
-            templateEngine.saveTemplate(lofiTemplate);
-            templateEngine.saveTemplate(horrorTemplate);
-            return { success: true };
+            // Initialize all built-in templates
+            const templates = [
+                (0, lofi_template_1.createLofiTemplate)(),
+                (0, horror_template_1.createHorrorTemplate)(),
+                (0, explainer_template_1.createExplainerTemplate)(),
+                (0, motivational_template_1.createMotivationalTemplate)(),
+                (0, news_template_1.createNewsTemplate)(),
+                (0, funfacts_template_1.createFunFactsTemplate)(),
+                (0, product_review_template_1.createProductReviewTemplate)(),
+            ];
+            for (const template of templates) {
+                templateEngine.saveTemplate(template);
+                console.log(`✓ Initialized template: ${template.name}`);
+            }
+            return { success: true, count: templates.length };
         }
         catch (error) {
             console.error('Error initializing built-in templates:', error);
