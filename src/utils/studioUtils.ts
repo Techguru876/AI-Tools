@@ -79,7 +79,7 @@ export async function generateTTS(
       }
 
       try {
-        const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        const response = await fetchWithRetry('https://api.openai.com/v1/audio/speech', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
@@ -91,6 +91,9 @@ export async function generateTTS(
             input: text,
             speed: config.speed,
           }),
+        }, {
+          timeout: 30000, // 30 second timeout for TTS
+          maxRetries: 2
         })
 
         if (!response.ok) {
@@ -120,7 +123,7 @@ export async function generateTTS(
       try {
         // ElevenLabs implementation
         const voiceId = config.voice // Should be ElevenLabs voice ID
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        const response = await fetchWithRetry(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
           method: 'POST',
           headers: {
             'xi-api-key': apiKey,
@@ -134,6 +137,9 @@ export async function generateTTS(
               similarity_boost: 0.5,
             },
           }),
+        }, {
+          timeout: 30000, // 30 second timeout for TTS
+          maxRetries: 2
         })
 
         if (!response.ok) {
@@ -268,10 +274,13 @@ export async function searchStockMedia(
         ? `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=${count}`
         : `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${count}`
 
-      const response = await fetch(endpoint, {
+      const response = await fetchWithRetry(endpoint, {
         headers: {
           'Authorization': apiKey,
         },
+      }, {
+        timeout: 15000, // 15 second timeout for media search
+        maxRetries: 2
       })
 
       if (!response.ok) {
@@ -316,7 +325,10 @@ export async function searchStockMedia(
         ? `https://pixabay.com/api/videos/?key=${apiKey}&q=${encodeURIComponent(query)}&per_page=${count}`
         : `https://pixabay.com/api/?key=${apiKey}&q=${encodeURIComponent(query)}&per_page=${count}`
 
-      const response = await fetch(endpoint)
+      const response = await fetchWithRetry(endpoint, {}, {
+        timeout: 15000, // 15 second timeout for media search
+        maxRetries: 2
+      })
 
       if (!response.ok) {
         throw new Error(`Pixabay API failed: ${response.statusText}`)
@@ -363,12 +375,16 @@ export async function searchStockMedia(
         if (onWarning) onWarning(warningMsg)
       }
 
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}`,
         {
           headers: {
             'Authorization': `Client-ID ${apiKey}`,
           },
+        },
+        {
+          timeout: 15000, // 15 second timeout for media search
+          maxRetries: 2
         }
       )
 
@@ -436,7 +452,7 @@ export async function generateAIImage(
         throw new Error(errorMsg)
       }
 
-      const response = await fetch('https://api.openai.com/v1/images/generations', {
+      const response = await fetchWithRetry('https://api.openai.com/v1/images/generations', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -448,6 +464,9 @@ export async function generateAIImage(
           n: 1,
           size: '1024x1024',
         }),
+      }, {
+        timeout: 60000, // 60 second timeout for AI image generation
+        maxRetries: 2
       })
 
       if (!response.ok) {
@@ -510,6 +529,9 @@ export async function generateAIVideo(
         resolution: options.quality || '1080p',
         aspect_ratio: options.aspectRatio || '16:9',
       }),
+    }, {
+      timeout: 120000, // 120 second timeout for AI video generation (longer process)
+      maxRetries: 1
     })
 
     if (!response.ok) {
@@ -681,7 +703,10 @@ export async function parseRSSFeed(feedUrl: string): Promise<RSSItem[]> {
   try {
     // Use a CORS proxy for RSS feeds since browsers don't allow direct RSS fetching
     const corsProxy = 'https://api.allorigins.win/get?url='
-    const response = await fetch(corsProxy + encodeURIComponent(feedUrl))
+    const response = await fetchWithRetry(corsProxy + encodeURIComponent(feedUrl), {}, {
+      timeout: 20000, // 20 second timeout for RSS feed fetching
+      maxRetries: 2
+    })
 
     if (!response.ok) {
       throw new Error(`Failed to fetch RSS feed: ${response.statusText}`)

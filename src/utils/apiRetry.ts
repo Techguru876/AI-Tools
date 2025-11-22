@@ -7,6 +7,7 @@ export interface RetryOptions {
   maxRetries?: number
   baseDelay?: number
   maxDelay?: number
+  timeout?: number // Timeout in milliseconds
   onRetry?: (attempt: number, error: Error) => void
 }
 
@@ -18,6 +19,7 @@ export async function withRetry<T>(
     maxRetries = 3,
     baseDelay = 1000,
     maxDelay = 10000,
+    timeout,
     onRetry,
   } = options
 
@@ -74,23 +76,81 @@ export function isRetryableError(error: any): boolean {
 }
 
 /**
- * Retry wrapper for fetch requests
+ * Retry wrapper for fetch requests WITH TIMEOUT SUPPORT
+ * @param url - The URL to fetch
+ * @param options - Standard fetch options
+ * @param retryOptions - Retry configuration including timeout
  */
 export async function fetchWithRetry(
   url: string,
   options?: RequestInit,
   retryOptions?: RetryOptions
 ): Promise<Response> {
-  return withRetry(async () => {
-    const response = await fetch(url, options)
+  const timeout = retryOptions?.timeout || 30000 // Default 30 second timeout
 
-    if (!response.ok) {
-      const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
-      error.status = response.status
-      error.response = response
+  return withRetry(async () => {
+    // Create AbortController for timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
+        error.status = response.status
+        error.response = response
+        throw error
+      }
+
+      return response
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+
+      // Check if it's a timeout/abort error
+      if (error.name === 'AbortError') {
+        const timeoutError: any = new Error(`Request timed out after ${timeout}ms`)
+        timeoutError.name = 'TimeoutError'
+        timeoutError.isTimeout = true
+        throw timeoutError
+      }
+
       throw error
     }
-
-    return response
   }, retryOptions)
+}
+
+/**
+ * Fetch with timeout (no retries) - for cases where retries aren't desired
+ */
+export async function fetchWithTimeout(
+  url: string,
+  options?: RequestInit,
+  timeoutMs: number = 30000
+): Promise<Response> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+    return response
+  } catch (error: any) {
+    clearTimeout(timeoutId)
+
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms`)
+    }
+
+    throw error
+  }
 }
