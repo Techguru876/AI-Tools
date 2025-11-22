@@ -203,10 +203,7 @@ export async function exportAsGIFSimple(
   options: Omit<GIFExportOptions, 'quality' | 'dither'> = {}
 ): Promise<GIFExportResult> {
   const {
-    width = 480,
-    height = 270,
     fps = 10, // Lower FPS for simpler method
-    loop = true,
     onProgress,
     onLog,
   } = options

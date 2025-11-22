@@ -188,7 +188,7 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
       rotation: 0,
       opacity: 1.0,
       z_index: 0,
-      source: { type: 'Stock', url: item.url, provider: item.provider, author: item.author },
+      source: { type: 'Image', path: item.url },
       animations: [],
     }
 
@@ -206,7 +206,7 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
     setIsGenerating(true)
 
     try {
-      const imageUrl = await generateAIImage(searchQuery, '1024x1024')
+      const imageUrl = await generateAIImage(searchQuery, 'openai')
 
       const element: SceneElement = {
         id: crypto.randomUUID(),
@@ -265,7 +265,7 @@ export default function AssetLibrary({ defaultType = 'background' }: AssetLibrar
         rotation: 0,
         opacity: 1.0,
         z_index: selectedType === 'background' ? 0 : 50,
-        source: { type: 'Video', prompt: searchQuery, url: videoUrl },
+        source: { type: 'Video', path: videoUrl },
         animations: [],
       }
 

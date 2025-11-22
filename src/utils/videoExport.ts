@@ -7,7 +7,7 @@
 import { invoke } from '@tauri-apps/api/tauri'
 import { save } from '@tauri-apps/api/dialog'
 import { ExportPreset, EXPORT_PRESETS } from './studioUtils'
-import { exportAsGIF, estimateGIFSize, getOptimalGIFSettings, GIFExportOptions } from './gifExport'
+import { exportAsGIF, GIFExportOptions } from './gifExport'
 
 export interface ExportProgress {
   stage: 'preparing' | 'rendering' | 'encoding' | 'saving' | 'complete'

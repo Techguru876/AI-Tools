@@ -119,7 +119,7 @@ export default function LofiCanvas({
 
     // Apply blend mode if specified
     if (element.blend_mode) {
-      ctx.globalCompositeOperation = element.blend_mode
+      ctx.globalCompositeOperation = element.blend_mode.toLowerCase() as GlobalCompositeOperation
     }
 
     // Load and render actual image
@@ -197,7 +197,11 @@ export default function LofiCanvas({
       if (typeof element.source === 'string') {
         return element.source
       } else if (typeof element.source === 'object') {
-        return element.source.path || element.source.url || null
+        if ('path' in element.source) {
+          return element.source.path
+        } else if ('url' in element.source) {
+          return element.source.url
+        }
       }
     }
     // @ts-ignore - Legacy support for old templates

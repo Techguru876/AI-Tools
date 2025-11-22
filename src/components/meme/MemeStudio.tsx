@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { generateTTS, searchStockMedia, batchProcess } from '../../utils/studioUtils'
+import { generateTTS, batchProcess } from '../../utils/studioUtils'
 import './MemeStudio.css'
 
 interface Meme {

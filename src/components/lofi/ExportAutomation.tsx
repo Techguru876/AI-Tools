@@ -171,6 +171,7 @@ export default function ExportAutomation() {
       }, 200)
 
       const format = preset?.settings.format || customSettings.format
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const result = await exportScene(format)
 
       clearInterval(progressInterval)

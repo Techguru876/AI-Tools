@@ -270,6 +270,7 @@ export default function HorrorStudio() {
     }))
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleToggleSfx = (projectId: string, sceneId: string, sfxId: string) => {
     setProjects(projects.map(p => {
       if (p.id === projectId) {

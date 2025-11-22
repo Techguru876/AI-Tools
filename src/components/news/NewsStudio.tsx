@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { generateTTS, searchStockMedia, batchProcess, parseRSSFeed, getTrendingNews, RSSItem } from '../../utils/studioUtils'
+import { generateTTS, searchStockMedia, batchProcess, parseRSSFeed, getTrendingNews } from '../../utils/studioUtils'
 import './NewsStudio.css'
 
 interface NewsStory {

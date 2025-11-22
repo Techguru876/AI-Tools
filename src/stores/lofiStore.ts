@@ -531,7 +531,7 @@ export const useLofiStore = create<LofiStoreState>()(
           if (format === 'video') {
             // Export as video using client-side rendering
             const duration = 60 // Default 60 seconds
-            const audioUrl = scene.audio?.url || null
+            const audioUrl = scene.music_track?.file_path || null
 
             const progress = (update: ExportProgress) => {
               console.log(`Export ${update.stage}: ${update.progress}% - ${update.message}`)

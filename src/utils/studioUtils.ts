@@ -66,7 +66,6 @@ export async function generateTTS(
   onWarning?: (message: string) => void,
   onError?: (message: string) => void
 ): Promise<string> {
-  const startTime = Date.now()
   const apiKeys = getAPIKeys()
 
   logger.info('audio', 'TTS generation started', {
@@ -424,7 +423,7 @@ export async function searchStockMedia(
 /**
  * Fallback media when API keys are not configured
  */
-function getFallbackMedia(query: string, type: string, count: number) {
+function getFallbackMedia(query: string, _type: string, count: number) {
   console.log(`Using fallback media for: ${query}`)
   return Array.from({ length: count }, (_, i) => ({
     id: `fallback-${i}`,

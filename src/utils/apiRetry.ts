@@ -19,7 +19,6 @@ export async function withRetry<T>(
     maxRetries = 3,
     baseDelay = 1000,
     maxDelay = 10000,
-    timeout,
     onRetry,
   } = options
 

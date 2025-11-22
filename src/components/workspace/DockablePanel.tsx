@@ -74,7 +74,7 @@ export default function DockablePanel({
     }
   }
 
-  const handleResizeStart = (_e: React.MouseEvent, _direction: 'horizontal' | 'vertical') => {
+  const handleResizeStart = (e: React.MouseEvent, _direction: 'horizontal' | 'vertical') => {
     e.preventDefault()
     e.stopPropagation()
     setIsResizing(true)
@@ -216,7 +216,7 @@ if (typeof window !== 'undefined') {
   let isDraggingPanel = false
   let isResizingPanel = false
 
-  window.addEventListener('mousemove', (e) => {
+  window.addEventListener('mousemove', (_e) => {
     if (isDraggingPanel || isResizingPanel) {
       // Handle dragging/resizing logic
       // This would update the panel position/size in the store
