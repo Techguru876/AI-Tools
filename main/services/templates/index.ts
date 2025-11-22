@@ -6,9 +6,11 @@
 export { TemplateEngine } from './TemplateEngine';
 export type { Template, TemplateLayer, TemplateVariable, ResolvedTemplate } from './TemplateEngine';
 export { createLofiTemplate } from './lofi-template';
+export { createHorrorTemplate } from './horror-template';
 
 // Import all built-in templates
 import { createLofiTemplate } from './lofi-template';
+import { createHorrorTemplate } from './horror-template';
 
 /**
  * Get all built-in templates
@@ -16,8 +18,8 @@ import { createLofiTemplate } from './lofi-template';
 export function getAllBuiltInTemplates() {
   return {
     lofi: createLofiTemplate(),
+    horror: createHorrorTemplate(),
     // Future templates will be added here:
-    // horror: createHorrorTemplate(),
     // explainer: createExplainerTemplate(),
     // motivational: createMotivationalTemplate(),
   };

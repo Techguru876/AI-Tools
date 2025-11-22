@@ -34,51 +34,54 @@
   "author": "ContentForge Team",
   "license": "MIT",
   "dependencies": {
-    "electron-store": "^8.1.0",
-    "fluent-ffmpeg": "^2.1.2",
-    "sharp": "^0.33.0",
-    "better-sqlite3": "^9.2.2",
-    "uuid": "^9.0.1",
-    "chokidar": "^3.5.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "fabric": "^5.3.0",
-    "konva": "^9.2.0",
-    "react-konva": "^18.2.10",
-    "wavesurfer.js": "^7.4.0",
-    "tone": "^14.7.77",
+    "@supabase/supabase-js": "^2.39.0",
     "@tensorflow/tfjs": "^4.14.0",
-    "color": "^4.2.3",
+    "axios": "^1.13.2",
+    "better-sqlite3": "^9.2.2",
+    "chokidar": "^3.5.3",
     "chroma-js": "^2.4.2",
-    "luxon": "^3.4.4",
-    "zustand": "^4.4.7",
-    "react-colorful": "^5.6.1",
-    "react-dropzone": "^14.2.3",
+    "color": "^4.2.3",
+    "electron-store": "^8.1.0",
+    "fabric": "^5.3.0",
+    "fluent-ffmpeg": "^2.1.2",
     "gl-matrix": "^3.4.3",
-    "@supabase/supabase-js": "^2.39.0"
+    "googleapis": "^166.0.0",
+    "konva": "^9.2.0",
+    "luxon": "^3.4.4",
+    "openai": "^6.9.1",
+    "react": "^18.2.0",
+    "react-colorful": "^5.6.1",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
+    "react-konva": "^18.2.10",
+    "sharp": "^0.33.0",
+    "tone": "^14.7.77",
+    "uuid": "^9.0.1",
+    "wavesurfer.js": "^7.4.0",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1",
-    "electron-rebuild": "^3.2.9",
-    "concurrently": "^8.2.2",
-    "wait-on": "^7.2.0",
-    "cross-env": "^7.0.3",
-    "node-gyp": "^10.0.1",
-    "@types/fluent-ffmpeg": "^2.1.24",
     "@types/better-sqlite3": "^7.6.8",
+    "@types/color": "^3.0.6",
+    "@types/fluent-ffmpeg": "^2.1.24",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@types/color": "^3.0.6",
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "node-gyp": "^10.0.1",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "wait-on": "^7.2.0"
   },
   "build": {
     "appId": "com.techguru.contentforge-studio",
@@ -93,20 +96,28 @@
       {
         "from": "resources/ffmpeg",
         "to": "ffmpeg",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "resources/icon.ico"
     },
     "mac": {
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "icon": "resources/icon.icns",
       "category": "public.app-category.photography"
     },
     "linux": {
-      "target": ["AppImage"],
+      "target": [
+        "AppImage"
+      ],
       "icon": "resources/icon.png",
       "category": "Graphics"
     }
