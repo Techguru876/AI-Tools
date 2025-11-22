@@ -64,6 +64,7 @@
     "@types/better-sqlite3": "^7.6.8",
     "@types/color": "^3.0.6",
     "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/node": "^24.10.1",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@types/uuid": "^9.0.7",

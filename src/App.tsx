@@ -4,7 +4,8 @@
  */
 
 import { useState, useEffect } from 'react'
-import { invoke } from '@tauri-apps/api/tauri'
+// NOTE: Tauri imports disabled - this is legacy PhotoVideo Pro code
+// import { invoke } from '@tauri-apps/api/tauri'
 import MenuBar from './components/MenuBar'
 import Toolbar from './components/Toolbar'
 import Timeline from './components/Timeline'
@@ -30,18 +31,20 @@ function App() {
       try {
         logger.systemEvent('Application initializing')
 
+        // NOTE: Tauri invoke disabled - this is legacy PhotoVideo Pro code
         // Get system information
-        const info = await invoke('get_system_info')
-        setSystemInfo(info)
-        logger.systemEvent('System info loaded', 'success', { details: info })
+        // const info = await invoke('get_system_info')
+        // setSystemInfo(info)
+        setSystemInfo({ platform: 'electron', mode: 'legacy' })
+        logger.systemEvent('System info loaded', 'success', { details: systemInfo })
 
         // Create a default project
-        const newProject = await invoke('create_new_project', {
-          name: 'Untitled Project',
-          settings: null,
-        })
-        initProject(newProject as any)
-        logger.systemEvent('Application initialized', 'success')
+        // const newProject = await invoke('create_new_project', {
+        //   name: 'Untitled Project',
+        //   settings: null,
+        // })
+        // initProject(newProject as any)
+        logger.systemEvent('Application initialized (legacy mode)', 'warning')
       } catch (error) {
         console.error('Failed to initialize app:', error)
         logger.error('system_event', 'Application initialization failed', error as Error)
