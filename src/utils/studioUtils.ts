@@ -55,11 +55,15 @@ function getAPIKeys() {
 }
 
 /**
- * Text-to-Speech Generation - REAL IMPLEMENTATION
+ * Text-to-Speech Generation - REAL IMPLEMENTATION WITH GRACEFUL DEGRADATION
+ * @param onWarning - Optional callback for non-fatal warnings (e.g., using fallback)
+ * @param onError - Optional callback for fatal errors
  */
 export async function generateTTS(
   text: string,
-  config: TTSConfig
+  config: TTSConfig,
+  onWarning?: (message: string) => void,
+  onError?: (message: string) => void
 ): Promise<string> {
   const apiKeys = getAPIKeys()
 
@@ -67,97 +71,141 @@ export async function generateTTS(
     if (config.provider === 'openai') {
       const apiKey = apiKeys.openai
       if (!apiKey) {
-        throw new Error('OpenAI API key not configured. Please add it in Settings.')
+        const warningMsg = 'OpenAI API key not configured. Using browser voice synthesis as fallback. For better quality, add your API key in Settings.'
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
+        // Fall through to browser TTS fallback below
+        return await browserTTSFallback(text, config, onError)
       }
 
-      const response = await fetch('https://api.openai.com/v1/audio/speech', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'tts-1',
-          voice: config.voice,
-          input: text,
-          speed: config.speed,
-        }),
-      })
+      try {
+        const response = await fetch('https://api.openai.com/v1/audio/speech', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'tts-1',
+            voice: config.voice,
+            input: text,
+            speed: config.speed,
+          }),
+        })
 
-      if (!response.ok) {
-        throw new Error(`OpenAI TTS failed: ${response.statusText}`)
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`OpenAI TTS failed (${response.status}): ${errorText}`)
+        }
+
+        const audioBlob = await response.blob()
+        const audioUrl = URL.createObjectURL(audioBlob)
+        return audioUrl
+      } catch (apiError: any) {
+        const warningMsg = `OpenAI TTS error: ${apiError.message}. Falling back to browser voice.`
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
+        return await browserTTSFallback(text, config, onError)
       }
-
-      const audioBlob = await response.blob()
-      const audioUrl = URL.createObjectURL(audioBlob)
-      return audioUrl
 
     } else if (config.provider === 'elevenlabs') {
       const apiKey = apiKeys.elevenlabs
       if (!apiKey) {
-        throw new Error('ElevenLabs API key not configured. Please add it in Settings.')
+        const warningMsg = 'ElevenLabs API key not configured. Using browser voice synthesis as fallback.'
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
+        return await browserTTSFallback(text, config, onError)
       }
 
-      // ElevenLabs implementation
-      const voiceId = config.voice // Should be ElevenLabs voice ID
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-        method: 'POST',
-        headers: {
-          'xi-api-key': apiKey,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: text,
-          model_id: 'eleven_monolingual_v1',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5,
+      try {
+        // ElevenLabs implementation
+        const voiceId = config.voice // Should be ElevenLabs voice ID
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': apiKey,
+            'Content-Type': 'application/json',
           },
-        }),
-      })
+          body: JSON.stringify({
+            text: text,
+            model_id: 'eleven_monolingual_v1',
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.5,
+            },
+          }),
+        })
 
-      if (!response.ok) {
-        throw new Error(`ElevenLabs TTS failed: ${response.statusText}`)
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`ElevenLabs TTS failed (${response.status}): ${errorText}`)
+        }
+
+        const audioBlob = await response.blob()
+        const audioUrl = URL.createObjectURL(audioBlob)
+        return audioUrl
+      } catch (apiError: any) {
+        const warningMsg = `ElevenLabs TTS error: ${apiError.message}. Falling back to browser voice.`
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
+        return await browserTTSFallback(text, config, onError)
       }
-
-      const audioBlob = await response.blob()
-      const audioUrl = URL.createObjectURL(audioBlob)
-      return audioUrl
 
     } else {
-      // Fallback to browser Speech Synthesis API (free, no API key needed)
-      return new Promise((resolve, reject) => {
-        const utterance = new SpeechSynthesisUtterance(text)
-        utterance.lang = config.language
-        utterance.rate = config.speed
-        utterance.pitch = config.pitch
-
-        // Get available voices
-        const voices = window.speechSynthesis.getVoices()
-        const voice = voices.find(v => v.name.includes(config.voice)) || voices[0]
-        if (voice) {
-          utterance.voice = voice
-        }
-
-        // We can't directly get audio URL from browser TTS, so we'll use a workaround
-        // In production, you'd want to record this to a blob
-        window.speechSynthesis.speak(utterance)
-
-        utterance.onend = () => {
-          // Return a placeholder - in real app, we'd record this
-          resolve(`browser-tts-${Date.now()}`)
-        }
-
-        utterance.onerror = (error) => {
-          reject(error)
-        }
-      })
+      // Explicitly requested browser TTS
+      return await browserTTSFallback(text, config, onError)
     }
   } catch (error: any) {
-    console.error('TTS Generation Error:', error)
-    alert(`TTS Error: ${error.message}`)
+    const errorMsg = `TTS Generation Error: ${error.message}`
+    console.error(errorMsg, error)
+    if (onError) onError(errorMsg)
     throw error
   }
+}
+
+/**
+ * Browser TTS Fallback (always available, no API key required)
+ */
+async function browserTTSFallback(
+  text: string,
+  config: TTSConfig,
+  onError?: (message: string) => void
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!('speechSynthesis' in window)) {
+      const errorMsg = 'Browser does not support text-to-speech. Please configure an API key for TTS.'
+      console.error(errorMsg)
+      if (onError) onError(errorMsg)
+      reject(new Error(errorMsg))
+      return
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = config.language
+    utterance.rate = config.speed
+    utterance.pitch = config.pitch
+
+    // Get available voices
+    const voices = window.speechSynthesis.getVoices()
+    const voice = voices.find(v => v.name.includes(config.voice)) || voices[0]
+    if (voice) {
+      utterance.voice = voice
+    }
+
+    window.speechSynthesis.speak(utterance)
+
+    utterance.onend = () => {
+      // Return a placeholder - in real app, we'd record this to a blob
+      resolve(`browser-tts-${Date.now()}`)
+    }
+
+    utterance.onerror = (error) => {
+      const errorMsg = `Browser TTS error: ${error.error}`
+      console.error(errorMsg)
+      if (onError) onError(errorMsg)
+      reject(new Error(errorMsg))
+    }
+  })
 }
 
 /**
@@ -194,13 +242,15 @@ export function parseCSV(content: string): string[][] {
 }
 
 /**
- * Search Stock Media - REAL IMPLEMENTATION
+ * Search Stock Media - REAL IMPLEMENTATION WITH GRACEFUL DEGRADATION
+ * @param onWarning - Optional callback for warnings (e.g., using placeholder images)
  */
 export async function searchStockMedia(
   query: string,
   type: 'image' | 'video',
   count: number = 12,
-  provider: 'pixabay' | 'unsplash' | 'pexels' = 'pexels'
+  provider: 'pixabay' | 'unsplash' | 'pexels' = 'pexels',
+  onWarning?: (message: string) => void
 ): Promise<any[]> {
   const apiKeys = getAPIKeys()
 
@@ -208,7 +258,9 @@ export async function searchStockMedia(
     if (provider === 'pexels') {
       const apiKey = apiKeys.pexels
       if (!apiKey) {
-        console.warn('Pexels API key not configured, using fallback')
+        const warningMsg = 'Pexels API key not configured. Using placeholder images. Get free API key at: https://www.pexels.com/api/ - Configure in Settings → API Keys for real stock photos.'
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
         return getFallbackMedia(query, type, count)
       }
 
@@ -254,7 +306,9 @@ export async function searchStockMedia(
     } else if (provider === 'pixabay') {
       const apiKey = apiKeys.pixabay
       if (!apiKey) {
-        console.warn('Pixabay API key not configured, using fallback')
+        const warningMsg = 'Pixabay API key not configured. Using placeholder images. Get free API key at: https://pixabay.com/api/docs/ - Configure in Settings → API Keys.'
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
         return getFallbackMedia(query, type, count)
       }
 
@@ -296,13 +350,17 @@ export async function searchStockMedia(
     } else if (provider === 'unsplash') {
       const apiKey = apiKeys.unsplash
       if (!apiKey) {
-        console.warn('Unsplash API key not configured, using fallback')
+        const warningMsg = 'Unsplash API key not configured. Using placeholder images. Get free API key at: https://unsplash.com/developers - Configure in Settings → API Keys.'
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
         return getFallbackMedia(query, type, count)
       }
 
       if (type === 'video') {
         // Unsplash doesn't support videos, fallback to images
-        console.warn('Unsplash does not support videos, returning images instead')
+        const warningMsg = 'Unsplash does not support videos. Showing images instead.'
+        console.warn(warningMsg)
+        if (onWarning) onWarning(warningMsg)
       }
 
       const response = await fetch(
@@ -334,8 +392,9 @@ export async function searchStockMedia(
     return getFallbackMedia(query, type, count)
 
   } catch (error: any) {
-    console.error('Stock Media Search Error:', error)
-    // Don't alert here, just return fallback
+    const errorMsg = `Stock Media Search Error: ${error.message}. Using placeholder images.`
+    console.error(errorMsg, error)
+    if (onWarning) onWarning(errorMsg)
     return getFallbackMedia(query, type, count)
   }
 }
@@ -357,11 +416,13 @@ function getFallbackMedia(query: string, type: string, count: number) {
 }
 
 /**
- * Generate AI Images - REAL IMPLEMENTATION
+ * Generate AI Images - REAL IMPLEMENTATION WITH ERROR HANDLING
+ * @param onError - Optional callback for error messages
  */
 export async function generateAIImage(
   prompt: string,
-  provider: 'openai' | 'leonardo' | 'midjourney' = 'openai'
+  provider: 'openai' | 'leonardo' | 'midjourney' = 'openai',
+  onError?: (message: string) => void
 ): Promise<string> {
   const apiKeys = getAPIKeys()
 
@@ -369,7 +430,10 @@ export async function generateAIImage(
     if (provider === 'openai') {
       const apiKey = apiKeys.openai
       if (!apiKey) {
-        throw new Error('OpenAI API key not configured. Please add it in Settings.')
+        const errorMsg = 'OpenAI API key required for AI image generation. Get your free API key at: https://platform.openai.com/api-keys - Configure it in Settings → API Keys.'
+        console.error(errorMsg)
+        if (onError) onError(errorMsg)
+        throw new Error(errorMsg)
       }
 
       const response = await fetch('https://api.openai.com/v1/images/generations', {
@@ -387,7 +451,8 @@ export async function generateAIImage(
       })
 
       if (!response.ok) {
-        throw new Error(`OpenAI Image Generation failed: ${response.statusText}`)
+        const errorText = await response.text()
+        throw new Error(`OpenAI Image Generation failed (${response.status}): ${errorText}`)
       }
 
       const data = await response.json()
@@ -395,16 +460,21 @@ export async function generateAIImage(
     }
 
     // Fallback if provider not supported
-    throw new Error(`Provider ${provider} not yet implemented. Please use OpenAI.`)
+    const errorMsg = `Provider ${provider} not yet implemented. Please use OpenAI.`
+    if (onError) onError(errorMsg)
+    throw new Error(errorMsg)
 
   } catch (error: any) {
-    console.error('AI Image Generation Error:', error)
+    const errorMsg = `AI Image Generation Error: ${error.message}`
+    console.error(errorMsg, error)
+    if (onError) onError(errorMsg)
     throw error
   }
 }
 
 /**
- * Generate AI Video with OpenAI Sora
+ * Generate AI Video with OpenAI Sora - WITH ERROR HANDLING
+ * @param onError - Optional callback for error messages
  */
 export async function generateAIVideo(
   prompt: string,
@@ -412,14 +482,18 @@ export async function generateAIVideo(
     duration?: number
     quality?: string
     aspectRatio?: string
-  } = {}
+  } = {},
+  onError?: (message: string) => void
 ): Promise<string> {
   const apiKeys = getAPIKeys()
 
   try {
     const apiKey = apiKeys.openai
     if (!apiKey) {
-      throw new Error('OpenAI API key not configured. Please add it in Settings.')
+      const errorMsg = 'OpenAI API key required for AI video generation (Sora). Get your API key at: https://platform.openai.com/api-keys - Configure it in Settings → API Keys.'
+      console.error(errorMsg)
+      if (onError) onError(errorMsg)
+      throw new Error(errorMsg)
     }
 
     // Sora API endpoint (placeholder - actual endpoint may differ)
@@ -440,7 +514,9 @@ export async function generateAIVideo(
 
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(error.error?.message || `Sora Video Generation failed: ${response.statusText}`)
+      const errorMsg = error.error?.message || `Sora Video Generation failed (${response.status}): ${response.statusText}`
+      if (onError) onError(errorMsg)
+      throw new Error(errorMsg)
     }
 
     const data = await response.json()
@@ -449,7 +525,9 @@ export async function generateAIVideo(
     return data.data?.[0]?.url || data.url || ''
 
   } catch (error: any) {
-    console.error('AI Video Generation Error:', error)
+    const errorMsg = `AI Video Generation Error: ${error.message}`
+    console.error(errorMsg, error)
+    if (onError) onError(errorMsg)
     throw error
   }
 }
