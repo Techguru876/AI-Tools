@@ -11,6 +11,15 @@ export default defineConfig({
     strictPort: true,
   },
   envPrefix: ['VITE_'],
+  resolve: {
+    alias: {
+      // Stub out legacy Tauri imports (PhotoVideo Pro is disabled)
+      '@tauri-apps/api/tauri': '/src/stubs/tauri.ts',
+      '@tauri-apps/api/dialog': '/src/stubs/tauri.ts',
+      '@ffmpeg/ffmpeg': '/src/stubs/ffmpeg.ts',
+      '@ffmpeg/util': '/src/stubs/ffmpeg.ts',
+    },
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
