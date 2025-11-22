@@ -12,6 +12,7 @@ aiosqlite==0.19.0
 pypdf2==3.0.1
 python-docx==1.1.0
 python-multipart==0.0.6
+reportlab==4.0.7
 
 # Web Scraping (for future phases)
 playwright==1.40.0

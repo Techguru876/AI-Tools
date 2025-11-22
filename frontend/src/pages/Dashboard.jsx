@@ -3,19 +3,14 @@
  * Displays key metrics and recent activity.
  */
 import React, { useState, useEffect } from 'react';
-import { FileText, Briefcase, CheckSquare, Calendar } from 'lucide-react';
+import { FileText, Briefcase, CheckSquare, Calendar, TrendingUp } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import StatCard from '../components/ui/StatCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { getResumes } from '../services/api';
+import { getDashboardStats } from '../services/api';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({
-    totalResumes: 0,
-    totalJobs: 0,
-    totalApplications: 0,
-    upcomingInterviews: 0,
-  });
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,16 +20,20 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      // Fetch resumes count
-      const resumes = await getResumes();
-      setStats({
-        totalResumes: resumes.length,
-        totalJobs: 0, // TODO: Implement in future phases
-        totalApplications: 0, // TODO: Implement in future phases
-        upcomingInterviews: 0, // TODO: Implement in future phases
-      });
+      const data = await getDashboardStats();
+      setStats(data);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      // Set default stats on error
+      setStats({
+        applications_today: 0,
+        total_applications: 0,
+        response_rate: 0,
+        active_jobs: 0,
+        interviews_scheduled: 0,
+        applications_by_status: {},
+        recent_applications: []
+      });
     } finally {
       setLoading(false);
     }
@@ -48,30 +47,45 @@ const Dashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
-          icon={FileText}
-          title="Total Resumes"
-          value={stats.totalResumes}
+          icon={CheckSquare}
+          title="Applications Today"
+          value={stats?.applications_today || 0}
+          loading={loading}
+        />
+        <StatCard
+          icon={TrendingUp}
+          title="Response Rate"
+          value={stats?.response_rate ? `${stats.response_rate}%` : '0%'}
           loading={loading}
         />
         <StatCard
           icon={Briefcase}
           title="Active Jobs"
-          value={stats.totalJobs}
-          loading={loading}
-        />
-        <StatCard
-          icon={CheckSquare}
-          title="Applications"
-          value={stats.totalApplications}
+          value={stats?.active_jobs || 0}
           loading={loading}
         />
         <StatCard
           icon={Calendar}
           title="Interviews"
-          value={stats.upcomingInterviews}
+          value={stats?.interviews_scheduled || 0}
           loading={loading}
         />
       </div>
+
+      {/* Applications by Status */}
+      {!loading && stats && stats.total_applications > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Applications by Status</h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {Object.entries(stats.applications_by_status || {}).map(([status, count]) => (
+              <div key={status} className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{count}</div>
+                <div className="text-sm text-gray-600 capitalize">{status}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Welcome Section */}
       <div className="bg-white rounded-lg shadow-md p-8 border border-gray-200">

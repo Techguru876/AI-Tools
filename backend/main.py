@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 
 from app.utils.database import init_db
-from app.api.routes import resumes
+from app.api.routes import resumes, jobs, applications
 
 # Load environment variables
 load_dotenv()
@@ -67,6 +67,8 @@ async def health_check():
 
 # Include routers
 app.include_router(resumes.router, prefix="/api")
+app.include_router(jobs.router, prefix="/api")
+app.include_router(applications.router, prefix="/api")
 
 
 # Global exception handler
