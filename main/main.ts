@@ -1,6 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import fs from 'fs';
 import { setupIpcHandlers } from './ipc-handlers';
+import { initializeDefaultTemplates } from './services/templates/initializeTemplates';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -40,7 +42,18 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  console.log('\n=== CONTENTFORGE STUDIO STARTUP ===');
+  console.log('User Data Path:', app.getPath('userData'));
+  console.log('Database Path:', path.join(app.getPath('userData'), 'contentforge.db'));
+  console.log('Database exists:', fs.existsSync(path.join(app.getPath('userData'), 'contentforge.db')));
+
+  console.log('\n=== INITIALIZING DEFAULT TEMPLATES ===');
+  initializeDefaultTemplates();
+
+  console.log('\n=== SETTING UP IPC HANDLERS ===');
   setupIpcHandlers();
+
+  console.log('\n=== CREATING WINDOW ===');
   createWindow();
 
   app.on('activate', () => {

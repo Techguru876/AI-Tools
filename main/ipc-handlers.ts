@@ -69,6 +69,8 @@ function initAIServices() {
 }
 
 export function setupIpcHandlers() {
+  console.log('🔧 Setting up IPC handlers...');
+
   // Project handlers
   ipcMain.handle('project:create', async (_event, name: string) => {
     try {
@@ -306,18 +308,33 @@ export function setupIpcHandlers() {
   // Template handlers
   ipcMain.handle('template:list', async (_event, niche?: string) => {
     try {
-      return templateEngine.listTemplates(niche);
+      console.log('📋 IPC: template:list called with niche:', niche || 'all');
+      const templates = templateEngine.listTemplates(niche);
+      console.log(`📊 IPC: Returning ${templates.length} templates`);
+      if (templates.length > 0) {
+        console.log('📄 Templates:', templates.map(t => ({ id: t.id, name: t.name, niche: t.niche })));
+      } else {
+        console.warn('⚠️ IPC: No templates found in database!');
+      }
+      return templates;
     } catch (error: any) {
-      console.error('Error listing templates:', error);
+      console.error('❌ Error listing templates:', error);
       throw error;
     }
   });
 
   ipcMain.handle('template:get', async (_event, templateId: string) => {
     try {
-      return templateEngine.getTemplate(templateId);
+      console.log('📄 IPC: template:get called with ID:', templateId);
+      const template = templateEngine.getTemplate(templateId);
+      if (template) {
+        console.log('✓ IPC: Found template:', template.name);
+      } else {
+        console.warn('⚠️ IPC: Template not found:', templateId);
+      }
+      return template;
     } catch (error: any) {
-      console.error('Error getting template:', error);
+      console.error('❌ Error getting template:', error);
       throw error;
     }
   });
@@ -958,4 +975,7 @@ export function setupIpcHandlers() {
 
   // Initialize AI services on startup if keys exist
   initAIServices();
+
+  console.log('✓ IPC handlers setup complete');
+  console.log('📊 Total handlers registered: ~90+');
 }

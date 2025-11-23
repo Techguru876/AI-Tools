@@ -15,6 +15,7 @@ import HorrorStudio from './horror/HorrorStudio'
 import NewsStudio from './news/NewsStudio'
 import MemeStudio from './meme/MemeStudio'
 import ContentForgeStudio from './contentforge/ContentForgeStudio'
+import { TemplateDebugTest } from './TemplateDebugTest'
 import Settings from './Settings'
 import './StudioSuite.css'
 
@@ -29,6 +30,7 @@ export type StudioType =
   | 'horror'
   | 'news'
   | 'meme'
+  | 'debug'
 
 interface Studio {
   id: StudioType
@@ -43,6 +45,13 @@ export default function StudioSuite() {
   const [showSettings, setShowSettings] = useState(false)
 
   const studios: Studio[] = [
+    {
+      id: 'debug',
+      name: '🔍 Debug',
+      icon: '🐛',
+      description: 'Template Debug & Test',
+      color: '#ff5722',
+    },
     {
       id: 'contentforge',
       name: 'ContentForge',
@@ -152,6 +161,7 @@ export default function StudioSuite() {
 
       {/* Studio Content */}
       <div className="studio-content">
+        {activeStudio === 'debug' && <TemplateDebugTest />}
         {activeStudio === 'contentforge' && <ContentForgeStudio />}
         {activeStudio === 'lofi' && <LofiStudio />}
         {activeStudio === 'quotes' && <QuotesStudio />}

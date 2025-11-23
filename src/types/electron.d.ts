@@ -1,4 +1,5 @@
 // Type definitions for Electron IPC API
+import { Template, ResolvedTemplate } from './template';
 
 export interface ElectronAPI {
   // Project management
@@ -49,6 +50,17 @@ export interface ElectronAPI {
   // Remove listeners
   removeFrameReadyListener: () => void;
   removeExportProgressListener: () => void;
+
+  // Template management (ContentForge)
+  listTemplates: (niche?: string) => Promise<Template[]>;
+  getTemplate: (templateId: string) => Promise<Template | null>;
+  saveTemplate: (template: Template) => Promise<{ success: boolean }>;
+  deleteTemplate: (templateId: string) => Promise<{ success: boolean }>;
+  cloneTemplate: (templateId: string, newName: string) => Promise<Template>;
+  resolveTemplate: (templateId: string, variables: Record<string, any>) => Promise<ResolvedTemplate>;
+  validateTemplate: (templateId: string, variables: Record<string, any>) => Promise<{ valid: boolean; errors: string[] }>;
+  getTemplateStats: () => Promise<{ total: number; byNiche: Record<string, number> }>;
+  initBuiltInTemplates: () => Promise<{ success: boolean; count: number }>;
 }
 
 export interface AppInfo {

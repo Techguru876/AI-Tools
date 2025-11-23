@@ -1,0 +1,314 @@
+.template-debug {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.template-debug h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error {
+  background: #fee;
+  border: 2px solid #f88;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 1rem 0;
+}
+
+.error h2 {
+  color: #d00;
+  margin: 0 0 1rem 0;
+}
+
+.error button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.error button:hover {
+  background: #5568d3;
+}
+
+.no-templates {
+  background: #fff8dc;
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 1rem 0;
+}
+
+.no-templates h2 {
+  color: #ff8c00;
+  margin: 0 0 1rem 0;
+}
+
+.debug-steps {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 4px;
+}
+
+.debug-steps h3 {
+  margin: 0 0 1rem 0;
+}
+
+.debug-steps ol {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.debug-steps li {
+  margin: 0.5rem 0;
+}
+
+.summary {
+  background: #e6ffe6;
+  border: 2px solid #2d2;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.summary h2 {
+  color: #0a0;
+  margin: 0 0 0.5rem 0;
+}
+
+.summary .count {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.summary button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.api-check {
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.template-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.template-preview {
+  height: 150px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.template-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.template-index {
+  font-size: 3rem;
+  font-weight: 700;
+  opacity: 0.3;
+}
+
+.template-info {
+  padding: 1.5rem;
+}
+
+.template-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.description {
+  color: #666;
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.template-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.stat .label {
+  font-weight: 600;
+  color: #666;
+}
+
+.stat .value {
+  color: #333;
+  font-family: monospace;
+}
+
+.template-variables {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f0f8ff;
+  border-radius: 4px;
+}
+
+.template-variables h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.template-variables ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.template-variables li {
+  margin: 0.25rem 0;
+}
+
+.required {
+  color: #f00;
+  font-weight: bold;
+}
+
+.var-desc {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.template-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.template-actions button {
+  flex: 1;
+  padding: 0.75rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.template-actions button:hover {
+  background: #5568d3;
+}
+
+.debug-console {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #1e1e1e;
+  border-radius: 8px;
+  color: #d4d4d4;
+}
+
+.debug-console h3 {
+  margin: 0 0 1rem 0;
+  color: #4ec9b0;
+}
+
+.debug-console p {
+  margin: 0 0 1rem 0;
+  color: #9cdcfe;
+}
+
+.debug-console pre {
+  margin: 0;
+  padding: 1rem;
+  background: #2d2d2d;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #ce9178;
+}
+
+.debug-info {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.debug-info h3 {
+  margin: 0 0 1rem 0;
+}
+
+.debug-info pre {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
+console.log('⚡ PRELOAD SCRIPT RUNNING ⚡');
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 electron_1.contextBridge.exposeInMainWorld('electronAPI', {
@@ -57,8 +58,14 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
         electron_1.ipcRenderer.removeAllListeners('export-progress');
     },
     // Template management (ContentForge)
-    listTemplates: (niche) => electron_1.ipcRenderer.invoke('template:list', niche),
-    getTemplate: (templateId) => electron_1.ipcRenderer.invoke('template:get', templateId),
+    listTemplates: (niche) => {
+        console.log('🌐 Frontend calling: listTemplates with niche:', niche || 'all');
+        return electron_1.ipcRenderer.invoke('template:list', niche);
+    },
+    getTemplate: (templateId) => {
+        console.log('🌐 Frontend calling: getTemplate with ID:', templateId);
+        return electron_1.ipcRenderer.invoke('template:get', templateId);
+    },
     saveTemplate: (template) => electron_1.ipcRenderer.invoke('template:save', template),
     deleteTemplate: (templateId) => electron_1.ipcRenderer.invoke('template:delete', templateId),
     cloneTemplate: (templateId, newName) => electron_1.ipcRenderer.invoke('template:clone', templateId, newName),
@@ -134,4 +141,7 @@ electron_1.contextBridge.exposeInMainWorld('appInfo', {
     version: '1.0.0',
     name: 'ContentForge Studio',
 });
+console.log('✓ electronAPI exposed to window');
+console.log('✓ appInfo exposed to window');
+console.log('📋 Template methods available: listTemplates, getTemplate, saveTemplate, etc.');
 //# sourceMappingURL=preload.js.map

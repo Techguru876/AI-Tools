@@ -1,0 +1,94 @@
+import { app } from 'electron';
+import path from 'path';
+import { TemplateEngine } from './TemplateEngine';
+import { createLofiTemplate } from './lofi-template';
+import { createHorrorTemplate } from './horror-template';
+import { createExplainerTemplate } from './explainer-template';
+import { createMotivationalTemplate } from './motivational-template';
+import { createNewsTemplate } from './news-template';
+import { createFunFactsTemplate } from './funfacts-template';
+import { createProductReviewTemplate } from './product-review-template';
+
+/**
+ * Initialize default templates on app startup
+ * This function creates all built-in templates if they don't exist
+ */
+export function initializeDefaultTemplates() {
+  try {
+    const dbPath = path.join(app.getPath('userData'), 'contentforge.db');
+    console.log('📁 Initializing templates with DB path:', dbPath);
+
+    const templateEngine = new TemplateEngine();
+
+    // Check existing templates
+    console.log('🔍 Checking for existing templates...');
+    const existingTemplates = templateEngine.listTemplates();
+    console.log(`📊 Found ${existingTemplates.length} existing templates`);
+
+    if (existingTemplates.length > 0) {
+      console.log('✓ Templates already initialized:');
+      existingTemplates.forEach(t => {
+        console.log(`   - ${t.name} (${t.niche}) - ID: ${t.id}`);
+      });
+      return;
+    }
+
+    console.log('📝 No templates found. Creating defaults...');
+
+    // Create all default templates
+    const templates = [
+      { fn: createLofiTemplate, name: 'Lofi Stream' },
+      { fn: createHorrorTemplate, name: 'Horror Story' },
+      { fn: createExplainerTemplate, name: 'Explainer' },
+      { fn: createMotivationalTemplate, name: 'Motivational' },
+      { fn: createNewsTemplate, name: 'News' },
+      { fn: createFunFactsTemplate, name: 'Fun Facts' },
+      { fn: createProductReviewTemplate, name: 'Product Review' },
+    ];
+
+    let successCount = 0;
+
+    for (const { fn, name } of templates) {
+      try {
+        console.log(`\n📄 Creating template: ${name}...`);
+        const template = fn();
+        console.log(`   Template ID: ${template.id}`);
+        console.log(`   Niche: ${template.niche}`);
+        console.log(`   Duration: ${template.duration}s`);
+        console.log(`   Layers: ${template.layers.length}`);
+
+        templateEngine.saveTemplate(template);
+        console.log(`✓ ${name} template saved successfully`);
+        successCount++;
+      } catch (error: any) {
+        console.error(`✗ Failed to create ${name} template:`, error.message);
+      }
+    }
+
+    // Verify they were saved
+    console.log('\n🔍 Verifying saved templates...');
+    const savedTemplates = templateEngine.listTemplates();
+    console.log(`📊 Now have ${savedTemplates.length} templates in database`);
+
+    if (savedTemplates.length > 0) {
+      console.log('\n✓ TEMPLATES INITIALIZED SUCCESSFULLY!');
+      console.log('📋 Available templates:');
+      savedTemplates.forEach(t => {
+        console.log(`   - ${t.name} (${t.niche})`);
+        console.log(`     ID: ${t.id}`);
+        console.log(`     Duration: ${t.duration}s`);
+        console.log(`     Layers: ${t.layers.length}`);
+        console.log(`     Variables: ${Object.keys(t.variables).length}`);
+      });
+    } else {
+      console.error('\n✗ TEMPLATES WERE NOT SAVED PROPERLY!');
+      console.error('This is a critical error. Template system will not function.');
+    }
+
+    console.log(`\n📈 Summary: ${successCount}/${templates.length} templates created successfully`);
+
+  } catch (error: any) {
+    console.error('\n❌ ERROR in initializeDefaultTemplates:', error);
+    console.error('Stack trace:', error.stack);
+  }
+}

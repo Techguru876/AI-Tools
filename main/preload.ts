@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+console.log('⚡ PRELOAD SCRIPT RUNNING ⚡');
+
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -65,8 +67,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   // Template management (ContentForge)
-  listTemplates: (niche?: string) => ipcRenderer.invoke('template:list', niche),
-  getTemplate: (templateId: string) => ipcRenderer.invoke('template:get', templateId),
+  listTemplates: (niche?: string) => {
+    console.log('🌐 Frontend calling: listTemplates with niche:', niche || 'all');
+    return ipcRenderer.invoke('template:list', niche);
+  },
+  getTemplate: (templateId: string) => {
+    console.log('🌐 Frontend calling: getTemplate with ID:', templateId);
+    return ipcRenderer.invoke('template:get', templateId);
+  },
   saveTemplate: (template: any) => ipcRenderer.invoke('template:save', template),
   deleteTemplate: (templateId: string) => ipcRenderer.invoke('template:delete', templateId),
   cloneTemplate: (templateId: string, newName: string) => ipcRenderer.invoke('template:clone', templateId, newName),
@@ -152,3 +160,7 @@ contextBridge.exposeInMainWorld('appInfo', {
   version: '1.0.0',
   name: 'ContentForge Studio',
 });
+
+console.log('✓ electronAPI exposed to window');
+console.log('✓ appInfo exposed to window');
+console.log('📋 Template methods available: listTemplates, getTemplate, saveTemplate, etc.');
