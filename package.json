@@ -1,7 +1,7 @@
 {
-  "name": "ai-tech-blog",
+  "name": "techblog-usa",
   "version": "1.0.0",
-  "description": "AI-automated tech blog platform in the style of Gizmodo",
+  "description": "TechBlog USA - AI-automated tech blog platform",
   "private": true,
   "scripts": {
     "dev": "next dev",

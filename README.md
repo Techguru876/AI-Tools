@@ -1,6 +1,6 @@
-# AI Tech Blog Platform
+# TechBlog USA
 
-A comprehensive, AI-automated tech blog platform in the style of Gizmodo, featuring automated content generation, editorial management, monetization, and advanced user experience.
+A comprehensive, AI-automated tech blog platform featuring automated content generation, editorial management, monetization, and advanced user experience.
 
 ## Features
 
@@ -55,9 +55,9 @@ A comprehensive, AI-automated tech blog platform in the style of Gizmodo, featur
 - **Embeddings**: OpenAI (optional)
 
 ### Infrastructure
-- **Hosting**: Vercel
-- **CDN**: Cloudflare
-- **Monitoring**: Vercel Analytics + Sentry
+- **Hosting**: Netlify
+- **CDN**: Netlify CDN
+- **Monitoring**: Netlify Analytics + Sentry
 - **Email**: Resend
 - **Payments**: Stripe
 
@@ -268,10 +268,10 @@ See `.env.example` for all available environment variables.
 
 ## Deployment
 
-### Vercel (Recommended)
+### Netlify (Recommended)
 
 1. Push your code to GitHub
-2. Import project in Vercel
+2. Import project in Netlify
 3. Add environment variables
 4. Deploy!
 
