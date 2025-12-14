@@ -2,7 +2,7 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { ArticleCard } from '@/components/article-cards/article-card'
 import { Sidebar } from '@/components/sidebar/sidebar'
-import { mockArticles } from '@/lib/mock-data/articles'
+import { db } from '@/lib/db'
 import { Search } from 'lucide-react'
 
 interface SearchPageProps {
@@ -15,21 +15,62 @@ export async function generateMetadata({ searchParams }: SearchPageProps) {
   const query = searchParams.q || ''
 
   return {
-    title: query ? `Search results for "${query}" - AI Tech Blog` : 'Search - AI Tech Blog',
+    title: query ? `Search results for "${query}" - TechFrontier` : 'Search - TechFrontier',
     description: `Search results for ${query}`,
   }
 }
 
-export default function SearchPage({ searchParams }: SearchPageProps) {
+export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = searchParams.q || ''
 
-  // Simple mock search - in production, this would use full-text search
-  const results = query
-    ? mockArticles.filter((article) => {
-        const searchText = `${article.title} ${article.excerpt} ${article.tags?.join(' ')}`.toLowerCase()
-        return searchText.includes(query.toLowerCase())
-      })
+  // Query database for matching articles
+  const posts = query
+    ? await db.post.findMany({
+      where: {
+        status: 'PUBLISHED',
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+          { excerpt: { contains: query, mode: 'insensitive' } },
+          { content: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      include: {
+        categories: {
+          select: {
+            name: true,
+            slug: true,
+            color: true,
+          },
+        },
+        tags: {
+          select: {
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: 20,
+    })
     : []
+
+  // Transform to match ArticleCardProps interface
+  const results = posts.map((post) => ({
+    id: post.id,
+    title: post.title,
+    excerpt: post.excerpt || '',
+    slug: post.slug,
+    category: post.categories[0]?.name || 'Tech',
+    categorySlug: post.categories[0]?.slug || 'tech',
+    categoryColor: post.categories[0]?.color || '#3B82F6',
+    author: 'TechFrontier Team',
+    publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
+    image: post.coverImage || `https://source.unsplash.com/800x600/?technology`,
+    contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    tags: post.tags.slice(0, 5).map((tag) => tag.name),
+    trending: post.viewCount > 500,
+    type: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+  }))
 
   return (
     <div className="flex min-h-screen flex-col">

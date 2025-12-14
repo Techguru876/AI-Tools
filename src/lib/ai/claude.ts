@@ -24,7 +24,7 @@ export interface GeneratedContent {
 export async function generateContent(options: GenerateContentOptions): Promise<GeneratedContent> {
   const {
     prompt,
-    model = 'claude-3-5-sonnet-20241022',
+    model = 'claude-sonnet-4-5-20250929',
     temperature = 0.7,
     maxTokens = 4000,
     systemPrompt,

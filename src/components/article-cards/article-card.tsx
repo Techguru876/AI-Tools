@@ -9,11 +9,13 @@ export type ArticleType = 'news' | 'feature' | 'deal' | 'review' | 'opinion'
 
 export interface ArticleCardProps {
   id: string
+  slug: string
   title: string
   excerpt: string
   author: string
-  publishedAt: Date
+  publishedAt: Date | string
   category: string
+  categorySlug: string
   type: ArticleType
   image?: string
   featured?: boolean
@@ -29,11 +31,13 @@ export interface ArticleCardProps {
 
 export function ArticleCard({
   id,
+  slug,
   title,
   excerpt,
   author,
   publishedAt,
   category,
+  categorySlug,
   type,
   image,
   featured = false,
@@ -44,8 +48,11 @@ export function ArticleCard({
   dealDiscount,
   rating,
 }: ArticleCardProps) {
-  const href = `/${category.toLowerCase()}/${id}`
-  const timeAgo = formatDistanceToNow(publishedAt, { addSuffix: true })
+  const href = `/${categorySlug}/${slug}`
+
+  // Handle both Date objects and ISO strings
+  const publishedDate = typeof publishedAt === 'string' ? new Date(publishedAt) : publishedAt
+  const timeAgo = formatDistanceToNow(publishedDate, { addSuffix: true })
 
   // Different styling based on type
   const cardClasses = cn(
@@ -92,7 +99,7 @@ export function ArticleCard({
         <div className="flex flex-1 flex-col p-4">
           {/* Metadata Row */}
           <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <time dateTime={publishedAt.toISOString()} className="flex items-center gap-1">
+            <time dateTime={publishedDate.toISOString()} className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {timeAgo}
             </time>

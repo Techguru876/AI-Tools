@@ -8,6 +8,8 @@ import {
   Settings,
   BarChart3,
   Calendar,
+  Zap,
+  ClipboardCheck,
 } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -41,6 +43,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Button variant="ghost" className="w-full justify-start">
               <Sparkles className="mr-2 h-4 w-4" />
               AI Generator
+            </Button>
+          </Link>
+          <Link href="/admin/batch">
+            <Button variant="ghost" className="w-full justify-start">
+              <Zap className="mr-2 h-4 w-4" />
+              Batch Generator
+            </Button>
+          </Link>
+          <Link href="/admin/review">
+            <Button variant="ghost" className="w-full justify-start">
+              <ClipboardCheck className="mr-2 h-4 w-4" />
+              Review Queue
             </Button>
           </Link>
           <Link href="/admin/scheduled">

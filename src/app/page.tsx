@@ -2,9 +2,49 @@ import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { ArticleFeed } from '@/components/homepage/article-feed'
 import { Sidebar } from '@/components/sidebar/sidebar'
-import { mockArticles } from '@/lib/mock-data/articles'
+import { db } from '@/lib/db'
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch published posts from database
+  const posts = await db.post.findMany({
+    where: { status: 'PUBLISHED' },
+    include: {
+      categories: {
+        select: {
+          name: true,
+          slug: true,
+          color: true,
+        },
+      },
+      tags: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: { publishedAt: 'desc' },
+    take: 20,
+  })
+
+  // Transform to match ArticleCardProps interface
+  const articles = posts.map((post) => ({
+    id: post.id,
+    title: post.title,
+    excerpt: post.excerpt || '',
+    slug: post.slug,
+    category: post.categories[0]?.name || 'Tech',
+    categorySlug: post.categories[0]?.slug || 'tech',
+    categoryColor: post.categories[0]?.color || '#3B82F6',
+    author: 'TechFrontier Team',
+    publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
+    image: post.coverImage || `https://source.unsplash.com/800x600/?technology,${post.categories[0]?.slug || 'tech'}`,
+    contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    type: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    tags: post.tags.slice(0, 5).map((tag) => tag.name),
+    trending: post.viewCount > 500,
+  }))
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -25,7 +65,7 @@ export default function HomePage() {
           {/* Main Feed + Sidebar Layout */}
           <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
             {/* Main Feed */}
-            <ArticleFeed initialArticles={mockArticles} />
+            <ArticleFeed initialArticles={articles} />
 
             {/* Sidebar (Desktop Only) */}
             <Sidebar />

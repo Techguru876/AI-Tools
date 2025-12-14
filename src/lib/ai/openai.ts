@@ -4,8 +4,8 @@ import { env } from '@/lib/env'
 // Initialize OpenAI client (optional - only if API key is provided)
 export const openai = env.OPENAI_API_KEY
   ? new OpenAI({
-      apiKey: env.OPENAI_API_KEY,
-    })
+    apiKey: env.OPENAI_API_KEY,
+  })
   : null
 
 export interface GenerateContentOptionsOpenAI {
@@ -38,7 +38,7 @@ export async function generateContentWithOpenAI(
 
   const {
     prompt,
-    model = 'gpt-4-turbo-preview',
+    model = 'gpt-5.2',
     temperature = 0.7,
     maxTokens = 4000,
     systemPrompt,
@@ -188,7 +188,7 @@ export async function analyzeSentiment(
   }
 
   const completion = await openai.chat.completions.create({
-    model: 'gpt-4-turbo-preview',
+    model: 'gpt-5.2',
     messages: [
       {
         role: 'system',

@@ -4,13 +4,13 @@ import { Footer } from '@/components/layout/footer'
 import { ArticleFeed } from '@/components/homepage/article-feed'
 import { Sidebar } from '@/components/sidebar/sidebar'
 import { CATEGORIES, CATEGORY_SLUGS, getCategoryBySlug } from '@/lib/constants/categories'
-import { getArticlesByCategory } from '@/lib/mock-data/articles'
+import { db } from '@/lib/db'
 import { Badge } from '@/components/ui/badge'
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string
-  }
+  }>
 }
 
 // Generate static params for all categories
@@ -22,7 +22,8 @@ export function generateStaticParams() {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: CategoryPageProps) {
-  const category = getCategoryBySlug(params.category)
+  const resolvedParams = await params
+  const category = getCategoryBySlug(resolvedParams.category)
 
   if (!category) {
     return {
@@ -31,24 +32,69 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   }
 
   return {
-    title: `${category.label} - AI Tech Blog`,
+    title: `${category.label} - TechFrontier`,
     description: category.description,
     openGraph: {
-      title: `${category.label} - AI Tech Blog`,
+      title: `${category.label} - TechFrontier`,
       description: category.description,
     },
   }
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const category = getCategoryBySlug(params.category)
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const resolvedParams = await params
+  const category = getCategoryBySlug(resolvedParams.category)
 
   if (!category) {
     notFound()
   }
 
-  // Get articles for this category
-  const articles = getArticlesByCategory(params.category)
+  // Fetch posts for this category from database
+  const posts = await db.post.findMany({
+    where: {
+      status: 'PUBLISHED',
+      categories: {
+        some: {
+          slug: resolvedParams.category,
+        },
+      },
+    },
+    include: {
+      categories: {
+        select: {
+          name: true,
+          slug: true,
+          color: true,
+        },
+      },
+      tags: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: { publishedAt: 'desc' },
+    take: 20,
+  })
+
+  // Transform to match ArticleCardProps interface
+  const articles = posts.map((post) => ({
+    id: post.id,
+    title: post.title,
+    excerpt: post.excerpt || '',
+    slug: post.slug,
+    category: post.categories[0]?.name || category.label,
+    categorySlug: post.categories[0]?.slug || resolvedParams.category,
+    categoryColor: post.categories[0]?.color || category.color,
+    author: 'TechFrontier Team',
+    publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
+    image: post.coverImage || `https://source.unsplash.com/800x600/?${resolvedParams.category},technology`,
+    contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    type: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    tags: post.tags.slice(0, 5).map((tag) => tag.name),
+    trending: post.viewCount > 500,
+  }))
 
   return (
     <div className="flex min-h-screen flex-col">

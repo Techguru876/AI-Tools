@@ -6,12 +6,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { Sparkles, Loader2 } from 'lucide-react'
+import { Sparkles, Loader2, Save, Send } from 'lucide-react'
+
+const CATEGORIES = [
+  { slug: 'tech', label: 'Tech' },
+  { slug: 'science', label: 'Science' },
+  { slug: 'culture', label: 'Culture' },
+  { slug: 'reviews', label: 'Reviews' },
+  { slug: 'deals', label: 'Deals' },
+  { slug: 'ai-news', label: 'AI News' },
+]
 
 export default function AIGeneratorPage() {
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [generated, setGenerated] = useState<any>(null)
   const { toast } = useToast()
 
@@ -23,6 +32,7 @@ export default function AIGeneratorPage() {
     product1: '',
     product2: '',
     aiProvider: 'claude',
+    categorySlug: 'tech',
   })
 
   const handleGenerate = async () => {
@@ -36,6 +46,7 @@ export default function AIGeneratorPage() {
     }
 
     setLoading(true)
+    setGenerated(null)
 
     try {
       const response = await fetch('/api/ai/generate', {
@@ -66,12 +77,66 @@ export default function AIGeneratorPage() {
     }
   }
 
+  const handleSave = async (status: 'DRAFT' | 'PUBLISHED') => {
+    if (!generated) return
+
+    setSaving(true)
+
+    try {
+      const response = await fetch('/api/posts/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: generated.title,
+          content: generated.content,
+          excerpt: generated.excerpt,
+          slug: generated.slug,
+          keywords: generated.keywords,
+          metaDescription: generated.metaDescription,
+          contentType: formData.type,
+          status,
+          categorySlug: formData.categorySlug,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save')
+      }
+
+      toast({
+        title: status === 'PUBLISHED' ? 'Published!' : 'Saved as Draft!',
+        description: `Article "${generated.title}" has been ${status === 'PUBLISHED' ? 'published' : 'saved as draft'}.`,
+      })
+
+      // Reset form after successful save
+      setGenerated(null)
+      setFormData({
+        ...formData,
+        topic: '',
+        additionalContext: '',
+        specifications: '',
+        product1: '',
+        product2: '',
+      })
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save article. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold">AI Content Generator</h2>
         <p className="text-muted-foreground">
-          Generate high-quality tech articles using AI
+          Generate high-quality tech articles using AI and save them to the database
         </p>
       </div>
 
@@ -83,22 +148,40 @@ export default function AIGeneratorPage() {
             <CardDescription>Configure what you want to generate</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="type">Content Type</Label>
-              <select
-                id="type"
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              >
-                <option value="ARTICLE">Article</option>
-                <option value="NEWS">Tech News</option>
-                <option value="AI_NEWS">AI News</option>
-                <option value="REVIEW">Product Review</option>
-                <option value="GUIDE">How-to Guide</option>
-                <option value="COMPARISON">Comparison</option>
-                <option value="ROUNDUP">Best Of Roundup</option>
-              </select>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="type">Content Type</Label>
+                <select
+                  id="type"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                >
+                  <option value="ARTICLE">Article</option>
+                  <option value="NEWS">Tech News</option>
+                  <option value="AI_NEWS">AI News</option>
+                  <option value="REVIEW">Product Review</option>
+                  <option value="GUIDE">How-to Guide</option>
+                  <option value="COMPARISON">Comparison</option>
+                  <option value="ROUNDUP">Best Of Roundup</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <select
+                  id="category"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  value={formData.categorySlug}
+                  onChange={(e) => setFormData({ ...formData, categorySlug: e.target.value })}
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.slug} value={cat.slug}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -204,18 +287,61 @@ export default function AIGeneratorPage() {
                   <p>{generated.title}</p>
                 </div>
                 <div>
+                  <h3 className="font-semibold">Slug</h3>
+                  <p className="text-sm text-muted-foreground">{generated.slug}</p>
+                </div>
+                <div>
                   <h3 className="font-semibold">Excerpt</h3>
                   <p className="text-sm text-muted-foreground">{generated.excerpt}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Content</h3>
-                  <div className="prose prose-sm max-h-96 overflow-y-auto rounded border p-4">
-                    <div dangerouslySetInnerHTML={{ __html: generated.content }} />
+                  <h3 className="font-semibold">Keywords</h3>
+                  <div className="flex flex-wrap gap-1">
+                    {generated.keywords?.map((kw: string, i: number) => (
+                      <span key={i} className="rounded bg-muted px-2 py-0.5 text-xs">
+                        {kw}
+                      </span>
+                    ))}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button>Save as Draft</Button>
-                  <Button variant="outline">Publish</Button>
+                <div>
+                  <h3 className="font-semibold">Content</h3>
+                  <div className="prose prose-sm max-h-64 overflow-y-auto rounded border p-4 dark:prose-invert">
+                    <div dangerouslySetInnerHTML={{ __html: generated.content.replace(/\n/g, '<br/>') }} />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="mb-2 font-semibold">Token Usage</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Input: {generated.usage?.inputTokens || 0} | Output: {generated.usage?.outputTokens || 0}
+                  </p>
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={() => handleSave('DRAFT')}
+                    disabled={saving}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    {saving ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
+                    Save as Draft
+                  </Button>
+                  <Button
+                    onClick={() => handleSave('PUBLISHED')}
+                    disabled={saving}
+                    className="flex-1"
+                  >
+                    {saving ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="mr-2 h-4 w-4" />
+                    )}
+                    Publish Now
+                  </Button>
                 </div>
               </div>
             ) : (
