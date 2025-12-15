@@ -30,7 +30,7 @@ export default function ContactPage() {
                 Contact Us
               </h1>
               <p className="text-xl text-muted-foreground">
-                Get in touch with the TechFrontier team
+                Get in touch with the TechBlog USA team
               </p>
             </div>
 
@@ -44,7 +44,7 @@ export default function ContactPage() {
                   <div className="rounded-lg border bg-green-50 p-6 text-green-900 dark:bg-green-900/20 dark:text-green-100">
                     <h3 className="mb-2 text-lg font-bold">Message Sent!</h3>
                     <p>
-                      Thank you for contacting TechFrontier. We&apos;ll get back to you
+                      Thank you for contacting TechBlog USA. We&apos;ll get back to you
                       within 24-48 hours.
                     </p>
                   </div>
@@ -124,10 +124,10 @@ export default function ContactPage() {
                     <div>
                       <h3 className="mb-1 font-bold">General Inquiries</h3>
                       <a
-                        href="mailto:hello@techfrontier.com"
+                        href="mailto:hello@techblogusa.com"
                         className="text-muted-foreground hover:text-primary"
                       >
-                        hello@techfrontier.com
+                        hello@techblogusa.com
                       </a>
                     </div>
                   </div>
@@ -139,10 +139,10 @@ export default function ContactPage() {
                     <div>
                       <h3 className="mb-1 font-bold">Editorial & Tips</h3>
                       <a
-                        href="mailto:editorial@techfrontier.com"
+                        href="mailto:editorial@techblogusa.com"
                         className="text-muted-foreground hover:text-primary"
                       >
-                        editorial@techfrontier.com
+                        editorial@techblogusa.com
                       </a>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Have a story tip or press release? Send it here.
@@ -157,10 +157,10 @@ export default function ContactPage() {
                     <div>
                       <h3 className="mb-1 font-bold">Advertising & Partnerships</h3>
                       <a
-                        href="mailto:advertising@techfrontier.com"
+                        href="mailto:advertising@techblogusa.com"
                         className="text-muted-foreground hover:text-primary"
                       >
-                        advertising@techfrontier.com
+                        advertising@techblogusa.com
                       </a>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Interested in advertising or partnerships?
@@ -178,12 +178,12 @@ export default function ContactPage() {
                           How do I submit a product for review?
                         </p>
                         <p className="text-muted-foreground">
-                          Email editorial@techfrontier.com with product details and
+                          Email editorial@techblogusa.com with product details and
                           press materials.
                         </p>
                       </div>
                       <div>
-                        <p className="font-medium">Can I write for TechFrontier?</p>
+                        <p className="font-medium">Can I write for TechBlog USA?</p>
                         <p className="text-muted-foreground">
                           We&apos;re always looking for talented contributors. Reach out
                           to our team with writing samples.
@@ -192,7 +192,7 @@ export default function ContactPage() {
                       <div>
                         <p className="font-medium">How do I report an error?</p>
                         <p className="text-muted-foreground">
-                          Please email editorial@techfrontier.com with the article URL
+                          Please email editorial@techblogusa.com with the article URL
                           and correction details.
                         </p>
                       </div>

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Download, Image as ImageIcon, FileText, Palette } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Media Kit | TechFrontier',
-  description: 'Download TechFrontier brand assets, logos, and press materials for media coverage.',
+  title: 'Media Kit | TechBlog USA',
+  description: 'Download TechBlog USA brand assets, logos, and press materials for media coverage.',
 }
 
 export default function MediaKitPage() {
@@ -23,18 +23,18 @@ export default function MediaKitPage() {
                 Media Kit
               </h1>
               <p className="text-xl text-muted-foreground">
-                Brand assets, logos, and press materials for TechFrontier
+                Brand assets, logos, and press materials for TechBlog USA
               </p>
             </div>
 
             <Separator className="mb-12" />
 
-            {/* About TechFrontier */}
+            {/* About TechBlog USA */}
             <section className="mb-12">
-              <h2 className="mb-4 text-3xl font-bold">About TechFrontier</h2>
+              <h2 className="mb-4 text-3xl font-bold">About TechBlog USA</h2>
               <div className="rounded-lg border bg-card p-6">
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  <strong className="text-foreground">TechFrontier</strong> is an independent tech media platform at the edge of innovation, delivering up-to-the-minute news, unbiased reviews, and expert analysis powered by both editorial expertise and AI intelligence.
+                  <strong className="text-foreground">TechBlog USA</strong> is an independent tech media platform at the edge of innovation, delivering up-to-the-minute news, unbiased reviews, and expert analysis powered by both editorial expertise and AI intelligence.
                 </p>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   <strong className="text-foreground">Tagline:</strong> Exploring Tomorrow&apos;s Tech, Today
@@ -71,7 +71,7 @@ export default function MediaKitPage() {
                 <div className="rounded-lg border bg-card p-6">
                   <div className="mb-4 flex items-start justify-between">
                     <div>
-                      <h3 className="mb-1 font-bold">TechFrontier Logo (SVG)</h3>
+                      <h3 className="mb-1 font-bold">TechBlog USA Logo (SVG)</h3>
                       <p className="text-sm text-muted-foreground">
                         Primary logo in vector format - use for all digital applications
                       </p>
@@ -97,7 +97,7 @@ export default function MediaKitPage() {
                 <div className="rounded-lg border bg-card p-6">
                   <div className="mb-4 flex items-start justify-between">
                     <div>
-                      <h3 className="mb-1 font-bold">TechFrontier Logo (PNG)</h3>
+                      <h3 className="mb-1 font-bold">TechBlog USA Logo (PNG)</h3>
                       <p className="text-sm text-muted-foreground">
                         High-resolution PNG versions for presentations and print
                       </p>
@@ -202,28 +202,28 @@ export default function MediaKitPage() {
                   <div>
                     <h3 className="mb-1 font-bold">Editorial Inquiries</h3>
                     <a
-                      href="mailto:editorial@techfrontier.com"
+                      href="mailto:editorial@techblogusa.com"
                       className="text-primary hover:underline"
                     >
-                      editorial@techfrontier.com
+                      editorial@techblogusa.com
                     </a>
                   </div>
                   <div>
                     <h3 className="mb-1 font-bold">Partnership Opportunities</h3>
                     <a
-                      href="mailto:advertising@techfrontier.com"
+                      href="mailto:advertising@techblogusa.com"
                       className="text-primary hover:underline"
                     >
-                      advertising@techfrontier.com
+                      advertising@techblogusa.com
                     </a>
                   </div>
                   <div>
                     <h3 className="mb-1 font-bold">General Press</h3>
                     <a
-                      href="mailto:hello@techfrontier.com"
+                      href="mailto:hello@techblogusa.com"
                       className="text-primary hover:underline"
                     >
-                      hello@techfrontier.com
+                      hello@techblogusa.com
                     </a>
                   </div>
                 </div>
@@ -238,9 +238,9 @@ export default function MediaKitPage() {
                   Usage Terms
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  These assets are provided for press and media use only. By downloading, you agree to use TechFrontier branding assets solely for editorial coverage, reviews, or news reporting. Commercial use requires prior written permission. For questions about usage rights, contact{' '}
-                  <a href="mailto:hello@techfrontier.com" className="text-primary hover:underline">
-                    hello@techfrontier.com
+                  These assets are provided for press and media use only. By downloading, you agree to use TechBlog USA branding assets solely for editorial coverage, reviews, or news reporting. Commercial use requires prior written permission. For questions about usage rights, contact{' '}
+                  <a href="mailto:hello@techblogusa.com" className="text-primary hover:underline">
+                    hello@techblogusa.com
                   </a>
                   .
                 </p>

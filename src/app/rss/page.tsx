@@ -10,7 +10,7 @@ export default function RSSPage() {
   const feeds = [
     {
       title: 'All Content',
-      description: 'Complete feed of all TechFrontier articles, news, and reviews',
+      description: 'Complete feed of all TechBlog USA articles, news, and reviews',
       url: '/feed.xml',
       subscribers: '15K+',
     },
@@ -75,7 +75,7 @@ export default function RSSPage() {
                 RSS Feeds
               </h1>
               <p className="text-xl text-muted-foreground">
-                Subscribe to TechFrontier content in your favorite RSS reader
+                Subscribe to TechBlog USA content in your favorite RSS reader
               </p>
             </div>
 
@@ -88,7 +88,7 @@ export default function RSSPage() {
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   RSS (Really Simple Syndication) is a web feed format that allows you to
                   subscribe to websites and receive updates automatically in your RSS
-                  reader app. Instead of visiting TechFrontier multiple times a day, your
+                  reader app. Instead of visiting TechBlog USA multiple times a day, your
                   RSS reader will notify you whenever we publish new content.
                 </p>
                 <p className="leading-relaxed text-muted-foreground">
@@ -179,7 +179,7 @@ export default function RSSPage() {
                   <p className="text-sm text-muted-foreground">
                     Example URL:{' '}
                     <code className="rounded bg-muted px-2 py-1 text-xs">
-                      https://techfrontier.com/feed.xml
+                      https://techblogusa.com/feed.xml
                     </code>
                   </p>
                 </div>
@@ -187,7 +187,7 @@ export default function RSSPage() {
                 <div className="rounded-lg border bg-card p-6">
                   <h3 className="mb-2 text-lg font-bold">Step 3: Enjoy!</h3>
                   <p className="text-sm text-muted-foreground">
-                    That&apos;s it! You&apos;ll now receive all new TechFrontier content
+                    That&apos;s it! You&apos;ll now receive all new TechBlog USA content
                     directly in your reader. You can subscribe to multiple feeds to
                     customize your reading experience.
                   </p>

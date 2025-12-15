@@ -84,7 +84,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     category: post.categories[0]?.name || category.label,
     categorySlug: post.categories[0]?.slug || resolvedParams.category,
     categoryColor: post.categories[0]?.color || category.color,
-    author: 'TechFrontier Team',
+    author: 'TechBlog USA Team',
     publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
     image: post.coverImage || `https://source.unsplash.com/800x600/?${resolvedParams.category},technology`,
     contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',

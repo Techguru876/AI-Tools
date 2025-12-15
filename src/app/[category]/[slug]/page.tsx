@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   }
 
   return {
-    title: `${post.title} - TechFrontier`,
+    title: `${post.title} - TechBlog USA`,
     description: post.excerpt || post.metaDescription,
     openGraph: {
       title: post.title,
@@ -114,7 +114,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   })
 
   const articleCategory = post.categories[0] || { name: category.label, slug: resolvedParams.category, color: category.color }
-  const authorName = 'TechFrontier Team'
+  const authorName = 'TechBlog USA Team'
   const publishedAt = post.publishedAt || post.createdAt
 
   return (

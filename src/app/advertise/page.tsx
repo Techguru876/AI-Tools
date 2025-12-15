@@ -4,11 +4,11 @@ import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'Advertise with TechFrontier',
+  title: 'Advertise with TechBlog USA',
   description:
-    'Reach a highly engaged audience of tech enthusiasts, early adopters, and decision-makers. Learn about advertising opportunities on TechFrontier.',
+    'Reach a highly engaged audience of tech enthusiasts, early adopters, and decision-makers. Learn about advertising opportunities on TechBlog USA.',
   openGraph: {
-    title: 'Advertise with TechFrontier',
+    title: 'Advertise with TechBlog USA',
     description:
       'Reach a highly engaged audience of tech enthusiasts, early adopters, and decision-makers.',
   },
@@ -24,7 +24,7 @@ export default function AdvertisePage() {
             {/* Hero Section */}
             <div className="mb-12 text-center">
               <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-                Advertise with TechFrontier
+                Advertise with TechBlog USA
               </h1>
               <p className="text-xl text-muted-foreground">
                 Reach a highly engaged audience at the frontier of technology
@@ -35,9 +35,9 @@ export default function AdvertisePage() {
 
             {/* Why Advertise Section */}
             <section className="mb-12">
-              <h2 className="mb-4 text-3xl font-bold">Why TechFrontier?</h2>
+              <h2 className="mb-4 text-3xl font-bold">Why TechBlog USA?</h2>
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
-                TechFrontier reaches a passionate, tech-savvy audience of early adopters,
+                TechBlog USA reaches a passionate, tech-savvy audience of early adopters,
                 industry professionals, and enthusiasts who are actively researching and
                 purchasing the latest technology products and services.
               </p>
@@ -142,7 +142,7 @@ export default function AdvertisePage() {
             <section className="mb-12">
               <h2 className="mb-4 text-3xl font-bold">Our Audience</h2>
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
-                TechFrontier readers are highly engaged technology enthusiasts who
+                TechBlog USA readers are highly engaged technology enthusiasts who
                 actively seek out the latest news, reviews, and buying guides:
               </p>
               <ul className="grid gap-3 md:grid-cols-2">
@@ -197,7 +197,7 @@ export default function AdvertisePage() {
                     Contact Sales
                   </a>
                   <a
-                    href="mailto:advertising@techfrontier.com"
+                    href="mailto:advertising@techblogusa.com"
                     className="inline-flex items-center justify-center rounded-md border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-accent"
                   >
                     Email Us

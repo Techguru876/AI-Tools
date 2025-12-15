@@ -4,8 +4,8 @@ import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy | TechFrontier',
-  description: 'TechFrontier Cookie Policy - Learn how we use cookies and similar technologies on our website.',
+  title: 'Cookie Policy | TechBlog USA',
+  description: 'TechBlog USA Cookie Policy - Learn how we use cookies and similar technologies on our website.',
 }
 
 export default function CookiePolicyPage() {
@@ -38,7 +38,7 @@ export default function CookiePolicyPage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">How We Use Cookies</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  TechFrontier uses cookies and similar technologies for the following
+                  TechBlog USA uses cookies and similar technologies for the following
                   purposes:
                 </p>
                 <ul className="mb-4 space-y-2 text-muted-foreground">
@@ -84,7 +84,7 @@ export default function CookiePolicyPage() {
                 <div className="mb-6">
                   <h3 className="mb-2 text-xl font-bold">First-Party Cookies</h3>
                   <p className="leading-relaxed text-muted-foreground">
-                    Set by TechFrontier directly. We use these for site functionality and
+                    Set by TechBlog USA directly. We use these for site functionality and
                     analytics.
                   </p>
                 </div>
@@ -150,7 +150,7 @@ export default function CookiePolicyPage() {
                 </ul>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   Please note that disabling cookies may affect the functionality of
-                  TechFrontier and limit your access to certain features.
+                  TechBlog USA and limit your access to certain features.
                 </p>
               </section>
 
@@ -205,7 +205,7 @@ export default function CookiePolicyPage() {
                 <p className="leading-relaxed text-muted-foreground">
                   If you have questions about our use of cookies, please contact us at:
                   <br />
-                  Email: privacy@techfrontier.com
+                  Email: privacy@techblogusa.com
                   <br />
                   Or visit our{' '}
                   <a href="/contact" className="text-primary hover:underline">

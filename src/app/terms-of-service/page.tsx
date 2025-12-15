@@ -4,8 +4,8 @@ import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | TechFrontier',
-  description: 'TechFrontier Terms of Service - Please read these terms carefully before using our website.',
+  title: 'Terms of Service | TechBlog USA',
+  description: 'TechBlog USA Terms of Service - Please read these terms carefully before using our website.',
 }
 
 export default function TermsOfServicePage() {
@@ -30,7 +30,7 @@ export default function TermsOfServicePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Agreement to Terms</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  By accessing or using TechFrontier (&quot;the Site&quot;), you agree to
+                  By accessing or using TechBlog USA (&quot;the Site&quot;), you agree to
                   be bound by these Terms of Service and our Privacy Policy. If you do
                   not agree with any part of these terms, you may not access the Site.
                 </p>
@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Use of the Site</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  TechFrontier grants you a limited, non-exclusive, non-transferable
+                  TechBlog USA grants you a limited, non-exclusive, non-transferable
                   license to access and use the Site for personal, non-commercial
                   purposes. You agree not to:
                 </p>
@@ -62,8 +62,8 @@ export default function TermsOfServicePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Intellectual Property</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  All content on TechFrontier, including but not limited to text,
-                  graphics, logos, images, and software, is the property of TechFrontier
+                  All content on TechBlog USA, including but not limited to text,
+                  graphics, logos, images, and software, is the property of TechBlog USA
                   or its content suppliers and is protected by copyright, trademark, and
                   other intellectual property laws.
                 </p>
@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
                 <h2 className="mb-3 text-2xl font-bold">User Content</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   If you submit comments, feedback, or other content to the Site, you
-                  grant TechFrontier a worldwide, non-exclusive, royalty-free license to
+                  grant TechBlog USA a worldwide, non-exclusive, royalty-free license to
                   use, reproduce, and publish such content. You represent that you own or
                   have permission to share the content you submit.
                 </p>
@@ -89,7 +89,7 @@ export default function TermsOfServicePage() {
                 <h2 className="mb-3 text-2xl font-bold">Third-Party Links</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   The Site may contain links to third-party websites. These links are
-                  provided for your convenience only. TechFrontier does not endorse or
+                  provided for your convenience only. TechBlog USA does not endorse or
                   assume responsibility for the content, privacy policies, or practices of
                   third-party sites.
                 </p>
@@ -100,7 +100,7 @@ export default function TermsOfServicePage() {
                   Affiliate Relationships and Advertising
                 </h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  TechFrontier participates in affiliate marketing programs and may earn
+                  TechBlog USA participates in affiliate marketing programs and may earn
                   commissions on purchases made through links on our Site. We also
                   display advertising and sponsored content. All sponsored content is
                   clearly marked. See our{' '}
@@ -115,7 +115,7 @@ export default function TermsOfServicePage() {
                 <h2 className="mb-3 text-2xl font-bold">Disclaimer of Warranties</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   THE SITE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot;
-                  WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TechFrontier
+                  WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TechBlog USA
                   DOES NOT WARRANT THAT THE SITE WILL BE UNINTERRUPTED, ERROR-FREE, OR
                   FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS.
                 </p>
@@ -129,7 +129,7 @@ export default function TermsOfServicePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Limitation of Liability</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  TO THE FULLEST EXTENT PERMITTED BY LAW, TechFrontier SHALL NOT BE
+                  TO THE FULLEST EXTENT PERMITTED BY LAW, TechBlog USA SHALL NOT BE
                   LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
                   PUNITIVE DAMAGES ARISING OUT OF OR RELATED TO YOUR USE OF THE SITE.
                 </p>
@@ -138,7 +138,7 @@ export default function TermsOfServicePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Indemnification</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  You agree to indemnify and hold harmless TechFrontier and its
+                  You agree to indemnify and hold harmless TechBlog USA and its
                   affiliates, officers, agents, and employees from any claim, demand,
                   loss, or damages arising out of your use of the Site or violation of
                   these Terms.
@@ -169,7 +169,7 @@ export default function TermsOfServicePage() {
                   If you have questions about these Terms of Service, please contact us
                   at:
                   <br />
-                  Email: legal@techfrontier.com
+                  Email: legal@techblogusa.com
                   <br />
                   Or visit our{' '}
                   <a href="/contact" className="text-primary hover:underline">

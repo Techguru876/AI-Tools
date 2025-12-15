@@ -4,8 +4,8 @@ import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | TechFrontier',
-  description: 'TechFrontier Privacy Policy - Learn how we collect, use, and protect your personal information.',
+  title: 'Privacy Policy | TechBlog USA',
+  description: 'TechBlog USA Privacy Policy - Learn how we collect, use, and protect your personal information.',
 }
 
 export default function PrivacyPolicyPage() {
@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Introduction</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  TechFrontier (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;)
+                  TechBlog USA (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;)
                   respects your privacy and is committed to protecting your personal data.
                   This privacy policy explains how we collect, use, disclose, and
                   safeguard your information when you visit our website.
@@ -115,7 +115,7 @@ export default function PrivacyPolicyPage() {
                   <li>• Object to or restrict certain processing activities</li>
                 </ul>
                 <p className="leading-relaxed text-muted-foreground">
-                  To exercise these rights, please contact us at privacy@techfrontier.com
+                  To exercise these rights, please contact us at privacy@techblogusa.com
                 </p>
               </section>
 
@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
                 <p className="leading-relaxed text-muted-foreground">
                   If you have questions about this Privacy Policy, please contact us at:
                   <br />
-                  Email: privacy@techfrontier.com
+                  Email: privacy@techblogusa.com
                   <br />
                   Or visit our{' '}
                   <a href="/contact" className="text-primary hover:underline">

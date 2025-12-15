@@ -19,7 +19,7 @@ export async function generateMetadata({ searchParams }: SearchPageProps) {
   const query = searchParams.q || ''
 
   return {
-    title: query ? `Search results for "${query}" - TechFrontier` : 'Search - TechFrontier',
+    title: query ? `Search results for "${query}" - TechBlog USA` : 'Search - TechBlog USA',
     description: `Search results for ${query}`,
   }
 }
@@ -67,7 +67,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     category: post.categories[0]?.name || 'Tech',
     categorySlug: post.categories[0]?.slug || 'tech',
     categoryColor: post.categories[0]?.color || '#3B82F6',
-    author: 'TechFrontier Team',
+    author: 'TechBlog USA Team',
     publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
     image: post.coverImage || `https://source.unsplash.com/800x600/?technology`,
     contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',

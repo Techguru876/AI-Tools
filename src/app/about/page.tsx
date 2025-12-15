@@ -4,13 +4,13 @@ import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'About TechFrontier | Exploring Tomorrow\'s Tech, Today',
+  title: 'About TechBlog USA | Exploring Tomorrow\'s Tech, Today',
   description:
-    'TechFrontier is an independent tech media platform at the edge of innovation, delivering up-to-the-minute news, unbiased reviews, and expert analysis.',
+    'TechBlog USA is an independent tech media platform at the edge of innovation, delivering up-to-the-minute news, unbiased reviews, and expert analysis.',
   openGraph: {
-    title: 'About TechFrontier',
+    title: 'About TechBlog USA',
     description:
-      'TechFrontier is an independent tech media platform at the edge of innovation, delivering up-to-the-minute news, unbiased reviews, and expert analysis.',
+      'TechBlog USA is an independent tech media platform at the edge of innovation, delivering up-to-the-minute news, unbiased reviews, and expert analysis.',
   },
 }
 
@@ -27,7 +27,7 @@ export default function AboutPage() {
                 <span className="text-3xl font-bold text-white">TF</span>
               </div>
               <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-                About TechFrontier
+                About TechBlog USA
               </h1>
               <p className="text-xl italic text-muted-foreground">
                 Exploring Tomorrow&apos;s Tech, Today
@@ -40,7 +40,7 @@ export default function AboutPage() {
             <section className="mb-12">
               <h2 className="mb-4 text-3xl font-bold">Who We Are</h2>
               <p className="mb-4 text-lg leading-relaxed text-muted-foreground">
-                TechFrontier is an independent tech media platform at the edge of
+                TechBlog USA is an independent tech media platform at the edge of
                 innovation. Our mission is to decode and showcase tomorrow&apos;s
                 breakthroughs—delivering up-to-the-minute news, unbiased reviews, and
                 expert analysis powered by both editorial expertise and AI intelligence.
@@ -100,7 +100,7 @@ export default function AboutPage() {
             <section className="mb-12">
               <h2 className="mb-4 text-3xl font-bold">What Users Can Expect</h2>
               <p className="mb-4 text-lg leading-relaxed text-muted-foreground">
-                At TechFrontier, readers find:
+                At TechBlog USA, readers find:
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start">

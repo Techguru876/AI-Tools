@@ -4,8 +4,8 @@ import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'Affiliate Disclosure | TechFrontier',
-  description: 'TechFrontier Affiliate Disclosure - Learn about our affiliate relationships and how we earn commissions.',
+  title: 'Affiliate Disclosure | TechBlog USA',
+  description: 'TechBlog USA Affiliate Disclosure - Learn about our affiliate relationships and how we earn commissions.',
 }
 
 export default function AffiliateDisclosurePage() {
@@ -30,13 +30,13 @@ export default function AffiliateDisclosurePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Our Commitment to Transparency</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  At TechFrontier, we believe in transparency and honesty with our
+                  At TechBlog USA, we believe in transparency and honesty with our
                   readers. This disclosure explains how we earn revenue through affiliate
                   relationships and how it affects our content.
                 </p>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   <strong>
-                    TechFrontier participates in affiliate marketing programs.
+                    TechBlog USA participates in affiliate marketing programs.
                   </strong>{' '}
                   This means that when you click on certain links on our website and make
                   a purchase, we may receive a commission at no extra cost to you.
@@ -48,7 +48,7 @@ export default function AffiliateDisclosurePage() {
                 <p className="mb-4 leading-relaxed text-muted-foreground">
                   Affiliate links are special URLs that contain a unique tracking code.
                   When you click these links and make a purchase, the merchant can
-                  identify that the sale came from TechFrontier, and we receive a small
+                  identify that the sale came from TechBlog USA, and we receive a small
                   commission.
                 </p>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
@@ -60,7 +60,7 @@ export default function AffiliateDisclosurePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Affiliate Programs We Participate In</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  TechFrontier is a participant in various affiliate programs, including
+                  TechBlog USA is a participant in various affiliate programs, including
                   but not limited to:
                 </p>
                 <ul className="mb-4 space-y-2 text-muted-foreground">
@@ -140,7 +140,7 @@ export default function AffiliateDisclosurePage() {
                   merchant.
                 </p>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  By using our affiliate links, you&apos;re supporting TechFrontier at no
+                  By using our affiliate links, you&apos;re supporting TechBlog USA at no
                   additional cost to you, which helps us continue providing free, quality
                   content.
                 </p>
@@ -149,7 +149,7 @@ export default function AffiliateDisclosurePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Sponsored Content</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  In addition to affiliate links, TechFrontier may publish sponsored
+                  In addition to affiliate links, TechBlog USA may publish sponsored
                   content, including:
                 </p>
                 <ul className="mb-4 space-y-2 text-muted-foreground">
@@ -169,7 +169,7 @@ export default function AffiliateDisclosurePage() {
               <section className="mb-8">
                 <h2 className="mb-3 text-2xl font-bold">Amazon Associates Disclosure</h2>
                 <p className="mb-4 leading-relaxed text-muted-foreground">
-                  TechFrontier is a participant in the Amazon Services LLC Associates
+                  TechBlog USA is a participant in the Amazon Services LLC Associates
                   Program, an affiliate advertising program designed to provide a means
                   for sites to earn advertising fees by advertising and linking to
                   Amazon.com and affiliated international sites (e.g., Amazon.co.uk,
@@ -193,7 +193,7 @@ export default function AffiliateDisclosurePage() {
                   disclosure, please contact us:
                 </p>
                 <p className="leading-relaxed text-muted-foreground">
-                  Email: editorial@techfrontier.com
+                  Email: editorial@techblogusa.com
                   <br />
                   Or visit our{' '}
                   <a href="/contact" className="text-primary hover:underline">

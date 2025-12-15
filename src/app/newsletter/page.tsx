@@ -30,7 +30,7 @@ export default function NewsletterPage() {
                 <Mail className="h-10 w-10 text-primary" />
               </div>
               <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-                Join the TechFrontier Newsletter
+                Join the TechBlog USA Newsletter
               </h1>
               <p className="text-xl text-muted-foreground">
                 Stay ahead of the curve with daily tech insights delivered to your inbox

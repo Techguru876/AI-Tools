@@ -6,8 +6,8 @@ import { Search, Mail, MessageSquare, Book, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Support & Help Center | TechFrontier',
-  description: 'Get help with TechFrontier. Find answers to common questions, contact support, and access resources.',
+  title: 'Support & Help Center | TechBlog USA',
+  description: 'Get help with TechBlog USA. Find answers to common questions, contact support, and access resources.',
 }
 
 export default function SupportPage() {
@@ -25,8 +25,8 @@ export default function SupportPage() {
       answer: (
         <>
           We welcome news tips and story ideas! Email our editorial team at{' '}
-          <a href="mailto:editorial@techfrontier.com" className="text-primary hover:underline">
-            editorial@techfrontier.com
+          <a href="mailto:editorial@techblogusa.com" className="text-primary hover:underline">
+            editorial@techblogusa.com
           </a>{' '}
           with details, sources, and any relevant links.
         </>
@@ -37,58 +37,58 @@ export default function SupportPage() {
       answer: (
         <>
           We take accuracy seriously. If you spot an error, please email{' '}
-          <a href="mailto:editorial@techfrontier.com" className="text-primary hover:underline">
-            editorial@techfrontier.com
+          <a href="mailto:editorial@techblogusa.com" className="text-primary hover:underline">
+            editorial@techblogusa.com
           </a>{' '}
           with the article URL and details of the correction needed.
         </>
       ),
     },
     {
-      question: 'Can I write for TechFrontier?',
+      question: 'Can I write for TechBlog USA?',
       answer: (
         <>
           We&apos;re always looking for talented contributors! Check our{' '}
           <Link href="/our-team" className="text-primary hover:underline">Our Team page</Link> or contact us at{' '}
-          <a href="mailto:hello@techfrontier.com" className="text-primary hover:underline">
-            hello@techfrontier.com
+          <a href="mailto:hello@techblogusa.com" className="text-primary hover:underline">
+            hello@techblogusa.com
           </a>{' '}
           with writing samples and areas of expertise.
         </>
       ),
     },
     {
-      question: 'How do I advertise on TechFrontier?',
+      question: 'How do I advertise on TechBlog USA?',
       answer: (
         <>
           Visit our <Link href="/advertise" className="text-primary hover:underline">Advertise page</Link> to learn about opportunities, or contact our advertising team at{' '}
-          <a href="mailto:advertising@techfrontier.com" className="text-primary hover:underline">
-            advertising@techfrontier.com
+          <a href="mailto:advertising@techblogusa.com" className="text-primary hover:underline">
+            advertising@techblogusa.com
           </a>.
         </>
       ),
     },
     {
       question: 'How do I unsubscribe from the newsletter?',
-      answer: 'Every newsletter email contains an unsubscribe link at the bottom. Click it to instantly unsubscribe. If you need assistance, contact us at hello@techfrontier.com.',
+      answer: 'Every newsletter email contains an unsubscribe link at the bottom. Click it to instantly unsubscribe. If you need assistance, contact us at hello@techblogusa.com.',
     },
     {
       question: 'Do you accept product submissions for review?',
       answer: (
         <>
           We review a wide range of tech products. Email{' '}
-          <a href="mailto:editorial@techfrontier.com" className="text-primary hover:underline">
-            editorial@techfrontier.com
+          <a href="mailto:editorial@techblogusa.com" className="text-primary hover:underline">
+            editorial@techblogusa.com
           </a>{' '}
           with product details, press materials, and availability. Note that we cannot guarantee coverage.
         </>
       ),
     },
     {
-      question: 'How is TechFrontier funded?',
+      question: 'How is TechBlog USA funded?',
       answer: (
         <>
-          TechFrontier is funded through advertising, affiliate partnerships, and sponsored content (clearly marked). Read our{' '}
+          TechBlog USA is funded through advertising, affiliate partnerships, and sponsored content (clearly marked). Read our{' '}
           <Link href="/affiliate-disclosure" className="text-primary hover:underline">
             Affiliate Disclosure
           </Link>{' '}
@@ -106,12 +106,12 @@ export default function SupportPage() {
       ),
     },
     {
-      question: 'How do I contact TechFrontier for other inquiries?',
+      question: 'How do I contact TechBlog USA for other inquiries?',
       answer: (
         <>
           For general inquiries, visit our <Link href="/contact" className="text-primary hover:underline">Contact page</Link> or email{' '}
-          <a href="mailto:hello@techfrontier.com" className="text-primary hover:underline">
-            hello@techfrontier.com
+          <a href="mailto:hello@techblogusa.com" className="text-primary hover:underline">
+            hello@techblogusa.com
           </a>.
         </>
       ),
@@ -177,7 +177,7 @@ export default function SupportPage() {
                   <div className="mb-3 flex items-center gap-3">
                     <Book className="h-6 w-6 text-primary" />
                     <h3 className="text-lg font-bold group-hover:text-primary">
-                      About TechFrontier
+                      About TechBlog USA
                     </h3>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -237,7 +237,7 @@ export default function SupportPage() {
                     Contact Support
                   </Link>
                   <a
-                    href="mailto:hello@techfrontier.com"
+                    href="mailto:hello@techblogusa.com"
                     className="inline-flex items-center justify-center rounded-md border bg-background px-6 py-3 text-sm font-medium transition-colors hover:bg-accent"
                   >
                     Email Us

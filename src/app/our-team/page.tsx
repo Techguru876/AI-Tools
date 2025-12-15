@@ -4,13 +4,13 @@ import { Footer } from '@/components/layout/footer'
 import { Separator } from '@/components/ui/separator'
 
 export const metadata: Metadata = {
-  title: 'Our Team | TechFrontier',
+  title: 'Our Team | TechBlog USA',
   description:
-    'Meet the team behind TechFrontier - passionate tech journalists, editors, and analysts dedicated to bringing you the latest in technology.',
+    'Meet the team behind TechBlog USA - passionate tech journalists, editors, and analysts dedicated to bringing you the latest in technology.',
   openGraph: {
-    title: 'Our Team | TechFrontier',
+    title: 'Our Team | TechBlog USA',
     description:
-      'Meet the team behind TechFrontier - passionate tech journalists, editors, and analysts dedicated to bringing you the latest in technology.',
+      'Meet the team behind TechBlog USA - passionate tech journalists, editors, and analysts dedicated to bringing you the latest in technology.',
   },
 }
 
@@ -36,7 +36,7 @@ export default function OurTeamPage() {
             {/* Team Introduction */}
             <section className="mb-12">
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
-                TechFrontier is powered by a passionate team of tech journalists,
+                TechBlog USA is powered by a passionate team of tech journalists,
                 editors, reviewers, and AI specialists who live and breathe innovation.
                 We combine decades of editorial experience with cutting-edge AI
                 technology to deliver content that&apos;s timely, accurate, and actionable.
@@ -89,7 +89,7 @@ export default function OurTeamPage() {
               <div className="rounded-lg border bg-muted/50 p-8 text-center">
                 <h2 className="mb-2 text-2xl font-bold">Join Our Team</h2>
                 <p className="mb-4 text-muted-foreground">
-                  Interested in contributing to TechFrontier? We&apos;re always looking
+                  Interested in contributing to TechBlog USA? We&apos;re always looking
                   for talented writers, reviewers, and tech experts.
                 </p>
                 <a
