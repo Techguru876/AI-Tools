@@ -81,7 +81,9 @@ ${additionalContext ? `Additional context: ${additionalContext}` : ''}
 
 Requirements:
 - Length: **Minimum 1200-1500 words** (This is a deep dive feature)
-- Include an engaging headline (use # for H1)
+- **Do NOT include the article title as an H1 heading** (It is rendered separately). Start directly with the introduction.
+- **Do NOT include any images or image URLs** in the content body.
+- **Do NOT include hashtags** at the end.
 - Write a compelling introduction paragraph that hooks the reader
 - Break content into varied sections with subheadings (use ## for H2 and ### for H3)
 - **Deep Analysis Required**: Go beyond the surface news. Explain the "Why" and "How".
@@ -103,7 +105,9 @@ ${specs ? `Product specifications:\n${specs}` : ''}
 
 Requirements:
 - Length: **Minimum 1500-2000 words**
-- Include an engaging headline (use # for H1)
+- **Do NOT include the article title as an H1 heading**.
+- **Do NOT include any images or image URLs**.
+- **Do NOT include hashtags**.
 - **Executive Summary**: Start with a "Bottom Line" summary.
 - Comprehensive Sections (use ## for H2):
   - Design & Build Quality (Materials, feel, durability)
