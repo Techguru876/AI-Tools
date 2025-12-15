@@ -146,6 +146,25 @@
     @apply mb-2;
   }
 
+  /* Article Typography - Serif for readability */
+  .article-content {
+    font-family: var(--font-lora), Georgia, serif;
+    font-size: 1.125rem;
+    line-height: 1.8;
+    letter-spacing: -0.003em;
+  }
+
+  .article-content p {
+    @apply mb-6;
+  }
+
+  .article-content h2,
+  .article-content h3,
+  .article-content h4 {
+    font-family: var(--font-inter), sans-serif;
+    @apply font-bold mt-10 mb-4;
+  }
+
   .article-content a {
     @apply text-primary hover:underline;
     transition: color var(--transition-fast);
@@ -157,14 +176,36 @@
 
   .article-content code {
     @apply bg-muted px-1.5 py-0.5 rounded text-sm;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   }
 
   .article-content pre {
     @apply bg-muted p-4 rounded-lg overflow-x-auto my-6;
   }
 
+  .article-content pre code {
+    @apply bg-transparent p-0;
+  }
+
+  /* Pull Quote Styling */
   .article-content blockquote {
-    @apply border-l-4 border-primary pl-4 italic my-6;
+    @apply border-l-4 border-primary pl-6 pr-4 py-4 my-8 bg-muted/30 rounded-r-lg;
+    font-size: 1.25rem;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.6;
+    color: hsl(var(--foreground));
+  }
+
+  .article-content blockquote p {
+    @apply mb-0;
+  }
+
+  /* Drop Cap for first paragraph */
+  .article-content > p:first-of-type::first-letter {
+    @apply text-6xl font-bold float-left leading-none mr-2 mt-1;
+    font-family: var(--font-inter), sans-serif;
+    color: hsl(var(--primary));
   }
 }
 
