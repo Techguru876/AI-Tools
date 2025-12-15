@@ -7,17 +7,14 @@ import { CATEGORIES, CATEGORY_SLUGS, getCategoryBySlug } from '@/lib/constants/c
 import { db } from '@/lib/db'
 import { Badge } from '@/components/ui/badge'
 
+// Force dynamic rendering - prevents build-time database queries
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface CategoryPageProps {
   params: Promise<{
     category: string
   }>
-}
-
-// Generate static params for all categories
-export function generateStaticParams() {
-  return CATEGORY_SLUGS.map((slug) => ({
-    category: slug,
-  }))
 }
 
 // Generate metadata for SEO

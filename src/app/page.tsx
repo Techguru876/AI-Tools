@@ -4,6 +4,11 @@ import { ArticleFeed } from '@/components/homepage/article-feed'
 import { Sidebar } from '@/components/sidebar/sidebar'
 import { db } from '@/lib/db'
 
+// Force dynamic rendering - prevents build-time database queries
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+
 export default async function HomePage() {
   // Fetch published posts from database
   const posts = await db.post.findMany({

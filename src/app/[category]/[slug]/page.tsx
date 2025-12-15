@@ -11,6 +11,10 @@ import { formatDistanceToNow } from 'date-fns'
 import { db } from '@/lib/db'
 import { getCategoryBySlug } from '@/lib/constants/categories'
 
+// Force dynamic rendering - prevents build-time database queries
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface ArticlePageProps {
   params: Promise<{
     category: string
