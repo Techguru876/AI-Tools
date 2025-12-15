@@ -12,6 +12,9 @@ import { db } from '@/lib/db'
 import { getCategoryBySlug } from '@/lib/constants/categories'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import { TableOfContents } from '@/components/article/table-of-contents'
 
 // Force dynamic rendering - prevents build-time database queries
 export const dynamic = 'force-dynamic'
@@ -224,6 +227,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <div className="article-content mx-auto max-w-[680px]">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSlug, rehypeAutolinkHeadings]}
               className="prose prose-lg dark:prose-invert max-w-none"
             >
               {post.content}
