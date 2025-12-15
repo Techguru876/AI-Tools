@@ -79,7 +79,7 @@ export function Header() {
             <Link href="/" className="flex items-center space-x-3">
               <div className="relative h-10 w-10 flex-shrink-0">
                 <Image
-                  src={resolvedTheme === 'dark' ? '/logos/header/tech_frontier_white.svg' : '/logos/header/tech_frontier.svg'}
+                  src={resolvedTheme === 'dark' ? '/logos/header/techblog_logo_white.svg' : '/logos/header/techblog_logo.svg'}
                   alt="TechBlog USA"
                   width={40}
                   height={40}

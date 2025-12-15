@@ -95,7 +95,7 @@ export function Footer() {
             <Link href="/" className="mb-4 inline-flex items-center space-x-2">
               <div className="relative h-10 w-10 flex-shrink-0">
                 <Image
-                  src={resolvedTheme === 'dark' ? '/logos/header/tech_frontier_white.svg' : '/logos/header/tech_frontier.svg'}
+                  src={resolvedTheme === 'dark' ? '/logos/header/techblog_logo_white.svg' : '/logos/header/techblog_logo.svg'}
                   alt="TechBlog USA"
                   width={40}
                   height={40}
