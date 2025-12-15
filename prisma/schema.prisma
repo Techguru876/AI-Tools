@@ -19,6 +19,8 @@ model User {
   emailVerified DateTime?
   image         String?
   role          UserRole  @default(READER)
+  bio           String?   @db.Text
+  title         String?   // e.g., "Senior Tech Editor"
 
   // Relationships
   accounts      Account[]
@@ -122,6 +124,10 @@ model Post {
 
   // Premium content
   isPremium       Boolean      @default(false)
+  
+  // Featured content
+  featured        Boolean      @default(false)
+  readingTime     Int?         // Estimated reading time in minutes
 
   // Scheduling
   publishedAt     DateTime?

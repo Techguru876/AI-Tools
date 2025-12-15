@@ -78,6 +78,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           slug: true,
         },
       },
+      author: {
+        select: {
+          name: true,
+          image: true,
+          bio: true,
+          title: true,
+        },
+      },
     },
   })
 
@@ -164,6 +172,21 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   })}
                 </time>
               </div>
+              {/* Reading Time */}
+              {post.readingTime && (
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span>{post.readingTime} min read</span>
+                </div>
+              )}
+              {/* View Count */}
+              <div className="flex items-center gap-1">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>{post.viewCount.toLocaleString()} views</span>
+              </div>
               {/* Social Share */}
               <div className="ml-auto flex gap-2">
                 <Button size="sm" variant="ghost">
@@ -198,7 +221,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           )}
 
           {/* Article Content */}
-          <div className="article-content max-w-none">
+          <div className="article-content mx-auto max-w-[680px]">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               className="prose prose-lg dark:prose-invert max-w-none"
@@ -206,6 +229,32 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {post.content}
             </ReactMarkdown>
           </div>
+
+          {/* Author Bio */}
+          {post.author && (
+            <div className="mx-auto mt-12 max-w-[680px] rounded-lg border bg-card p-6">
+              <div className="flex items-start gap-4">
+                {post.author.image && (
+                  <Image
+                    src={post.author.image}
+                    alt={post.author.name || 'Author'}
+                    width={64}
+                    height={64}
+                    className="rounded-full"
+                  />
+                )}
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold">{post.author.name || authorName}</h3>
+                  {post.author.title && (
+                    <p className="text-sm text-muted-foreground">{post.author.title}</p>
+                  )}
+                  {post.author.bio && (
+                    <p className="mt-2 text-sm text-muted-foreground">{post.author.bio}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
