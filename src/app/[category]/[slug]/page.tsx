@@ -10,6 +10,8 @@ import { Clock, User, Share2, Facebook, Twitter, Linkedin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { db } from '@/lib/db'
 import { getCategoryBySlug } from '@/lib/constants/categories'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 // Force dynamic rendering - prevents build-time database queries
 export const dynamic = 'force-dynamic'
@@ -196,8 +198,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           )}
 
           {/* Article Content */}
-          <div className="article-content prose prose-lg dark:prose-invert max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br/>') }} />
+          <div className="article-content max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              className="prose prose-lg dark:prose-invert max-w-none"
+            >
+              {post.content}
+            </ReactMarkdown>
           </div>
 
           {/* Tags */}

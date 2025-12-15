@@ -75,66 +75,74 @@ Your reviews are:
 
 export const CONTENT_PROMPTS = {
   generateNews: (topic: string, additionalContext?: string) => `
-Write a comprehensive tech news article about: ${topic}
+Write a comprehensive, deep-dive tech news feature about: ${topic}
 
 ${additionalContext ? `Additional context: ${additionalContext}` : ''}
 
 Requirements:
-- Length: 600-800 words
+- Length: **Minimum 1200-1500 words** (This is a deep dive feature)
 - Include an engaging headline (use # for H1)
-- Write a compelling introduction paragraph
-- Break content into sections with subheadings (use ## for H2)
-- Include relevant technical details
-- Mention potential implications or impact
-- End with a brief conclusion or what to watch for next
-- Use proper markdown formatting
-- If this is about a specific product or company, include background information
+- Write a compelling introduction paragraph that hooks the reader
+- Break content into varied sections with subheadings (use ## for H2 and ### for H3)
+- **Deep Analysis Required**: Go beyond the surface news. Explain the "Why" and "How".
+- Include specific technical details, specs, and numbers.
+- **Historical Context**: Explain what led to this moment.
+- **Industry Impact**: specific predictions for competitors and the market.
+- Use proper markdown formatting:
+  - Use bullet points and numbered lists for readability
+  - Use **bold** for key terms
+  - Use > Blockquotes for key takeaways or expert quotes
+- End with a strong conclusion.
 
 Format the article in clean markdown.`,
 
   generateReview: (product: string, specs?: string) => `
-Write a detailed product review for: ${product}
+Write an in-depth, definitive product review for: ${product}
 
 ${specs ? `Product specifications:\n${specs}` : ''}
 
 Requirements:
-- Length: 800-1200 words
+- Length: **Minimum 1500-2000 words**
 - Include an engaging headline (use # for H1)
-- Start with a brief overview and key specs
-- Include the following sections (use ## for H2):
-  - Design and Build Quality
-  - Performance
-  - Key Features
-  - Battery Life / Longevity (if applicable)
-  - Price and Value
-  - Verdict
+- **Executive Summary**: Start with a "Bottom Line" summary.
+- Comprehensive Sections (use ## for H2):
+  - Design & Build Quality (Materials, feel, durability)
+  - Display & Audio (if applicable)
+  - Performance & Benchmarks (Real-world testing scenarios)
+  - Software & Features
+  - Battery Life & Charging
+  - The Competition (Direct comparisons)
+  - Price & Value Proposition
+  - Final Verdict
 - Provide a rating out of 10
-- List clear pros and cons
-- Include a final recommendation
-- Use proper markdown formatting with lists and emphasis
+- List detailed Pros and Cons (at least 5 each)
+- Use **tables** for specs and comparisons (Markdown tables).
+- Use proper markdown formatting with extensive detail.
 
 Format the review in clean markdown.`,
 
   generateBuyingGuide: (category: string, priceRange?: string) => `
-Create a comprehensive buying guide for: ${category}
+Create an ultimate buying guide for: ${category}
 
 ${priceRange ? `Focus on products in the ${priceRange} price range` : ''}
 
 Requirements:
-- Length: 1000-1500 words
+- Length: **Minimum 2000 words**
 - Include an engaging headline (use # for H1)
-- Introduction explaining what to look for
-- Section on key features to consider (use ## for H2)
-- Product recommendations (3-5 products) with:
-  - Product name and brief description
-  - Key specifications
-  - Pros and cons
-  - Price range
-  - Best for (which type of user)
-- Include budget, mid-range, and premium options
-- Comparison table of top picks
-- Conclusion with final recommendations
-- Use proper markdown formatting
+- **Introduction**: Why this category matters right now.
+- **Buying Advice**: "What to Look For" section (Deep technical explanation of features).
+- **Top Picks**: detailed mini-reviews for 4-6 products:
+  - "Best Overall"
+  - "Best Budget"
+  - "Best Premium"
+  - "Best for [Specific Use Case]"
+- For each product include:
+  - Specs List
+  - Why we picked it
+  - Who it is for
+  - Who should avoid it
+- **Comparison Table**: Markdown table comparing key specs of all picks.
+- Conclusion with final "Cheat Sheet" recommendations.
 
 Format the guide in clean markdown.`,
 
