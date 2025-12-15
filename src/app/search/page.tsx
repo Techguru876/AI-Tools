@@ -5,6 +5,10 @@ import { Sidebar } from '@/components/sidebar/sidebar'
 import { db } from '@/lib/db'
 import { Search } from 'lucide-react'
 
+// Force dynamic rendering - prevents build-time database queries
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface SearchPageProps {
   searchParams: {
     q?: string
