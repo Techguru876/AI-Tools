@@ -31,16 +31,39 @@ export function ArticleFeed({ initialArticles }: ArticleFeedProps) {
 
   return (
     <div className="space-y-6">
-      {/* Article Grid */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Magazine-Style Grid */}
+      <div className="grid gap-6 md:grid-cols-4">
         {articles.map((article, index) => {
-          // First article spans full width and is larger
-          const isFeatured = index === 0 || (article.featured && index < 3)
-          const gridClass = isFeatured ? 'md:col-span-2' : ''
+          // Magazine layout pattern:
+          // Articles 0-1: First two are 2-column featured cards
+          // Articles 2-5: Four standard 1-column cards
+          // Articles 6-7: Two more 2-column featured
+          // Articles 8+: Standard 2-column grid
+
+          let gridClass = 'md:col-span-2' // Default to medium
+          let cardSize: 'large' | 'medium' | 'small' = 'medium'
+
+          if (index < 2) {
+            // First two articles: Large featured
+            gridClass = 'md:col-span-2'
+            cardSize = 'large'
+          } else if (index < 6) {
+            // Next 4: Small cards in a row
+            gridClass = 'md:col-span-1'
+            cardSize = 'small'
+          } else if (index < 8) {
+            // Next 2: Medium featured
+            gridClass = 'md:col-span-2'
+            cardSize = 'medium'
+          } else {
+            // Rest: Standard 2-column grid
+            gridClass = 'md:col-span-2'
+            cardSize = 'medium'
+          }
 
           return (
             <div key={article.id} className={gridClass}>
-              <ArticleCard {...article} featured={isFeatured} />
+              <ArticleCard {...article} featured={cardSize === 'large'} size={cardSize} />
             </div>
           )
         })}
