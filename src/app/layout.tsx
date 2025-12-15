@@ -9,12 +9,13 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://techblogusa.com'),
   title: {
-    default: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
-    template: '%s | TechFrontier',
+    default: 'TechBlog USA - Exploring Tomorrow\'s Tech, Today',
+    template: '%s | TechBlog USA',
   },
   description:
-    'TechFrontier is your premier destination for AI-powered tech news, in-depth product reviews, buying guides, and expert analysis on emerging technology, AI, gadgets, and innovation.',
+    'TechBlog USA is your premier destination for AI-powered tech news, in-depth product reviews, buying guides, and expert analysis on emerging technology, AI, gadgets, and innovation.',
   keywords: [
     'technology',
     'tech news',
@@ -29,14 +30,14 @@ export const metadata: Metadata = {
     'innovation',
     'emerging tech',
   ],
-  authors: [{ name: 'TechFrontier' }],
-  creator: 'TechFrontier',
+  authors: [{ name: 'TechBlog USA' }],
+  creator: 'TechBlog USA',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: process.env.NEXT_PUBLIC_APP_URL,
-    siteName: 'TechFrontier',
-    title: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://techblogusa.com',
+    siteName: 'TechBlog USA',
+    title: 'TechBlog USA - Exploring Tomorrow\'s Tech, Today',
     description:
       'Your premier destination for AI-powered tech news, in-depth product reviews, and expert analysis at the edge of innovation.',
     images: [
@@ -44,17 +45,17 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
+        alt: 'TechBlog USA - Exploring Tomorrow\'s Tech, Today',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TechFrontier - Exploring Tomorrow\'s Tech, Today',
+    title: 'TechBlog USA - Exploring Tomorrow\'s Tech, Today',
     description:
       'Your premier destination for AI-powered tech news, in-depth product reviews, and expert analysis at the edge of innovation.',
     images: ['/og-image.png'],
-    creator: '@techfrontier',
+    creator: '@techblogusa',
   },
   robots: {
     index: true,

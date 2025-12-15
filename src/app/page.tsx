@@ -41,7 +41,7 @@ export default async function HomePage() {
     category: post.categories[0]?.name || 'Tech',
     categorySlug: post.categories[0]?.slug || 'tech',
     categoryColor: post.categories[0]?.color || '#3B82F6',
-    author: 'TechFrontier Team',
+    author: 'TechBlog USA Team',
     publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
     image: post.coverImage || `https://source.unsplash.com/800x600/?technology,${post.categories[0]?.slug || 'tech'}`,
     contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
@@ -54,11 +54,11 @@ export default async function HomePage() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main id="main-content" className="flex-1">
-        {/* Hero Section - TechFrontier Slogan */}
+        {/* Hero Section - TechBlog USA Slogan */}
         <div className="border-b bg-gradient-to-r from-blue-50 to-teal-50 dark:from-blue-950/20 dark:to-teal-950/20">
           <div className="container py-8 text-center">
             <h1 className="mb-2 text-3xl font-bold tracking-tight md:text-4xl">
-              TechFrontier
+              TechBlog USA
             </h1>
             <p className="text-lg text-muted-foreground md:text-xl">
               Exploring Tomorrow&apos;s Tech, Today

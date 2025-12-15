@@ -29,10 +29,10 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   }
 
   return {
-    title: `${category.label} - TechFrontier`,
+    title: `${category.label} - TechBlog USA`,
     description: category.description,
     openGraph: {
-      title: `${category.label} - TechFrontier`,
+      title: `${category.label} - TechBlog USA`,
       description: category.description,
     },
   }

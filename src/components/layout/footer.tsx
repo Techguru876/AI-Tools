@@ -96,13 +96,13 @@ export function Footer() {
               <div className="relative h-10 w-10 flex-shrink-0">
                 <Image
                   src={resolvedTheme === 'dark' ? '/logos/header/tech_frontier_white.svg' : '/logos/header/tech_frontier.svg'}
-                  alt="TechFrontier"
+                  alt="TechBlog USA"
                   width={40}
                   height={40}
                   className="h-10 w-10"
                 />
               </div>
-              <span className="text-xl font-bold">TechFrontier</span>
+              <span className="text-xl font-bold">TechBlog USA</span>
             </Link>
             <p className="mb-2 text-xs italic text-muted-foreground">
               Exploring Tomorrow&apos;s Tech, Today
@@ -154,7 +154,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-sm text-muted-foreground md:flex-row">
           <p>
-            © {new Date().getFullYear()} TechFrontier. All rights reserved.
+            © {new Date().getFullYear()} TechBlog USA. All rights reserved.
           </p>
           <p className="text-center md:text-right">
             Built with Next.js • Powered by AI

@@ -75,12 +75,12 @@ export function Header() {
               </Button>
             </div>
 
-            {/* TechFrontier Logo */}
+            {/* TechBlog USA Logo */}
             <Link href="/" className="flex items-center space-x-3">
               <div className="relative h-10 w-10 flex-shrink-0">
                 <Image
                   src={resolvedTheme === 'dark' ? '/logos/header/tech_frontier_white.svg' : '/logos/header/tech_frontier.svg'}
-                  alt="TechFrontier"
+                  alt="TechBlog USA"
                   width={40}
                   height={40}
                   className="h-10 w-10"
@@ -88,7 +88,7 @@ export function Header() {
                 />
               </div>
               <div className="hidden flex-col sm:flex">
-                <span className="text-xl font-bold leading-tight">TechFrontier</span>
+                <span className="text-xl font-bold leading-tight">TechBlog USA</span>
                 <span className="text-[10px] leading-tight text-muted-foreground">
                   Exploring Tomorrow&apos;s Tech, Today
                 </span>
