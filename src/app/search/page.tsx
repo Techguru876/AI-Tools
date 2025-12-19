@@ -10,13 +10,14 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     q?: string
-  }
+  }>
 }
 
 export async function generateMetadata({ searchParams }: SearchPageProps) {
-  const query = searchParams.q || ''
+  const params = await searchParams
+  const query = params.q || ''
 
   return {
     title: query ? `Search results for "${query}" - TechBlog USA` : 'Search - TechBlog USA',
@@ -25,7 +26,8 @@ export async function generateMetadata({ searchParams }: SearchPageProps) {
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = searchParams.q || ''
+  const params = await searchParams
+  const query = params.q || ''
 
   // Query database for matching articles
   const posts = query
