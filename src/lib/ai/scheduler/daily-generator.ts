@@ -8,8 +8,6 @@ import { ai, z } from '../genkit'
 import { getCategoriesNeedingContent, recordGeneration, getRemainingQuota } from './quota-tracker'
 import { getRAGContext } from '../rag'
 import { db } from '@/lib/db'
-import { firestore, COLLECTIONS } from '../config/firebase-admin'
-import { FieldValue } from 'firebase-admin/firestore'
 
 export interface GenerationResult {
     category: string
@@ -130,14 +128,7 @@ Respond only in JSON: {"keywords": ["..."], "metaDescription": "150 char descrip
         await recordGeneration(category)
 
         // Log the generation
-        await firestore.collection(COLLECTIONS.GENERATION_LOGS).add({
-            category,
-            postId: post.id,
-            title: post.title,
-            topic: articleTopic,
-            success: true,
-            createdAt: FieldValue.serverTimestamp(),
-        })
+        console.log(`[DailyGenerator] Generated: ${post.title} (${category})`)
 
         return {
             category,
@@ -149,13 +140,7 @@ Respond only in JSON: {"keywords": ["..."], "metaDescription": "150 char descrip
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
         // Log the failure
-        await firestore.collection(COLLECTIONS.GENERATION_LOGS).add({
-            category,
-            topic,
-            success: false,
-            error: errorMessage,
-            createdAt: FieldValue.serverTimestamp(),
-        })
+        console.error(`[DailyGenerator] Failed: ${category} - ${errorMessage}`)
 
         return {
             category,
