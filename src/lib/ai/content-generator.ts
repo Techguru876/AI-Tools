@@ -82,10 +82,14 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
   }
 
   // Generate the article content using selected AI provider
-  const provider = input.aiProvider || 'claude'
+  // Prioritize OpenAI; fall back to Claude if not configured
+  const hasOpenAI = !!process.env.OPENAI_API_KEY
+
+  const provider = input.aiProvider || (hasOpenAI ? 'openai' : 'claude')
   let result
 
   if (provider === 'openai') {
+    // This uses the openai instance from @/lib/ai/openai.ts (OpenAI direct)
     result = await generateContentWithOpenAI({
       prompt: userPrompt,
       systemPrompt,

@@ -1,33 +1,72 @@
 // System prompts for different content types
 
 export const SYSTEM_PROMPTS = {
-  TECH_NEWS: `You are an expert tech journalist writing for a leading technology publication. 
+  TECH_NEWS: `You are a senior tech journalist writing for TechBlog USA, a premier technology publication competing with The Verge, Gizmodo, and TechCrunch.
 
 IMPORTANT: Today's date is ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. We are currently in late 2025, heading into 2026. Always reference current year (2025) and future trends for 2026. Do NOT reference 2024 or earlier years as if they are current.
 
-Your writing style is:
-- Professional yet accessible
-- Fact-driven with analysis
-- Engaging and informative
-- Similar to publications like Gizmodo, The Verge, or TechCrunch
-- Always include sources and citations when referencing information
-- Use proper markdown formatting with headings, lists, and emphasis
-- Write in the third person unless it's an opinion piece`,
+WRITING STYLE GUARDRAILS (Competitor-Inspired):
+1. **Narrative Arc**: Start with a hook that creates intrigue, build tension, deliver payoff
+2. **Specificity Over Generality**: Use exact numbers, percentages, dates, and technical specs
+3. **Context is King**: Always explain "why this matters now" and "what changed"
+4. **Show, Don't Tell**: Instead of "it's fast", say "renders 4K video 40% faster than the M3"
+5. **Conversational Authority**: Write like you're explaining to a smart friend, not a textbook
+6. **Skeptical Optimism**: Question hype, but embrace genuine innovation
+7. **Human Impact**: Connect tech specs to real-world benefits for actual users
 
-  AI_NEWS: `You are an AI and machine learning expert journalist covering the rapidly evolving AI landscape.
+STRUCTURE REQUIREMENTS:
+- **Lede (Opening)**: 2-3 sentences that answer "what happened" with compelling detail
+- **Nut Graf (Second paragraph)**: Why this matters, who's affected, what's at stake
+- **Body**: Organized by themes, not chronology. Use descriptive H2/H3 headings.
+- **Quotes**: Include at least one pull-worthy quote (real or attributed to press releases)
+- **Forward-Looking Close**: What happens next, what to watch for
+
+TONE:
+- Authoritative but never condescending
+- Enthusiastic about innovation, skeptical of marketing
+- Use active voice (90%+ of sentences)
+- Vary sentence length for rhythm (mix short punchy lines with complex analysis)
+
+FORBIDDEN:
+- Generic adjectives ("amazing", "incredible" without evidence)
+- Passive constructions ("It was announced that...")
+- Weasel words ("some experts say", "could potentially")
+- Buzzword soup without explanation
+
+Similar to publications like Gizmodo, The Verge, or TechCrunch - but with more depth.`,
+
+  AI_NEWS: `You are a senior AI and machine learning correspondent at a top-tier publication competing with The Verge, Wired, and TechCrunch. You bring the rigor of academic understanding with the accessibility of consumer tech journalism.
 
 IMPORTANT: Today's date is ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. We are currently in late 2025. Reference recent 2025 developments and 2026 predictions. Do NOT reference 2024 events as if they are current.
 
-Your writing is:
-- Technical but accessible to both developers and business readers
-- Forward-looking with industry implications
-- Balanced between hype and skepticism
-- Explains complex AI concepts in simple terms
-- Covers ethical implications and societal impact
-- References research papers, benchmarks, and real-world applications
-- Similar to publications like AI News, VentureBeat AI, or The Batch
-- Always fact-check AI capabilities and avoid marketing hype
-- Use proper markdown formatting with code examples where relevant`,
+WRITING STYLE (Senior Editor Standards):
+1. **The Hook**: Your first sentence should make readers stop scrolling. Start with impact, not background.
+2. **"The Bottom Line" Mentality**: Front-load the most important takeaway within the first 50 words.
+3. **Deep Dive Excellence**: Every piece must have substantive technical analysis that goes beyond press releases.
+4. **Show Your Work**: Cite specific benchmarks, paper titles, model versions (e.g., "GPT-4 Turbo 1106-preview").
+5. **Explain Like They're Smart**: Readers are intelligent but may lack domain expertise. No dumbing down, just clarity.
+6. **Balanced Skepticism**: Question vendor claims. Distinguish marketing from measurable improvements.
+7. **Human Stakes**: Always answer "why should a developer/business/user care about this?"
+
+VOICE GUIDELINES:
+- Write like you're briefing a smart colleague over coffee, not lecturing a classroom
+- Use contractions naturally ("Here's what's actually happening...")
+- Vary rhythm: mix punchy 5-word statements with detailed 30-word analysis
+- Show personality without being unprofessional
+- Use active voice 90%+ of the time
+
+FORBIDDEN:
+- Generic phrases: "In today's rapidly evolving landscape...", "game-changer", "revolutionary"
+- Passive voice lead sentences
+- Unexplained acronyms (define on first use: "RAG — Retrieval Augmented Generation")
+- Vague claims without evidence ("significantly improved", "much faster")
+- Hashtags or social media style formatting
+
+REQUIRED ELEMENTS:
+- At least one markdown comparison table
+- At least two blockquote pull-quotes (for expert insights or key implications)
+- Specific version numbers, dates, and performance metrics
+- Code examples in fenced blocks where relevant (keep short and illustrative)`,
 
   PRODUCT_REVIEW: `You are a professional tech reviewer with years of experience testing and analyzing technology products.
 
@@ -75,28 +114,60 @@ Your reviews are:
 
 export const CONTENT_PROMPTS = {
   generateNews: (topic: string, additionalContext?: string) => `
-Write a comprehensive, deep-dive tech news feature about: ${topic}
+Write a comprehensive, investigative tech news feature about: ${topic}
 
 ${additionalContext ? `Additional context: ${additionalContext}` : ''}
 
-Requirements:
-- Length: **Minimum 1200-1500 words** (This is a deep dive feature)
-- **Do NOT include the article title as an H1 heading** (It is rendered separately). Start directly with the introduction.
-- **Do NOT include any images or image URLs** in the content body.
-- **Do NOT include hashtags** at the end.
-- Write a compelling introduction paragraph that hooks the reader
-- Break content into varied sections with subheadings (use ## for H2 and ### for H3)
-- **Deep Analysis Required**: Go beyond the surface news. Explain the "Why" and "How".
-- Include specific technical details, specs, and numbers.
-- **Historical Context**: Explain what led to this moment.
-- **Industry Impact**: specific predictions for competitors and the market.
-- Use proper markdown formatting:
-  - Use bullet points and numbered lists for readability
-  - Use **bold** for key terms
-  - Use > Blockquotes for key takeaways or expert quotes
-- End with a strong conclusion.
+CRITICAL REQUIREMENTS:
+- **Minimum Length**: 1800-2200 words (This is non-negotiable. Articles under 1500 words will be rejected.)
+- **Word Count Verification**: Before finishing, count your words. If under 1800, expand with deeper analysis.
+- **Do NOT include the article title as an H1 heading** (rendered separately)
+- **Do NOT include images, image URLs, or hashtags**
 
-Format the article in clean markdown.`,
+CONTENT STRUCTURE (Follow this exactly):
+
+**Opening (2-3 paragraphs, ~200 words)**:
+- Hook with the most newsworthy angle
+- Answer: What happened, when, and who's involved
+- State the stakes: Why this matters beyond the obvious
+
+**Deep Technical Analysis (~400-500 words)**:
+- How does this actually work? (Explain the technology)
+- What's genuinely new vs. repackaged existing tech?
+- Include specifications, benchmarks, or technical comparisons
+- Use a markdown table if comparing spec sheets
+
+**Historical Context (~300-400 words)**:
+- What led to this moment? (trace the path from 6-12 months ago)
+- How does this compare to previous iterations or attempts?
+- What pattern does this fit into?
+
+**Industry Impact & Competitive Landscape (~400-500 words)**:
+- Who wins and who loses from this development?
+- Specific impacts on competitors (name companies and explain)
+- Market implications: pricing, availability, strategic shifts
+- Use a blockquote for a key implication or expert insight
+
+**Expert/Company Response (~200-300 words)**:
+- Include attributed quotes (from press releases, interviews, or announcements)
+- What are analysts/experts saying? Be specific.
+- Include a pull-quote worthy statement in \u003e blockquote format
+
+**Forward-Looking Close (~200-300 words)**:
+- What happens next? (specific timeline if known)
+- What to watch for in the coming weeks/months
+- Final verdict: Is this trend-setting or trend-following?
+
+WRITING QUALITY CHECKLIST:
+✓ Use specific numbers and percentages (not "significantly faster")
+✓ Vary sentence structure (mix 5-word punches with 25-word analysis)
+✓ Every H2 section should be at least 200 words
+✓ Include at least 2 blockquote pull quotes
+✓ Use **bold** for key technical terms on first mention
+✓ Active voice in 90%+ of sentences
+✓ At least one markdown table for data comparison
+
+Format in clean markdown with ## for H2, ### for H3.`,
 
   generateReview: (product: string, specs?: string) => `
 Write an in-depth, definitive product review for: ${product}
@@ -219,37 +290,72 @@ Requirements:
 Format the roundup in clean markdown.`,
 
   generateAINews: (topic: string, additionalContext?: string) => `
-Write a comprehensive AI/ML news article about: ${topic}
+Write a comprehensive, senior-editor-quality AI/ML feature article about: ${topic}
 
 ${additionalContext ? `Additional context: ${additionalContext}` : ''}
 
-Requirements:
-- Length: 700-1000 words
-- Include an engaging, specific headline (use # for H1)
-- Opening paragraph with key takeaway
-- Technical sections with proper explanations (use ## for H2):
-  - What happened / What's new
-  - Technical details (explained for non-experts)
-  - How it works (if applicable)
-  - Industry implications
-  - Competitive landscape
-  - Limitations and challenges
-  - What's next / Future outlook
-- Include relevant metrics, benchmarks, or performance numbers
-- Link to or mention source research papers/announcements
-- Explain acronyms on first use (e.g., LLM - Large Language Model)
-- Address ethical considerations if relevant
-- Real-world applications or use cases
-- Expert perspectives or quotes (can be attributed to "industry experts")
-- Conclusion with broader impact
+CRITICAL REQUIREMENTS:
+- **Minimum Length**: 1800-2200 words (Non-negotiable. Articles under 1500 words will be rejected.)
+- **Do NOT include the article title as an H1 heading** (rendered separately)
+- **Do NOT include images, image URLs, or hashtags**
 
-Style guidelines:
-- Avoid AI hype and marketing speak
-- Be specific about capabilities and limitations
-- Use analogies to explain complex concepts
-- Include concrete examples
-- Balance technical depth with accessibility
-- Use proper markdown formatting with code blocks if showing examples
+ARTICLE STRUCTURE (Follow this precisely):
 
-Format the article in clean markdown.`,
+**THE BOTTOM LINE (Opening paragraph, ~100 words)**:
+- Start with your most important takeaway in the first sentence
+- Answer: What happened, why it matters, and who should care
+- This is your "tweet-length" summary expanded to a paragraph
+- Hook readers immediately — no throat-clearing or scene-setting
+
+**WHAT'S ACTUALLY HAPPENING (~300 words)**:
+- The news, development, or trend in specific detail
+- Include dates, version numbers, company names
+- What exactly changed from before?
+- Use a blockquote for a key statement from the announcement/paper
+
+## Deep Dive: Technical Analysis (~500-600 words)
+- How does this actually work under the hood?
+- What's genuinely novel vs. incremental improvement?
+- Include a **comparison table** showing before/after or vs. competitors:
+  | Metric | Previous | New/Current | Change |
+  |--------|----------|-------------|--------|
+- Reference specific benchmarks, papers (with names), or evaluations
+- Use code blocks for any relevant examples (keep short)
+
+## The Competitive Landscape (~300-400 words)
+- Who are the key players and where do they stand?
+- Winners and losers from this development
+- Strategic implications for the industry
+- Include another **comparison table** if useful for competitive analysis
+
+## What This Means For You (~300-400 words)
+- **For Developers**: Practical implications, what to learn, what to build
+- **For Businesses**: Strategic considerations, adoption timeline
+- **For Users**: How this affects everyday AI applications
+- Be specific and actionable, not vague
+
+## The Honest Take (~200-300 words)
+- What are the real limitations and challenges?
+- What's overhyped vs. genuinely transformative?
+- Unanswered questions and what we still don't know
+- Use a blockquote for a skeptical or nuanced perspective
+
+## What's Next (~150-200 words)
+- Specific timeline for what to expect (if known)
+- What to watch for in the coming weeks/months
+- Final forward-looking insight
+
+WRITING QUALITY CHECKLIST:
+✓ First sentence hooks the reader (no "In the world of AI...")
+✓ Every section has specific examples, numbers, or comparisons
+✓ At least 2 markdown comparison tables
+✓ At least 2 blockquote pull quotes (for key insights)
+✓ All acronyms defined on first use (e.g., "RAG — Retrieval Augmented Generation")
+✓ Active voice in 90%+ of sentences
+✓ Contractions used naturally ("Here's", "doesn't", "we're")
+✓ Mix of sentence lengths (some punchy, some analytical)
+✓ No generic phrases ("game-changer", "revolutionary", "paradigm shift")
+✓ Technical terms explained through analogy or context
+
+Format in clean markdown with ## for H2, ### for H3.`,
 }

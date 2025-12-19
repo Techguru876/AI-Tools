@@ -1,10 +1,17 @@
 import OpenAI from 'openai'
-import { env } from '@/lib/env'
 
-// Initialize OpenAI client (optional - only if API key is provided)
-export const openai = env.OPENAI_API_KEY
+// Initialize OpenAI client (OpenAI only)
+const openaiKey = process.env.OPENAI_API_KEY
+
+if (openaiKey) {
+  console.log('[AI] Initialized with OpenAI API')
+} else {
+  console.warn('[AI] No API key found. Set OPENAI_API_KEY in .env.local')
+}
+
+export const openai = openaiKey
   ? new OpenAI({
-    apiKey: env.OPENAI_API_KEY,
+    apiKey: openaiKey,
   })
   : null
 
@@ -36,9 +43,11 @@ export async function generateContentWithOpenAI(
     throw new Error('OpenAI API key not configured')
   }
 
+  const defaultModel = 'gpt-4o-mini'
+
   const {
     prompt,
-    model = 'gpt-5.2',
+    model = defaultModel,
     temperature = 0.7,
     maxTokens = 4000,
     systemPrompt,
@@ -58,12 +67,14 @@ export async function generateContentWithOpenAI(
     content: prompt,
   })
 
-  const completion = await openai.chat.completions.create({
+  const completionParams: any = {
     model,
     messages,
-    temperature,
     max_tokens: maxTokens,
-  })
+    temperature,
+  }
+
+  const completion = await openai.chat.completions.create(completionParams)
 
   const content = completion.choices[0]?.message?.content
   if (!content) {
