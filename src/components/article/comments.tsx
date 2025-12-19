@@ -16,7 +16,7 @@ interface CommentsProps {
     postId: string
 }
 
-export function Comments({ postId }: Comm entsProps) {
+export function Comments({ postId }: CommentsProps) {
     const [comments, setComments] = useState<Comment[]>([])
     const [newComment, setNewComment] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
