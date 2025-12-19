@@ -14,6 +14,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeRaw from 'rehype-raw'
 import { TableOfContents } from '@/components/article/table-of-contents'
 
 // Force dynamic rendering - prevents build-time database queries
@@ -225,13 +226,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Article Content */}
           <div className="article-content mx-auto max-w-[680px]">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSlug, rehypeAutolinkHeadings]}
-              className="prose prose-lg dark:prose-invert max-w-none"
-            >
-              {post.content}
-            </ReactMarkdown>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw, rehypeSlug, rehypeAutolinkHeadings]}
+              >
+                {post.content}
+              </ReactMarkdown>
+            </div>
           </div>
 
           {/* Author Bio */}
@@ -267,7 +269,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 {post.tags.map((tag) => (
                   <Link key={tag.slug} href={`/topics/${tag.slug}`}>
                     <Badge variant="outline" className="hover:bg-accent">
-                      #{tag.name}
+                      {tag.name}
                     </Badge>
                   </Link>
                 ))}
