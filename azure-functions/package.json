@@ -1,0 +1,19 @@
+{
+    "name": "techblog-azure-functions",
+    "version": "1.0.0",
+    "description": "Azure Functions for TechBlog scheduled content generation",
+    "main": "dist/ContentGenerator/index.js",
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "start": "func start",
+        "deploy": "npm run build && func azure functionapp publish techblogusa"
+    },
+    "dependencies": {
+        "@azure/functions": "^4.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.0",
+        "@types/node": "^20.0.0"
+    }
+}
