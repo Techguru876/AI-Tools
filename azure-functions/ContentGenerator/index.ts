@@ -41,7 +41,7 @@ async function contentGenerator(myTimer: Timer, context: InvocationContext): Pro
         const result = await response.json()
 
         context.log('[ContentGenerator] Generation complete:', JSON.stringify(result, null, 2))
-        context.log(`[ContentGenerator] Generated ${result.generated?.length || 0} articles`)
+        context.log(`[ContentGenerator] Generated ${result.totalGenerated || 0} articles`)
 
     } catch (error) {
         context.error('[ContentGenerator] Failed:', error)
