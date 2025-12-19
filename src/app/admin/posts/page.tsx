@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Edit, Eye, Trash2 } from 'lucide-react'
 
+// Force dynamic rendering - admin pages need database access
+export const dynamic = 'force-dynamic'
+
 export default async function PostsPage() {
     const posts = await db.post.findMany({
         orderBy: { createdAt: 'desc' },

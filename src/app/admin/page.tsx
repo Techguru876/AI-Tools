@@ -3,6 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FileText, Users, Eye, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
+// Force dynamic rendering - admin pages need database access
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard() {
   // Fetch real stats from database
   const [postCount, userCount, totalViews, recentPosts] = await Promise.all([

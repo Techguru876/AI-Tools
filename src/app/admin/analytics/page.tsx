@@ -2,6 +2,9 @@ import { db } from '@/lib/db'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart3, TrendingUp, Eye, FileText } from 'lucide-react'
 
+// Force dynamic rendering - admin pages need database access
+export const dynamic = 'force-dynamic'
+
 export default async function AnalyticsPage() {
     // Fetch real analytics from database
     const [postCount, totalViews, topPosts] = await Promise.all([
