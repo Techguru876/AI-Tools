@@ -5,13 +5,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { blogManagerFlow, contentPipelineFlow } from '@/lib/ai/flows'
+
+// Force dynamic rendering to avoid build-time initialization
+export const dynamic = 'force-dynamic'
 
 // POST /api/agent - Send instructions to the agent
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
         const { action, instruction, ...params } = body
+
+        // Dynamic import to avoid build-time Genkit initialization
+        const { blogManagerFlow, contentPipelineFlow } = await import('@/lib/ai/flows')
 
         // Route to appropriate flow based on action type
         switch (action) {
@@ -109,3 +114,4 @@ export async function GET() {
         },
     })
 }
+

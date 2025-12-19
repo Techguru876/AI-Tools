@@ -6,8 +6,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { runDailyGeneration } from '@/lib/ai/scheduler'
-import { getAllCategoryQuotas } from '@/lib/ai/scheduler/quota-tracker'
+
+// Force dynamic rendering to avoid build-time initialization
+export const dynamic = 'force-dynamic'
 
 // Verify cron secret to prevent unauthorized access
 function verifyCronSecret(request: NextRequest): boolean {
@@ -25,6 +26,8 @@ function verifyCronSecret(request: NextRequest): boolean {
 // GET /api/cron - Check quota status
 export async function GET(request: NextRequest) {
     try {
+        // Dynamic import to avoid build-time initialization
+        const { getAllCategoryQuotas } = await import('@/lib/ai/scheduler/quota-tracker')
         const quotas = await getAllCategoryQuotas()
 
         return NextResponse.json({
@@ -57,6 +60,8 @@ export async function POST(request: NextRequest) {
 
         console.log(`[CRON] Starting daily generation with max ${maxArticles} articles`)
 
+        // Dynamic import to avoid build-time initialization
+        const { runDailyGeneration } = await import('@/lib/ai/scheduler')
         const result = await runDailyGeneration()
 
         console.log(`[CRON] Generated ${result.totalGenerated} articles`)
@@ -79,3 +84,4 @@ export async function POST(request: NextRequest) {
         )
     }
 }
+
