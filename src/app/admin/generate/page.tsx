@@ -2,358 +2,307 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
-import { Sparkles, Loader2, Save, Send } from 'lucide-react'
+import { Loader2, Sparkles, Check, AlertCircle } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
-const CATEGORIES = [
-  { slug: 'tech', label: 'Tech' },
-  { slug: 'science', label: 'Science' },
-  { slug: 'culture', label: 'Culture' },
-  { slug: 'reviews', label: 'Reviews' },
-  { slug: 'deals', label: 'Deals' },
-  { slug: 'ai-news', label: 'AI News' },
-]
+export default function AdminGeneratePage() {
+  const [contentType, setContentType] = useState<'NEWS' | 'REVIEW' | 'FEATURE'>('NEWS')
+  const [topic, setTopic] = useState('')
+  const [context, setContext] = useState('')
+  const [category, setCategory] = useState('tech')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [generatedArticle, setGeneratedArticle] = useState<any>(null)
+  const [error, setError] = useState('')
 
-export default function AIGeneratorPage() {
-  const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [generated, setGenerated] = useState<any>(null)
-  const { toast } = useToast()
+  const LEGACY_ARTICLES = [
+    { title: 'Apple M4 Pro Chip', slug: 'apple-m4-pro-chip-ai-december-2025', context: 'Focus on 40% AI performance boost, new Neural Engine, 3nm process. Competes with Snapdragon X Elite.' },
+    { title: 'OpenAI GPT-5 Launch', slug: 'openai-gpt5-launch-december-2025', context: 'Features Q* reasoning, 1M token context, self-correction. Competes with Claude 3.5 Opus.' },
+    { title: 'Meta Llama 4', slug: 'meta-llama-4-release-december-2025', context: 'Open source, 405B params, beats GPT-4o on coding. Challenges proprietary models.' },
+    { title: 'Samsung S25 Ultra', slug: 'samsung-s25-ultra-review-december-2025', context: 'Titanium frame, 200MP camera, Snapdragon 8 Gen 4, Galaxy AI 2.0.' },
+    { title: 'MacBook Pro M4', slug: 'macbook-pro-m4-2025-review', context: 'M4 Max chip, Tandem OLED, 22-hour battery, Thunderbolt 5.' },
+    { title: 'Google Algorithm Update', slug: 'google-algorithm-update-ai-content-december-2025', context: 'Targets low-quality AI content, rewards first-hand experience.' },
+    { title: 'Microsoft Copilot', slug: 'microsoft-copilot-december-2025-update', context: 'Deep OS integration, Copilot Studio, Excel Python.' },
+    { title: 'NASA Mars Water', slug: 'nasa-mars-water-discovery-december-2025', context: 'Liquid water confirmed 3-5km beneath surface.' },
+    { title: 'Fusion Energy', slug: 'fusion-energy-breakthrough-december-2025', context: 'Net gain achieved at NIF for third time. 4.1MJ output.' },
+    { title: '2026 Games Preview', slug: 'most-anticipated-games-2026-december-2025', context: 'GTA VI, Elder Scrolls VI, Switch 2 launch titles.' },
+    { title: 'Netflix New Releases', slug: 'netflix-december-2025-new-releases', context: 'Squid Game S3, Witcher S4, Electric State.' },
+    { title: 'Tech Deals', slug: 'december-2025-tech-deals-black-friday', context: 'Extended Black Friday deals on M3 MacBook Air, PS5 Pro.' },
+  ]
 
-  const [formData, setFormData] = useState({
-    type: 'ARTICLE',
-    topic: '',
-    additionalContext: '',
-    specifications: '',
-    product1: '',
-    product2: '',
-    aiProvider: 'claude',
-    categorySlug: 'tech',
-  })
+  const loadPreset = (preset: typeof LEGACY_ARTICLES[0]) => {
+    setTopic(preset.title)
+    setContext(preset.context)
+    // We can't easily force the slug in this form without adding a slug field, 
+    // but the AI usually generates a close enough title. 
+    // Ideally we'd modify the generation API to accept a specific slug to update.
+  }
+
 
   const handleGenerate = async () => {
-    if (!formData.topic) {
-      toast({
-        title: 'Error',
-        description: 'Please enter a topic',
-        variant: 'destructive',
-      })
+    if (!topic.trim()) {
+      setError('Please enter a topic')
       return
     }
 
-    setLoading(true)
-    setGenerated(null)
+    setIsGenerating(true)
+    setError('')
+    setGeneratedArticle(null)
 
     try {
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to generate content')
-      }
-
-      const data = await response.json()
-      setGenerated(data)
-
-      toast({
-        title: 'Success!',
-        description: 'Content generated successfully',
-      })
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to generate content. Please try again.',
-        variant: 'destructive',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSave = async (status: 'DRAFT' | 'PUBLISHED') => {
-    if (!generated) return
-
-    setSaving(true)
-
-    try {
-      const response = await fetch('/api/posts/save', {
+      const response = await fetch('/api/admin/generate-content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: generated.title,
-          content: generated.content,
-          excerpt: generated.excerpt,
-          slug: generated.slug,
-          keywords: generated.keywords,
-          metaDescription: generated.metaDescription,
-          contentType: formData.type,
-          status,
-          categorySlug: formData.categorySlug,
+          type: contentType,
+          topic: topic.trim(),
+          additionalContext: context.trim() || undefined,
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to save')
+        throw new Error(data.error || 'Generation failed')
       }
 
-      toast({
-        title: status === 'PUBLISHED' ? 'Published!' : 'Saved as Draft!',
-        description: `Article "${generated.title}" has been ${status === 'PUBLISHED' ? 'published' : 'saved as draft'}.`,
-      })
-
-      // Reset form after successful save
-      setGenerated(null)
-      setFormData({
-        ...formData,
-        topic: '',
-        additionalContext: '',
-        specifications: '',
-        product1: '',
-        product2: '',
-      })
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to save article. Please try again.',
-        variant: 'destructive',
-      })
+      setGeneratedArticle(data)
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate article. Please try again.')
+      console.error(err)
     } finally {
-      setSaving(false)
+      setIsGenerating(false)
     }
   }
 
+  const handlePublish = async () => {
+    if (!generatedArticle) return
+
+    setIsPublishing(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/admin/publish-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...generatedArticle,
+          categorySlug: category,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Publishing failed')
+      }
+
+      const published = await response.json()
+      alert(`✅ Article published! View at: /${category}/${published.slug}`)
+
+      // Reset form
+      setTopic('')
+      setContext('')
+      setGeneratedArticle(null)
+    } catch (err) {
+      setError('Failed to publish article')
+      console.error(err)
+    } finally {
+      setIsPublishing(false)
+    }
+  }
+
+  const wordCount = generatedArticle?.content?.split(/\s+/).length || 0
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold">AI Content Generator</h2>
-        <p className="text-muted-foreground">
-          Generate high-quality tech articles using AI and save them to the database
-        </p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-7xl py-12">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold">Generate Article</h1>
+          <p className="text-muted-foreground mt-2">
+            AI-powered content generation with enhanced prompts (1800-2200 words)
+          </p>
+        </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Input Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Content Parameters</CardTitle>
-            <CardDescription>Configure what you want to generate</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="type">Content Type</Label>
-                <select
-                  id="type"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                >
-                  <option value="ARTICLE">Article</option>
-                  <option value="NEWS">Tech News</option>
-                  <option value="AI_NEWS">AI News</option>
-                  <option value="REVIEW">Product Review</option>
-                  <option value="GUIDE">How-to Guide</option>
-                  <option value="COMPARISON">Comparison</option>
-                  <option value="ROUNDUP">Best Of Roundup</option>
-                </select>
-              </div>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Left Column: Form */}
+          <div className="space-y-6">
+            <div className="rounded-lg border bg-card p-6">
+              <h2 className="text-xl font-semibold mb-4">Article Details</h2>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <select
-                  id="category"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={formData.categorySlug}
-                  onChange={(e) => setFormData({ ...formData, categorySlug: e.target.value })}
-                >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.slug} value={cat.slug}>
-                      {cat.label}
-                    </option>
+              {/* Content Type */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Content Type</label>
+                <div className="flex gap-2">
+                  {(['NEWS', 'REVIEW', 'FEATURE'] as const).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setContentType(type)}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${contentType === type
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'hover:bg-muted'
+                        }`}
+                    >
+                      {type}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="aiProvider">AI Provider</Label>
-              <select
-                id="aiProvider"
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
-                value={formData.aiProvider}
-                onChange={(e) => setFormData({ ...formData, aiProvider: e.target.value })}
-              >
-                <option value="claude">Claude (Anthropic)</option>
-                <option value="openai">GPT-4 (OpenAI)</option>
-              </select>
-              <p className="text-xs text-muted-foreground">
-                Claude is recommended for tech content. GPT-4 is faster but may be less detailed.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="topic">Topic *</Label>
-              <Input
-                id="topic"
-                placeholder="e.g., iPhone 15 Pro Max"
-                value={formData.topic}
-                onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-              />
-            </div>
-
-            {formData.type === 'COMPARISON' && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="product1">Product 1</Label>
-                  <Input
-                    id="product1"
-                    placeholder="e.g., iPhone 15 Pro"
-                    value={formData.product1}
-                    onChange={(e) => setFormData({ ...formData, product1: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="product2">Product 2</Label>
-                  <Input
-                    id="product2"
-                    placeholder="e.g., Samsung Galaxy S24"
-                    value={formData.product2}
-                    onChange={(e) => setFormData({ ...formData, product2: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="context">Additional Context (Optional)</Label>
-              <Textarea
-                id="context"
-                placeholder="Any specific details, requirements, or context..."
-                value={formData.additionalContext}
-                onChange={(e) => setFormData({ ...formData, additionalContext: e.target.value })}
-                rows={3}
-              />
-            </div>
-
-            {formData.type === 'REVIEW' && (
-              <div className="space-y-2">
-                <Label htmlFor="specs">Product Specifications (Optional)</Label>
-                <Textarea
-                  id="specs"
-                  placeholder="Key specs to include in the review..."
-                  value={formData.specifications}
-                  onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
-                  rows={3}
+              {/* Topic */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Topic / Title <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="e.g., Apple M4 Pro chip announcement"
+                  className="w-full rounded-lg border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
-            )}
 
-            <Button onClick={handleGenerate} disabled={loading} className="w-full">
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate Content
-                </>
+              {/* Context */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Additional Context (Optional)
+                </label>
+                <textarea
+                  value={context}
+                  onChange={(e) => setContext(e.target.value)}
+                  placeholder="e.g., Focus on AI performance, 3nm process, competes with Snapdragon X Elite..."
+                  rows={4}
+                  className="w-full rounded-lg border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Add specific details, dates, specs, or competitors to mention
+                </p>
+              </div>
+
+              {/* Category */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full rounded-lg border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="tech">Tech</option>
+                  <option value="ai-news">AI News</option>
+                  <option value="reviews">Reviews</option>
+                  <option value="gaming">Gaming</option>
+                  <option value="deals">Deals</option>
+                </select>
+              </div>
+
+              {/* Legacy Presets */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">Populate from Legacy Article</label>
+                <div className="flex flex-wrap gap-2">
+                  {LEGACY_ARTICLES.map((article) => (
+                    <button
+                      key={article.slug}
+                      onClick={() => loadPreset(article)}
+                      className="text-xs px-3 py-1 bg-muted hover:bg-muted/80 rounded-full border transition-colors"
+                    >
+                      {article.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generate Button */}
+              <Button
+                onClick={handleGenerate}
+                disabled={isGenerating || !topic.trim()}
+                className="w-full py-6 text-lg"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Generating... (~30-60 seconds)
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-5 w-5" />
+                    Generate Article
+                  </>
+                )}
+              </Button>
+
+              {error && (
+                <div className="mt-4 rounded-lg bg-destructive/10 border border-destructive p-4 flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
               )}
-            </Button>
-          </CardContent>
-        </Card>
+            </div>
+          </div>
 
-        {/* Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Preview</CardTitle>
-            <CardDescription>Generated content will appear here</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {generated ? (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold">Title</h3>
-                  <p>{generated.title}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Slug</h3>
-                  <p className="text-sm text-muted-foreground">{generated.slug}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Excerpt</h3>
-                  <p className="text-sm text-muted-foreground">{generated.excerpt}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold">Keywords</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {generated.keywords?.map((kw: string, i: number) => (
-                      <span key={i} className="rounded bg-muted px-2 py-0.5 text-xs">
-                        {kw}
-                      </span>
-                    ))}
+          {/* Right Column: Preview */}
+          <div>
+            {generatedArticle ? (
+              <div className="rounded-lg border bg-card p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Preview</h2>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className={wordCount >= 1800 ? 'text-green-600 font-semibold' : 'text-orange-600 font-semibold'}>
+                      {wordCount.toLocaleString()} words
+                    </span>
+                    {wordCount >= 1800 && <Check className="h-5 w-5 text-green-600" />}
                   </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold">Content</h3>
-                  <div className="prose prose-sm max-h-64 overflow-y-auto rounded border p-4 dark:prose-invert">
-                    <div dangerouslySetInnerHTML={{ __html: generated.content.replace(/\n/g, '<br/>') }} />
+
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold">{generatedArticle.title}</h3>
+                  </div>
+                  <div className="text-muted-foreground">
+                    <p>{generatedArticle.excerpt}</p>
                   </div>
                 </div>
-                <div>
-                  <h3 className="mb-2 font-semibold">Token Usage</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Input: {generated.usage?.inputTokens || 0} | Output: {generated.usage?.outputTokens || 0}
-                  </p>
+
+                <div className="max-h-[500px] overflow-y-auto border rounded-lg p-4 bg-muted/20">
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {generatedArticle.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
-                <div className="flex gap-2 pt-4">
+
+                <div className="mt-6">
                   <Button
-                    onClick={() => handleSave('DRAFT')}
-                    disabled={saving}
-                    variant="outline"
-                    className="flex-1"
+                    onClick={handlePublish}
+                    disabled={isPublishing}
+                    className="w-full py-6 text-lg"
+                    variant="default"
                   >
-                    {saving ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isPublishing ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Publishing...
+                      </>
                     ) : (
-                      <Save className="mr-2 h-4 w-4" />
+                      <>
+                        <Check className="mr-2 h-5 w-5" />
+                        Publish to Website
+                      </>
                     )}
-                    Save as Draft
-                  </Button>
-                  <Button
-                    onClick={() => handleSave('PUBLISHED')}
-                    disabled={saving}
-                    className="flex-1"
-                  >
-                    {saving ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="mr-2 h-4 w-4" />
-                    )}
-                    Publish Now
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex h-96 items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <Sparkles className="mx-auto mb-4 h-12 w-12" />
-                  <p>Fill in the form and click Generate to see content here</p>
-                </div>
+              <div className="rounded-lg border border-dashed bg-muted/20 p-12 text-center">
+                <Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  {isGenerating
+                    ? 'Generating your article with AI...'
+                    : 'Fill in the form and click Generate to create an article'}
+                </p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

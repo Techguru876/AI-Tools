@@ -50,9 +50,9 @@ A comprehensive, AI-automated tech blog platform featuring automated content gen
 - **Jobs**: BullMQ
 
 ### AI & Content
-- **Content Generation**: Anthropic Claude API
+- **Content Generation**: OpenAI GPT-5 mini (default) with optional Anthropic fallback
 - **Images**: Unsplash API
-- **Embeddings**: OpenAI (optional)
+- **Embeddings**: OpenAI
 
 ### Infrastructure
 - **Hosting**: Netlify
@@ -102,7 +102,8 @@ A comprehensive, AI-automated tech blog platform featuring automated content gen
    NEXTAUTH_URL="http://localhost:3000"
 
    # AI
-   ANTHROPIC_API_KEY="your-anthropic-api-key"
+   OPENAI_API_KEY="your-openai-api-key"
+   ANTHROPIC_API_KEY="your-anthropic-api-key" # optional fallback for batch tools
 
    # Unsplash (optional)
    UNSPLASH_ACCESS_KEY="your-unsplash-key"
@@ -257,11 +258,11 @@ See `.env.example` for all available environment variables.
 ### Required Variables
 - `DATABASE_URL`: PostgreSQL connection string
 - `NEXTAUTH_SECRET`: Secret for NextAuth.js
-- `ANTHROPIC_API_KEY`: Claude AI API key
+- `OPENAI_API_KEY`: OpenAI API key for GPT-5-mini content generation
 
 ### Optional Variables
+- `ANTHROPIC_API_KEY`: Claude AI API key (fallback for batch tools)
 - `UNSPLASH_ACCESS_KEY`: For image sourcing
-- `OPENAI_API_KEY`: For embeddings and image generation
 - `STRIPE_SECRET_KEY`: For payments
 - `RESEND_API_KEY`: For email
 - `REDIS_URL`: For caching

@@ -35,6 +35,8 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
     NEXT_PUBLIC_APP_NAME: z.string().default('AI Tech Blog'),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
+    NEXT_PUBLIC_HAS_OPENAI: z.string().optional(),
+    NEXT_PUBLIC_HAS_ANTHROPIC: z.string().optional(),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -64,6 +66,8 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    NEXT_PUBLIC_HAS_OPENAI: process.env.NEXT_PUBLIC_HAS_OPENAI,
+    NEXT_PUBLIC_HAS_ANTHROPIC: process.env.NEXT_PUBLIC_HAS_ANTHROPIC,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 })

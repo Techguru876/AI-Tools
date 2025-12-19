@@ -187,6 +187,14 @@
     @apply bg-transparent p-0;
   }
 
+  .article-content strong {
+    @apply font-bold;
+  }
+
+  .article-content em {
+    @apply italic;
+  }
+
   /* Pull Quote Styling */
   .article-content blockquote {
     @apply border-l-4 border-primary pl-6 pr-4 py-4 my-8 bg-muted/30 rounded-r-lg;

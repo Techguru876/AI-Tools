@@ -107,7 +107,17 @@ NEXT_PUBLIC_APP_NAME="AI Tech Blog"
 
 ## API Keys Setup
 
-### Required: Anthropic Claude API
+### Required: OpenAI API (GPT-5-mini)
+
+1. Sign up at [https://platform.openai.com/](https://platform.openai.com/)
+2. Create an API key
+3. Add to `.env`:
+
+```env
+OPENAI_API_KEY="sk-your-openai-key"
+```
+
+### Optional: Anthropic Claude API (fallback for batch tools)
 
 1. Sign up at [https://console.anthropic.com/](https://console.anthropic.com/)
 2. Create an API key
@@ -129,18 +139,6 @@ For image sourcing:
 ```env
 UNSPLASH_ACCESS_KEY="your-access-key"
 UNSPLASH_SECRET_KEY="your-secret-key"
-```
-
-### Optional: OpenAI API
-
-For image generation and embeddings:
-
-1. Sign up at [https://platform.openai.com/](https://platform.openai.com/)
-2. Create an API key
-3. Add to `.env`:
-
-```env
-OPENAI_API_KEY="sk-your-openai-key"
 ```
 
 ### Optional: Stripe API

@@ -34,6 +34,16 @@ export async function POST(request: NextRequest) {
         const body: BatchGenerateRequest = await request.json()
         const { count = 3, topics, autoPublish = false, cronSecret } = body
 
+        const hasAnthropic = !!process.env.ANTHROPIC_API_KEY
+        const hasOpenAI = !!process.env.OPENAI_API_KEY
+
+        if (!hasAnthropic && !hasOpenAI) {
+            return NextResponse.json(
+                { error: 'No AI provider configured. Set ANTHROPIC_API_KEY or OPENAI_API_KEY.' },
+                { status: 500 }
+            )
+        }
+
         // Verify cron secret if set (for automated calls)
         if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
             // Allow if no cron secret in request (manual call from admin)
@@ -65,7 +75,7 @@ export async function POST(request: NextRequest) {
                 const generated = await generateArticle({
                     type: contentType as ContentType,
                     topic,
-                    aiProvider: 'claude',
+                    aiProvider: hasAnthropic ? 'claude' : 'openai',
                 })
 
                 // Get category

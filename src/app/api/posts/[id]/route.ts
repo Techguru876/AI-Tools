@@ -59,9 +59,26 @@ export async function PATCH(
                 }
                 break
 
+            case 'update':
+                // Handle content updates (title, excerpt, content, coverImage)
+                const { title, excerpt, content, coverImage } = body
+                updateData = {}
+                if (title !== undefined) updateData.title = title
+                if (excerpt !== undefined) updateData.excerpt = excerpt
+                if (content !== undefined) updateData.content = content
+                if (coverImage !== undefined) updateData.coverImage = coverImage
+
+                if (Object.keys(updateData).length === 0) {
+                    return NextResponse.json(
+                        { error: 'No fields to update. Provide title, excerpt, content, or coverImage.' },
+                        { status: 400 }
+                    )
+                }
+                break
+
             default:
                 return NextResponse.json(
-                    { error: 'Invalid action. Use: approve, reject, draft, or schedule' },
+                    { error: 'Invalid action. Use: approve, reject, draft, schedule, or update' },
                     { status: 400 }
                 )
         }
