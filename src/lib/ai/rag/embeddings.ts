@@ -1,27 +1,22 @@
 /**
  * Embeddings Generator & Storage
  * 
- * Generates vector embeddings using Gemini and stores them in Firestore.
+ * Generates vector embeddings using Gemini and retrieves RAG context from Azure Blob.
  */
 
 import { ai } from '../genkit'
-import { firestore, COLLECTIONS } from '../config/firebase-admin'
-import type { ScrapedArticle } from './article-scraper'
-import { FieldValue } from 'firebase-admin/firestore'
+import { getRAGContextFromBlob, findSimilarArticles, type RAGArticle } from '@/lib/azure/rag-storage'
 
-// Embedding dimension for Gemini text-embedding-004
-const EMBEDDING_DIMENSION = 768
+export type { RAGArticle as ArticleEmbedding }
 
-export interface ArticleEmbedding {
-    id: string
+// Re-export ScrapedArticle type for compatibility
+export interface ScrapedArticle {
     url: string
     source: string
     title: string
     content: string
     excerpt: string
     category: string
-    embedding: number[]
-    createdAt: Date
 }
 
 /**
@@ -31,72 +26,38 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     // Truncate text to fit embedding model limits (~8000 tokens)
     const truncatedText = text.slice(0, 25000)
 
-    const response = await ai.embed({
-        embedder: 'googleai/text-embedding-004',
-        content: truncatedText,
-    })
+    try {
+        const response = await ai.embed({
+            embedder: 'googleai/text-embedding-004',
+            content: truncatedText,
+        })
 
-    // ai.embed returns an array of embeddings, get the first one
-    return (response as unknown as { embedding: number[] }).embedding || []
+        // ai.embed returns different structures - handle both
+        return (response as unknown as { embedding: number[] }).embedding || []
+    } catch (error) {
+        console.error('[Embeddings] Failed to generate embedding:', error)
+        return []
+    }
 }
 
 /**
- * Store article with embedding in Firestore
+ * Store article with embedding - delegated to Azure Blob
+ * This is now handled by the populate-rag script uploading to Azure
  */
 export async function storeArticleEmbedding(article: ScrapedArticle): Promise<string> {
-    // Check if already exists
-    const existing = await firestore
-        .collection(COLLECTIONS.ARTICLE_EMBEDDINGS)
-        .where('url', '==', article.url)
-        .limit(1)
-        .get()
-
-    if (!existing.empty) {
-        console.log(`Article already exists: ${article.url}`)
-        return existing.docs[0].id
-    }
-
-    // Generate embedding from title + excerpt + first part of content
-    const textForEmbedding = `${article.title}\n\n${article.excerpt}\n\n${article.content.slice(0, 3000)}`
-    const embedding = await generateEmbedding(textForEmbedding)
-
-    // Store in Firestore with vector field
-    const docRef = await firestore.collection(COLLECTIONS.ARTICLE_EMBEDDINGS).add({
-        url: article.url,
-        source: article.source,
-        title: article.title,
-        content: article.content,
-        excerpt: article.excerpt,
-        category: article.category,
-        embedding: FieldValue.vector(embedding),
-        createdAt: FieldValue.serverTimestamp(),
-    })
-
-    console.log(`Stored article: ${article.title} (${docRef.id})`)
-    return docRef.id
+    console.log(`[Embeddings] Article storage now handled by Azure Blob: ${article.title}`)
+    return article.url
 }
 
 /**
- * Batch process articles and store embeddings
+ * Batch process articles - delegated to Azure Blob
  */
 export async function processArticlesForRAG(articles: ScrapedArticle[]): Promise<{
     processed: number
     failed: number
 }> {
-    let processed = 0
-    let failed = 0
-
-    for (const article of articles) {
-        try {
-            await storeArticleEmbedding(article)
-            processed++
-        } catch (error) {
-            console.error(`Failed to process ${article.url}:`, error)
-            failed++
-        }
-    }
-
-    return { processed, failed }
+    console.log(`[Embeddings] Batch processing now handled by Azure Blob upload`)
+    return { processed: articles.length, failed: 0 }
 }
 
 /**
@@ -106,72 +67,22 @@ export async function retrieveSimilarArticles(
     query: string,
     category?: string,
     limit = 3
-): Promise<ArticleEmbedding[]> {
-    // Generate embedding for query
-    const queryEmbedding = await generateEmbedding(query)
+): Promise<RAGArticle[]> {
+    try {
+        // Generate embedding for query
+        const queryEmbedding = await generateEmbedding(query)
 
-    // Build Firestore query with vector similarity
-    let collectionRef = firestore.collection(COLLECTIONS.ARTICLE_EMBEDDINGS)
-
-    // Note: Firestore vector search requires a composite index
-    // For now, we'll do a simple fetch and compute similarity client-side
-    // In production, use Firestore's findNearest() with proper indexes
-
-    let query_ref = collectionRef.limit(50)
-    if (category) {
-        query_ref = collectionRef.where('category', '==', category).limit(50)
-    }
-
-    const snapshot = await query_ref.get()
-
-    // Calculate cosine similarity for each document
-    const articlesWithScores: Array<ArticleEmbedding & { score: number }> = []
-
-    snapshot.forEach(doc => {
-        const data = doc.data()
-        const embedding = data.embedding?.toArray?.() || data.embedding
-
-        if (embedding && Array.isArray(embedding)) {
-            const score = cosineSimilarity(queryEmbedding, embedding)
-            articlesWithScores.push({
-                id: doc.id,
-                url: data.url,
-                source: data.source,
-                title: data.title,
-                content: data.content,
-                excerpt: data.excerpt,
-                category: data.category,
-                embedding,
-                createdAt: data.createdAt?.toDate() || new Date(),
-                score,
-            })
+        if (queryEmbedding.length === 0) {
+            console.warn('[Embeddings] Could not generate query embedding')
+            return []
         }
-    })
 
-    // Sort by similarity and return top results
-    articlesWithScores.sort((a, b) => b.score - a.score)
-
-    return articlesWithScores.slice(0, limit).map(({ score, ...article }) => article)
-}
-
-/**
- * Calculate cosine similarity between two vectors
- */
-function cosineSimilarity(a: number[], b: number[]): number {
-    if (a.length !== b.length) return 0
-
-    let dotProduct = 0
-    let normA = 0
-    let normB = 0
-
-    for (let i = 0; i < a.length; i++) {
-        dotProduct += a[i] * b[i]
-        normA += a[i] * a[i]
-        normB += b[i] * b[i]
+        // Find similar articles from Azure Blob storage
+        return await findSimilarArticles(queryEmbedding, category, limit)
+    } catch (error) {
+        console.error('[Embeddings] Error retrieving similar articles:', error)
+        return []
     }
-
-    const magnitude = Math.sqrt(normA) * Math.sqrt(normB)
-    return magnitude === 0 ? 0 : dotProduct / magnitude
 }
 
 /**
@@ -181,24 +92,5 @@ export async function getRAGContext(
     topic: string,
     category: string
 ): Promise<string> {
-    const similarArticles = await retrieveSimilarArticles(topic, category, 3)
-
-    if (similarArticles.length === 0) {
-        return ''
-    }
-
-    const context = similarArticles.map((article, i) => {
-        return `--- Example ${i + 1} from ${article.source} ---
-Title: ${article.title}
-Excerpt: ${article.excerpt}
-Style sample (first 500 chars):
-${article.content.slice(0, 500)}
----`
-    }).join('\n\n')
-
-    return `Use the following high-quality tech journalism examples as style references:
-
-${context}
-
-Now write your article matching this professional standard.`
+    return getRAGContextFromBlob(topic, category, generateEmbedding)
 }

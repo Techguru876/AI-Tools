@@ -2,10 +2,8 @@
  * Daily Content Quota Tracker
  * 
  * Tracks how many articles have been generated per category per day.
+ * Uses in-memory storage (quota resets when deployed).
  */
-
-import { firestore, COLLECTIONS } from '../config/firebase-admin'
-import { FieldValue } from 'firebase-admin/firestore'
 
 export interface DailyQuota {
     date: string // YYYY-MM-DD
@@ -15,6 +13,9 @@ export interface DailyQuota {
 }
 
 const DEFAULT_DAILY_TARGET = 5
+
+// In-memory quota storage
+const memoryQuotas: Map<string, DailyQuota> = new Map()
 
 /**
  * Get today's date string
@@ -41,12 +42,8 @@ export async function getRemainingQuota(category: string): Promise<{
     const today = getTodayString()
     const docId = getQuotaId(today, category)
 
-    const doc = await firestore
-        .collection(COLLECTIONS.DAILY_QUOTAS)
-        .doc(docId)
-        .get()
-
-    if (!doc.exists) {
+    const quota = memoryQuotas.get(docId)
+    if (!quota) {
         return {
             remaining: DEFAULT_DAILY_TARGET,
             generated: 0,
@@ -54,13 +51,11 @@ export async function getRemainingQuota(category: string): Promise<{
         }
     }
 
-    const data = doc.data() as DailyQuota
-    const remaining = Math.max(0, data.target - data.generated)
-
+    const remaining = Math.max(0, quota.target - quota.generated)
     return {
         remaining,
-        generated: data.generated,
-        target: data.target,
+        generated: quota.generated,
+        target: quota.target,
     }
 }
 
@@ -71,24 +66,17 @@ export async function recordGeneration(category: string): Promise<void> {
     const today = getTodayString()
     const docId = getQuotaId(today, category)
 
-    const docRef = firestore.collection(COLLECTIONS.DAILY_QUOTAS).doc(docId)
-
-    await firestore.runTransaction(async (transaction) => {
-        const doc = await transaction.get(docRef)
-
-        if (!doc.exists) {
-            transaction.set(docRef, {
-                date: today,
-                category,
-                generated: 1,
-                target: DEFAULT_DAILY_TARGET,
-            })
-        } else {
-            transaction.update(docRef, {
-                generated: FieldValue.increment(1),
-            })
-        }
-    })
+    const existing = memoryQuotas.get(docId)
+    if (!existing) {
+        memoryQuotas.set(docId, {
+            date: today,
+            category,
+            generated: 1,
+            target: DEFAULT_DAILY_TARGET,
+        })
+    } else {
+        existing.generated++
+    }
 }
 
 /**
@@ -128,12 +116,15 @@ export async function setDailyTarget(category: string, target: number): Promise<
     const today = getTodayString()
     const docId = getQuotaId(today, category)
 
-    await firestore.collection(COLLECTIONS.DAILY_QUOTAS).doc(docId).set(
-        {
+    const existing = memoryQuotas.get(docId)
+    if (existing) {
+        existing.target = target
+    } else {
+        memoryQuotas.set(docId, {
             date: today,
             category,
+            generated: 0,
             target,
-        },
-        { merge: true }
-    )
+        })
+    }
 }
