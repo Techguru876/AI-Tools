@@ -50,7 +50,14 @@ export const generateImageWithDalleTool = ai.defineTool(
                 quality: 'hd',
             })
 
-            const image = response.data[0]
+            const image = response.data?.[0]
+
+            if (!image) {
+                return {
+                    success: false,
+                    error: 'No image data returned from DALL-E',
+                }
+            }
 
             return {
                 success: true,

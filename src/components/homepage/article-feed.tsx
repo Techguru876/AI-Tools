@@ -63,7 +63,7 @@ export function ArticleFeed({ initialArticles }: ArticleFeedProps) {
 
           return (
             <div key={article.id} className={gridClass}>
-              <ArticleCard {...article} featured={cardSize === 'large'} size={cardSize} />
+              <ArticleCard {...article} featured={cardSize === 'large'} />
             </div>
           )
         })}

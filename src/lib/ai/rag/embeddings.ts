@@ -36,7 +36,8 @@ export async function generateEmbedding(text: string): Promise<number[]> {
         content: truncatedText,
     })
 
-    return response.embedding
+    // ai.embed returns an array of embeddings, get the first one
+    return (response as unknown as { embedding: number[] }).embedding || []
 }
 
 /**

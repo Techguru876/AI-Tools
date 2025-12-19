@@ -253,7 +253,7 @@ export const contentPipelineFlow = ai.defineFlow(
                         quality: 'hd',
                     })
 
-                    const tempImageUrl = imageResponse.data[0]?.url
+                    const tempImageUrl = imageResponse.data?.[0]?.url
                     console.log('[ContentPipeline] DALL-E image generated successfully')
 
                     // Upload to Azure Blob Storage for permanent URL
@@ -331,11 +331,11 @@ Respond ONLY with valid JSON (no markdown):
             }
 
             // Determine status based on quality gate
-            let postStatus: 'DRAFT' | 'PUBLISHED' | 'REVIEW' = 'DRAFT'
+            let postStatus: 'DRAFT' | 'PUBLISHED' | 'IN_REVIEW' = 'DRAFT'
             if (input.publishImmediately && qualityResult.recommendation === 'PUBLISH') {
                 postStatus = 'PUBLISHED'
             } else if (qualityResult.recommendation === 'NEEDS_REVISION' || qualityResult.recommendation === 'REJECT') {
-                postStatus = 'REVIEW' // Needs human attention
+                postStatus = 'IN_REVIEW' // Needs human attention
             }
 
             // Step 5: Save to database
@@ -380,7 +380,7 @@ Respond ONLY with valid JSON (no markdown):
             let message = ''
             if (postStatus === 'PUBLISHED') {
                 message = `Article "${title}" published (quality score: ${qualityResult.overallScore}/100)`
-            } else if (postStatus === 'REVIEW') {
+            } else if (postStatus === 'IN_REVIEW') {
                 message = `Article "${title}" needs review - ${qualityResult.issues.join('; ')}`
             } else {
                 message = `Article "${title}" created as draft (quality score: ${qualityResult.overallScore}/100)`
