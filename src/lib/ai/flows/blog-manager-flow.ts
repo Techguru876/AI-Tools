@@ -64,7 +64,7 @@ export const blogManagerFlow = ai.defineFlow(
             suggestions: z.array(z.string()).optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const actions: Array<{
             tool: string
             input: Record<string, unknown>
@@ -75,34 +75,22 @@ export const blogManagerFlow = ai.defineFlow(
             // Build context message if provided
             let contextMessage = ''
             if (input.context?.previousActions?.length) {
-                contextMessage += `\n\nPrevious actions in this session:\n${input.context.previousActions.map(a => `- ${a}`).join('\n')}`
+                contextMessage += `\n\nPrevious actions in this session:\n${input.context.previousActions.map((a: string) => `- ${a}`).join('\n')}`
             }
             if (input.context?.constraints?.length) {
-                contextMessage += `\n\nConstraints to respect:\n${input.context.constraints.map(c => `- ${c}`).join('\n')}`
+                contextMessage += `\n\nConstraints to respect:\n${input.context.constraints.map((c: string) => `- ${c}`).join('\n')}`
             }
 
-            // Use Genkit's agent capability with tools
-            const { text, toolRequests } = await ai.generate({
+            // Use minimal AI generate (tools not supported in Cloudflare-compatible version)
+            const result = await ai.generate({
                 system: BLOG_MANAGER_SYSTEM_PROMPT,
                 prompt: `${input.instruction}${contextMessage}`,
-                tools: allTools,
                 config: {
-                    temperature: 0.3, // Lower temperature for more deterministic tool use
+                    temperature: 0.3, // Lower temperature for more deterministic responses
                 },
             })
 
-            // Process tool requests and collect results
-            if (toolRequests && toolRequests.length > 0) {
-                for (const request of toolRequests) {
-                    // Genkit returns toolRequest nested inside the request object
-                    const toolReq = request.toolRequest
-                    actions.push({
-                        tool: toolReq.name,
-                        input: (toolReq.input as Record<string, unknown>) || {},
-                        result: (request.data as Record<string, unknown>) || {},
-                    })
-                }
-            }
+            const text = result.text
 
             return {
                 success: true,
@@ -202,7 +190,7 @@ export const contentPipelineFlow = ai.defineFlow(
             message: z.string(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         console.log(`[ContentPipeline] Starting generation for: ${input.topic}`)
 
         try {
@@ -338,41 +326,57 @@ Respond ONLY with valid JSON (no markdown):
                 postStatus = 'IN_REVIEW' // Needs human attention
             }
 
-            // Step 5: Save to database
+            // Step 5: Save to database with Drizzle
             console.log('[ContentPipeline] Step 5: Saving to database...')
             const { db } = await import('@/lib/db')
+            const { posts, categories, postCategories } = await import('@/lib/db/schema')
+            const { eq } = await import('drizzle-orm')
 
             // Check for duplicate slug
-            const existing = await db.post.findUnique({ where: { slug } })
-            const finalSlug = existing ? `${slug}-${Date.now()}` : slug
+            const existing = await db
+                .select({ id: posts.id })
+                .from(posts)
+                .where(eq(posts.slug, slug))
+                .limit(1)
+            const finalSlug = existing.length > 0 ? `${slug}-${Date.now()}` : slug
 
             // Find category
-            let categoryConnect = undefined
+            let categoryId: string | null = null
             if (input.category) {
-                const category = await db.category.findUnique({
-                    where: { slug: input.category },
-                })
-                if (category) {
-                    categoryConnect = { connect: [{ id: category.id }] }
+                const category = await db
+                    .select({ id: categories.id })
+                    .from(categories)
+                    .where(eq(categories.slug, input.category))
+                    .limit(1)
+                if (category[0]) {
+                    categoryId = category[0].id
                 }
             }
 
-            const post = await db.post.create({
-                data: {
-                    title,
-                    slug: finalSlug,
-                    content: generatedContent,
-                    excerpt,
-                    contentType: input.contentType,
-                    keywords,
-                    metaDescription,
-                    coverImage,
-                    isAiGenerated: true,
-                    status: postStatus,
-                    publishedAt: postStatus === 'PUBLISHED' ? new Date() : null,
-                    categories: categoryConnect,
-                },
-            })
+            // Create post
+            const newPost = await db.insert(posts).values({
+                title,
+                slug: finalSlug,
+                content: generatedContent,
+                excerpt,
+                contentType: input.contentType,
+                keywords,
+                metaDescription,
+                coverImage,
+                isAiGenerated: true,
+                status: postStatus,
+                publishedAt: postStatus === 'PUBLISHED' ? new Date() : null,
+            }).returning({ id: posts.id, slug: posts.slug, title: posts.title })
+
+            const post = newPost[0]
+
+            // Connect category if found
+            if (categoryId && post) {
+                await db.insert(postCategories).values({
+                    postId: post.id,
+                    categoryId,
+                })
+            }
 
             console.log(`[ContentPipeline] ✓ Created post: ${post.id} (status: ${postStatus})`)
 
@@ -419,29 +423,30 @@ export const processScheduledPostsFlow = ai.defineFlow(
     },
     async () => {
         const { db } = await import('@/lib/db')
+        const { posts } = await import('@/lib/db/schema')
+        const { eq, lte, and } = await import('drizzle-orm')
 
         const now = new Date()
 
         // Find all posts scheduled to be published by now
-        const postsToPublish = await db.post.findMany({
-            where: {
-                status: 'SCHEDULED',
-                scheduledFor: { lte: now },
-            },
-            select: { id: true, title: true },
-        })
+        const postsToPublish = await db
+            .select({ id: posts.id, title: posts.title })
+            .from(posts)
+            .where(and(
+                eq(posts.status, 'SCHEDULED'),
+                lte(posts.scheduledFor, now)
+            ))
 
         const publishedPosts: string[] = []
 
         for (const post of postsToPublish) {
-            await db.post.update({
-                where: { id: post.id },
-                data: {
+            await db.update(posts)
+                .set({
                     status: 'PUBLISHED',
                     publishedAt: now,
                     scheduledFor: null,
-                },
-            })
+                })
+                .where(eq(posts.id, post.id))
             publishedPosts.push(post.title)
         }
 

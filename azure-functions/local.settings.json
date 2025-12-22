@@ -1,9 +1,0 @@
-{
-    "IsEncrypted": false,
-    "Values": {
-        "AzureWebJobsStorage": "",
-        "FUNCTIONS_WORKER_RUNTIME": "node",
-        "BLOG_API_URL": "http://localhost:3000",
-        "CRON_SECRET": "S3cur!tyR0ck$"
-    }
-}

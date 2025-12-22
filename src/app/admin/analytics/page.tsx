@@ -1,4 +1,6 @@
 import { db } from '@/lib/db'
+import { posts, categories, postCategories } from '@/lib/db/schema'
+import { eq, desc, sql } from 'drizzle-orm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart3, TrendingUp, Eye, FileText } from 'lucide-react'
 
@@ -7,22 +9,46 @@ export const dynamic = 'force-dynamic'
 
 export default async function AnalyticsPage() {
     // Fetch real analytics from database
-    const [postCount, totalViews, topPosts] = await Promise.all([
-        db.post.count({ where: { status: 'PUBLISHED' } }),
-        db.post.aggregate({ _sum: { viewCount: true } }),
-        db.post.findMany({
-            where: { status: 'PUBLISHED' },
-            orderBy: { viewCount: 'desc' },
-            take: 10,
-            select: {
-                id: true,
-                title: true,
-                slug: true,
-                viewCount: true,
-                categories: { select: { slug: true } },
-            },
-        }),
-    ])
+    const postCountResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(posts)
+        .where(eq(posts.status, 'PUBLISHED'))
+
+    const totalViewsResult = await db
+        .select({ sum: sql<number>`coalesce(sum(${posts.viewCount}), 0)` })
+        .from(posts)
+
+    const topPostsResult = await db
+        .select({
+            id: posts.id,
+            title: posts.title,
+            slug: posts.slug,
+            viewCount: posts.viewCount,
+        })
+        .from(posts)
+        .where(eq(posts.status, 'PUBLISHED'))
+        .orderBy(desc(posts.viewCount))
+        .limit(10)
+
+    // Fetch categories for top posts
+    const topPosts = await Promise.all(
+        topPostsResult.map(async (post) => {
+            const postCats = await db
+                .select({ slug: categories.slug })
+                .from(categories)
+                .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+                .where(eq(postCategories.postId, post.id))
+                .limit(1)
+
+            return {
+                ...post,
+                categories: postCats,
+            }
+        })
+    )
+
+    const postCount = Number(postCountResult[0]?.count ?? 0)
+    const totalViews = Number(totalViewsResult[0]?.sum ?? 0)
 
     return (
         <div className="space-y-6">
@@ -49,7 +75,7 @@ export default async function AnalyticsPage() {
                         <Eye className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{(totalViews._sum.viewCount || 0).toLocaleString()}</div>
+                        <div className="text-2xl font-bold">{totalViews.toLocaleString()}</div>
                     </CardContent>
                 </Card>
 
@@ -60,7 +86,7 @@ export default async function AnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {postCount > 0 ? Math.round((totalViews._sum.viewCount || 0) / postCount) : 0}
+                            {postCount > 0 ? Math.round(totalViews / postCount) : 0}
                         </div>
                     </CardContent>
                 </Card>

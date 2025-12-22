@@ -218,7 +218,7 @@ export const qualityGateTool = ai.defineTool(
             recommendation: z.enum(['PUBLISH', 'REVIEW', 'NEEDS_REVISION', 'REJECT']),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         return await runQualityGate(input.content, input.title, input.metaDescription)
     }
 )

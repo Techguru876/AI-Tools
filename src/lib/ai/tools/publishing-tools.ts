@@ -7,7 +7,8 @@
 
 import { ai, z } from '../genkit'
 import { db } from '@/lib/db'
-import type { PostStatus } from '@prisma/client'
+import { posts } from '@/lib/db/schema'
+import { eq, asc } from 'drizzle-orm'
 
 // ============================================
 // Publish Post Tool
@@ -26,12 +27,15 @@ export const publishPostTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
-            const post = await db.post.findUnique({
-                where: { id: input.postId },
-                select: { status: true, slug: true },
-            })
+            const postResult = await db
+                .select({ status: posts.status, slug: posts.slug })
+                .from(posts)
+                .where(eq(posts.id, input.postId))
+                .limit(1)
+
+            const post = postResult[0]
 
             if (!post) {
                 return { success: false, error: 'Post not found' }
@@ -41,13 +45,12 @@ export const publishPostTool = ai.defineTool(
                 return { success: true, slug: post.slug } // Already published
             }
 
-            await db.post.update({
-                where: { id: input.postId },
-                data: {
+            await db.update(posts)
+                .set({
                     status: 'PUBLISHED',
                     publishedAt: new Date(),
-                },
-            })
+                })
+                .where(eq(posts.id, input.postId))
 
             return { success: true, slug: post.slug }
         } catch (error) {
@@ -77,7 +80,7 @@ export const schedulePostTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             const scheduleDate = new Date(input.publishAt)
 
@@ -85,13 +88,12 @@ export const schedulePostTool = ai.defineTool(
                 return { success: false, error: 'Schedule date must be in the future' }
             }
 
-            await db.post.update({
-                where: { id: input.postId },
-                data: {
+            await db.update(posts)
+                .set({
                     status: 'SCHEDULED',
                     scheduledFor: scheduleDate,
-                },
-            })
+                })
+                .where(eq(posts.id, input.postId))
 
             return {
                 success: true,
@@ -122,12 +124,11 @@ export const moveToReviewTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
-            await db.post.update({
-                where: { id: input.postId },
-                data: { status: 'IN_REVIEW' },
-            })
+            await db.update(posts)
+                .set({ status: 'IN_REVIEW' })
+                .where(eq(posts.id, input.postId))
 
             return { success: true }
         } catch (error) {
@@ -155,12 +156,11 @@ export const archivePostTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
-            await db.post.update({
-                where: { id: input.postId },
-                data: { status: 'ARCHIVED' },
-            })
+            await db.update(posts)
+                .set({ status: 'ARCHIVED' })
+                .where(eq(posts.id, input.postId))
 
             return { success: true }
         } catch (error) {
@@ -193,7 +193,7 @@ export const fetchCoverImageTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             const accessKey = process.env.UNSPLASH_ACCESS_KEY
 
@@ -264,27 +264,27 @@ export const getPendingReviewsTool = ai.defineTool(
         }),
     },
     async () => {
-        const posts = await db.post.findMany({
-            where: { status: 'IN_REVIEW' },
-            select: {
-                id: true,
-                title: true,
-                contentType: true,
-                createdAt: true,
-                excerpt: true,
-            },
-            orderBy: { createdAt: 'asc' },
-        })
+        const postsResult = await db
+            .select({
+                id: posts.id,
+                title: posts.title,
+                contentType: posts.contentType,
+                createdAt: posts.createdAt,
+                excerpt: posts.excerpt,
+            })
+            .from(posts)
+            .where(eq(posts.status, 'IN_REVIEW'))
+            .orderBy(asc(posts.createdAt))
 
         return {
-            posts: posts.map(p => ({
+            posts: postsResult.map(p => ({
                 id: p.id,
                 title: p.title,
                 contentType: p.contentType as string,
-                createdAt: p.createdAt.toISOString(),
+                createdAt: p.createdAt?.toISOString() ?? new Date().toISOString(),
                 excerpt: p.excerpt,
             })),
-            count: posts.length,
+            count: postsResult.length,
         }
     }
 )

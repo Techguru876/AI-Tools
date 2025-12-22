@@ -1,6 +1,8 @@
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { db } from '@/lib/db'
+import { posts, categories, tags, postCategories, postTags } from '@/lib/db/schema'
+import { eq, desc, inArray, sql } from 'drizzle-orm'
 import { ReviewQueueClient } from './client'
 
 // Force dynamic rendering - prevents build-time database queries
@@ -9,26 +11,63 @@ export const revalidate = 0
 
 export default async function ReviewQueuePage() {
     // Fetch posts pending review
-    const pendingPosts = await db.post.findMany({
-        where: {
-            status: { in: ['IN_REVIEW', 'DRAFT'] },
-        },
-        include: {
-            categories: {
-                select: { name: true, slug: true, color: true },
-            },
-            tags: {
-                select: { name: true, slug: true },
-            },
-        },
-        orderBy: { createdAt: 'desc' },
-    })
+    const pendingPostsResult = await db
+        .select()
+        .from(posts)
+        .where(inArray(posts.status, ['IN_REVIEW', 'DRAFT']))
+        .orderBy(desc(posts.createdAt))
 
-    // Get stats
-    const stats = await db.post.groupBy({
-        by: ['status'],
-        _count: true,
-    })
+    // Fetch categories and tags for each post
+    const pendingPosts = await Promise.all(
+        pendingPostsResult.map(async (post) => {
+            const postCats = await db
+                .select({
+                    name: categories.name,
+                    slug: categories.slug,
+                    color: categories.color,
+                })
+                .from(categories)
+                .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+                .where(eq(postCategories.postId, post.id))
+
+            const postTagsResult = await db
+                .select({
+                    name: tags.name,
+                    slug: tags.slug,
+                })
+                .from(tags)
+                .innerJoin(postTags, eq(tags.id, postTags.tagId))
+                .where(eq(postTags.postId, post.id))
+
+            return {
+                id: post.id,
+                title: post.title,
+                slug: post.slug,
+                excerpt: post.excerpt,
+                content: post.content,
+                coverImage: post.coverImage,
+                status: post.status ?? 'DRAFT',
+                contentType: post.contentType ?? 'ARTICLE',
+                createdAt: post.createdAt ?? new Date(),
+                categories: postCats,
+                tags: postTagsResult,
+            }
+        })
+    )
+
+    // Get stats by status using raw SQL for groupBy
+    const statsResult = await db
+        .select({
+            status: posts.status,
+            count: sql<number>`count(*)`,
+        })
+        .from(posts)
+        .groupBy(posts.status)
+
+    const stats = statsResult.map((s) => ({
+        status: s.status,
+        _count: Number(s.count),
+    }))
 
     return (
         <div className="space-y-6">
@@ -41,7 +80,7 @@ export default async function ReviewQueuePage() {
 
             {/* Stats */}
             <div className="grid gap-4 sm:grid-cols-4">
-                {['IN_REVIEW', 'DRAFT', 'PUBLISHED', 'REJECTED'].map((status) => {
+                {['IN_REVIEW', 'DRAFT', 'PUBLISHED', 'ARCHIVED'].map((status) => {
                     const stat = stats.find((s) => s.status === status)
                     return (
                         <div

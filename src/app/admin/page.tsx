@@ -1,4 +1,6 @@
 import { db } from '@/lib/db'
+import { posts, users, categories, postCategories } from '@/lib/db/schema'
+import { eq, desc, sql } from 'drizzle-orm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Users, Eye, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
@@ -8,29 +10,44 @@ export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
   // Fetch real stats from database
-  const [postCount, userCount, totalViews, recentPosts] = await Promise.all([
-    db.post.count(),
-    db.user.count(),
-    db.post.aggregate({ _sum: { viewCount: true } }),
-    db.post.findMany({
-      take: 5,
-      orderBy: { publishedAt: 'desc' },
-      where: { status: 'PUBLISHED' },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        viewCount: true,
-        publishedAt: true,
-        categories: { select: { slug: true } },
-      },
-    }),
-  ])
+  const postCountResult = await db.select({ count: sql<number>`count(*)` }).from(posts)
+  const userCountResult = await db.select({ count: sql<number>`count(*)` }).from(users)
+  const totalViewsResult = await db.select({ sum: sql<number>`coalesce(sum(${posts.viewCount}), 0)` }).from(posts)
+
+  const recentPostsResult = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      viewCount: posts.viewCount,
+      publishedAt: posts.publishedAt,
+    })
+    .from(posts)
+    .where(eq(posts.status, 'PUBLISHED'))
+    .orderBy(desc(posts.publishedAt))
+    .limit(5)
+
+  // Fetch categories for recent posts
+  const recentPosts = await Promise.all(
+    recentPostsResult.map(async (post) => {
+      const postCats = await db
+        .select({ slug: categories.slug })
+        .from(categories)
+        .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+        .where(eq(postCategories.postId, post.id))
+        .limit(1)
+
+      return {
+        ...post,
+        categories: postCats,
+      }
+    })
+  )
 
   const stats = {
-    totalPosts: postCount,
-    totalUsers: userCount,
-    totalViews: totalViews._sum.viewCount || 0,
+    totalPosts: Number(postCountResult[0]?.count ?? 0),
+    totalUsers: Number(userCountResult[0]?.count ?? 0),
+    totalViews: Number(totalViewsResult[0]?.sum ?? 0),
   }
 
   return (

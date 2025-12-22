@@ -63,7 +63,7 @@ export const env = createEnv({
 
     REDIS_URL: process.env.REDIS_URL,
 
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:1010',
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
     NEXT_PUBLIC_HAS_OPENAI: process.env.NEXT_PUBLIC_HAS_OPENAI,

@@ -3,6 +3,8 @@ import { Footer } from '@/components/layout/footer'
 import { ArticleFeed } from '@/components/homepage/article-feed'
 import { Sidebar } from '@/components/sidebar/sidebar'
 import { db } from '@/lib/db'
+import { posts, categories, tags, postCategories, postTags } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 
 // Force dynamic rendering - prevents build-time database queries
 export const dynamic = 'force-dynamic'
@@ -10,48 +12,94 @@ export const revalidate = 0
 
 
 export default async function HomePage() {
-  // Fetch featured post
-  const featuredPost = await db.post.findFirst({
-    where: {
-      status: 'PUBLISHED',
-      featured: true
-    },
-    include: {
-      categories: {
-        select: {
-          name: true,
-          slug: true,
-          color: true,
-        },
-      },
-    },
-    orderBy: { publishedAt: 'desc' },
-  })
+  // Fetch featured post with categories
+  const featuredPostResult = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      excerpt: posts.excerpt,
+      coverImage: posts.coverImage,
+      readingTime: posts.readingTime,
+      viewCount: posts.viewCount,
+      publishedAt: posts.publishedAt,
+      contentType: posts.contentType,
+    })
+    .from(posts)
+    .where(eq(posts.status, 'PUBLISHED'))
+    .orderBy(desc(posts.publishedAt))
+    .limit(1)
 
-  // Fetch published posts from database
-  const posts = await db.post.findMany({
-    where: { status: 'PUBLISHED' },
-    include: {
-      categories: {
-        select: {
-          name: true,
-          slug: true,
-          color: true,
-        },
-      },
-      tags: {
-        select: {
-          name: true,
-          slug: true,
-        },
-      },
-    },
-    orderBy: { publishedAt: 'desc' },
-    take: 20,
-  })
+  // Get featured post's categories
+  let featuredPost = featuredPostResult[0] ? {
+    ...featuredPostResult[0],
+    categories: [] as { name: string; slug: string; color: string | null }[],
+  } : null
+
+  if (featuredPost) {
+    const featuredCategories = await db
+      .select({
+        name: categories.name,
+        slug: categories.slug,
+        color: categories.color,
+      })
+      .from(categories)
+      .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+      .where(eq(postCategories.postId, featuredPost.id))
+
+    featuredPost.categories = featuredCategories
+  }
+
+  // Fetch published posts with categories and tags
+  const postsResult = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      excerpt: posts.excerpt,
+      coverImage: posts.coverImage,
+      publishedAt: posts.publishedAt,
+      contentType: posts.contentType,
+      viewCount: posts.viewCount,
+    })
+    .from(posts)
+    .where(eq(posts.status, 'PUBLISHED'))
+    .orderBy(desc(posts.publishedAt))
+    .limit(20)
+
+  // Fetch categories and tags for each post
+  const postsWithRelations = await Promise.all(
+    postsResult.map(async (post) => {
+      const postCats = await db
+        .select({
+          name: categories.name,
+          slug: categories.slug,
+          color: categories.color,
+        })
+        .from(categories)
+        .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+        .where(eq(postCategories.postId, post.id))
+
+      const postTagsResult = await db
+        .select({
+          name: tags.name,
+          slug: tags.slug,
+        })
+        .from(tags)
+        .innerJoin(postTags, eq(tags.id, postTags.tagId))
+        .where(eq(postTags.postId, post.id))
+        .limit(5)
+
+      return {
+        ...post,
+        categories: postCats,
+        tags: postTagsResult,
+      }
+    })
+  )
 
   // Transform to match ArticleCardProps interface
-  const articles = posts.map((post) => ({
+  const articles = postsWithRelations.map((post) => ({
     id: post.id,
     title: post.title,
     excerpt: post.excerpt || '',
@@ -62,10 +110,10 @@ export default async function HomePage() {
     author: 'TechBlog USA Team',
     publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
     image: post.coverImage || `https://source.unsplash.com/800x600/?technology,${post.categories[0]?.slug || 'tech'}`,
-    contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
-    type: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    contentType: post.contentType?.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    type: post.contentType?.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
     tags: post.tags.slice(0, 5).map((tag) => tag.name),
-    trending: post.viewCount > 500,
+    trending: (post.viewCount ?? 0) > 500,
   }))
 
   return (
@@ -126,7 +174,7 @@ export default async function HomePage() {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span>{featuredPost.readingTime || 5} min read</span>
                     <span>•</span>
-                    <span>{featuredPost.viewCount.toLocaleString()} views</span>
+                    <span>{(featuredPost.viewCount ?? 0).toLocaleString()} views</span>
                   </div>
                 </div>
               </div>

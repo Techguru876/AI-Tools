@@ -1,10 +1,4 @@
-/**
- * Embeddings Generator & Storage
- * 
- * Generates vector embeddings using Gemini and retrieves RAG context from Azure Blob.
- */
-
-import { ai } from '../genkit'
+import { generateEmbedding as openAIGenerateEmbedding } from '../openai'
 import { getRAGContextFromBlob, findSimilarArticles, type RAGArticle } from '@/lib/azure/rag-storage'
 
 export type { RAGArticle as ArticleEmbedding }
@@ -20,20 +14,11 @@ export interface ScrapedArticle {
 }
 
 /**
- * Generate embedding for text using Gemini
+ * Generate embedding for text using OpenAI (Cloudflare Workers Compatible)
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-    // Truncate text to fit embedding model limits (~8000 tokens)
-    const truncatedText = text.slice(0, 25000)
-
     try {
-        const response = await ai.embed({
-            embedder: 'googleai/text-embedding-004',
-            content: truncatedText,
-        })
-
-        // ai.embed returns different structures - handle both
-        return (response as unknown as { embedding: number[] }).embedding || []
+        return await openAIGenerateEmbedding(text)
     } catch (error) {
         console.error('[Embeddings] Failed to generate embedding:', error)
         return []

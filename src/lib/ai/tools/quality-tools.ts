@@ -6,6 +6,8 @@
 
 import { ai, z } from '../genkit'
 import { db } from '@/lib/db'
+import { posts } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 
 // ============================================
 // Plagiarism Check Tool
@@ -30,43 +32,47 @@ export const checkPlagiarismTool = ai.defineTool(
             recommendation: z.string(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             // Extract key phrases for comparison
             const sentences = input.content
                 .split(/[.!?]+/)
-                .map(s => s.trim())
-                .filter(s => s.length > 50)
+                .map((s: string) => s.trim())
+                .filter((s: string) => s.length > 50)
                 .slice(0, 10) // Check first 10 significant sentences
 
             const matches: Array<{ source: string; matchedText: string; similarity: number }> = []
 
-            // Check against our own database
-            for (const sentence of sentences) {
-                const wordsToSearch = sentence.split(' ').slice(0, 8).join(' ')
-
-                const similarPosts = await db.post.findMany({
-                    where: {
-                        content: { contains: wordsToSearch, mode: 'insensitive' },
-                        status: 'PUBLISHED',
-                    },
-                    select: { title: true, slug: true },
-                    take: 3,
+            // Check against our own database - fetch all published posts and search in JS
+            const publishedPosts = await db
+                .select({
+                    title: posts.title,
+                    slug: posts.slug,
+                    content: posts.content,
                 })
+                .from(posts)
+                .where(eq(posts.status, 'PUBLISHED'))
+                .limit(50)
 
-                for (const post of similarPosts) {
-                    matches.push({
-                        source: `Internal: ${post.slug}`,
-                        matchedText: wordsToSearch,
-                        similarity: 0.8,
-                    })
+            for (const sentence of sentences) {
+                const wordsToSearch = sentence.split(' ').slice(0, 8).join(' ').toLowerCase()
+
+                for (const post of publishedPosts) {
+                    if (post.content.toLowerCase().includes(wordsToSearch)) {
+                        matches.push({
+                            source: `Internal: ${post.slug}`,
+                            matchedText: wordsToSearch,
+                            similarity: 0.8,
+                        })
+                        break // Only count once per sentence
+                    }
                 }
             }
 
             // Calculate originality score
             const uniqueSentences = sentences.length
             const matchedSentences = new Set(matches.map(m => m.matchedText)).size
-            const originalityScore = Math.round(((uniqueSentences - matchedSentences) / uniqueSentences) * 100)
+            const originalityScore = Math.round(((uniqueSentences - matchedSentences) / Math.max(uniqueSentences, 1)) * 100)
 
             // Use AI to assess overall originality  
             const { text } = await ai.generate({
@@ -133,7 +139,7 @@ export const verifyFactsTool = ai.defineTool(
             recommendation: z.string(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             const { text } = await ai.generate({
                 prompt: `You are a fact-checker for a tech publication. Analyze this article and identify key factual claims.
@@ -207,7 +213,7 @@ export const calculateSEOScoreTool = ai.defineTool(
             suggestions: z.array(z.string()),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const issues: string[] = []
         const suggestions: string[] = []
 

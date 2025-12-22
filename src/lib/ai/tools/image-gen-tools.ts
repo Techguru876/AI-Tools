@@ -35,7 +35,7 @@ export const generateImageWithDalleTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             if (!process.env.OPENAI_API_KEY) {
                 return { success: false, error: 'OPENAI_API_KEY not configured' }
@@ -96,7 +96,7 @@ export const generateImageWithMidjourneyTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             const apiKey = process.env.MIDJOURNEY_API_KEY
             if (!apiKey) {
@@ -167,7 +167,7 @@ export const generateArticleVisualTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             // Generate an optimized image prompt using AI
             const { text: promptResponse } = await ai.generate({

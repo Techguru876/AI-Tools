@@ -1,4 +1,6 @@
 import { db } from '@/lib/db'
+import { users, posts } from '@/lib/db/schema'
+import { eq, desc, sql } from 'drizzle-orm'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users } from 'lucide-react'
 
@@ -6,13 +8,28 @@ import { Users } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function UsersPage() {
-    const users = await db.user.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 50,
-        include: {
-            _count: { select: { posts: true } },
-        },
-    })
+    const usersResult = await db
+        .select()
+        .from(users)
+        .orderBy(desc(users.createdAt))
+        .limit(50)
+
+    // Fetch post counts for each user
+    const usersWithCounts = await Promise.all(
+        usersResult.map(async (user) => {
+            const postCountResult = await db
+                .select({ count: sql<number>`count(*)` })
+                .from(posts)
+                .where(eq(posts.authorId, user.id))
+
+            return {
+                ...user,
+                _count: {
+                    posts: Number(postCountResult[0]?.count ?? 0),
+                },
+            }
+        })
+    )
 
     return (
         <div className="space-y-6">
@@ -25,11 +42,11 @@ export default async function UsersPage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Users className="h-5 w-5" />
-                        All Users ({users.length})
+                        All Users ({usersWithCounts.length})
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {users.length === 0 ? (
+                    {usersWithCounts.length === 0 ? (
                         <p className="text-muted-foreground text-center py-8">No users found</p>
                     ) : (
                         <div className="overflow-x-auto">
@@ -44,11 +61,11 @@ export default async function UsersPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map((user) => (
+                                    {usersWithCounts.map((user) => (
                                         <tr key={user.id} className="border-t hover:bg-muted/20">
                                             <td className="px-4 py-3 font-medium">{user.name || 'Unknown'}</td>
                                             <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
-                                            <td className="px-4 py-3 text-muted-foreground">-</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{user.title || '-'}</td>
                                             <td className="px-4 py-3">{user._count.posts}</td>
                                             <td className="px-4 py-3 text-muted-foreground">
                                                 {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}

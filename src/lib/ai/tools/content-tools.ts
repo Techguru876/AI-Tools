@@ -8,7 +8,7 @@
 import { ai, z } from '../genkit'
 import { generateArticle as generateArticleCore, type GenerateArticleInput } from '../content-generator'
 import { SYSTEM_PROMPTS, CONTENT_PROMPTS } from '../prompts'
-import type { ContentType } from '@prisma/client'
+import { ContentType } from '@/lib/db'
 
 // ============================================
 // Generate Article Tool
@@ -47,7 +47,7 @@ export const generateArticleTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             const result = await generateArticleCore({
                 type: input.type as ContentType,
@@ -101,7 +101,7 @@ export const generateWithGeminiTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             const messages = []
 
@@ -156,9 +156,9 @@ export const suggestTopicsTool = ai.defineTool(
             })),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const avoidList = input.avoidTopics?.length
-            ? `\nAvoid these topics as they've been recently covered:\n${input.avoidTopics.map(t => `- ${t}`).join('\n')}`
+            ? `\nAvoid these topics as they've been recently covered:\n${input.avoidTopics.map((t: string) => `- ${t}`).join('\n')}`
             : ''
 
         const prompt = `You are a senior tech editor at a leading technology publication. Suggest ${input.count} compelling article topics for the "${input.category}" category.
@@ -227,7 +227,7 @@ export const analyzeContentQualityTool = ai.defineTool(
             estimatedReadTime: z.number().describe('Estimated reading time in minutes'),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const wordCount = input.content.split(/\s+/).length
         const estimatedReadTime = Math.ceil(wordCount / 200) // ~200 wpm reading speed
 

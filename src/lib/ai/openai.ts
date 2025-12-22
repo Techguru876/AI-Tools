@@ -1,19 +1,26 @@
 import OpenAI from 'openai'
 
-// Initialize OpenAI client (OpenAI only)
-const openaiKey = process.env.OPENAI_API_KEY
+// Lazy-loaded OpenAI client to avoid MessagePort errors at module load time
+// (Note: OpenAI SDK may use MessagePort internally)
+let _openai: OpenAI | null = null
 
-if (openaiKey) {
-  console.log('[AI] Initialized with OpenAI API')
-} else {
-  console.warn('[AI] No API key found. Set OPENAI_API_KEY in .env.local')
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    const openaiKey = process.env.OPENAI_API_KEY
+    if (!openaiKey) {
+      throw new Error('OpenAI API key not configured. Set OPENAI_API_KEY in environment.')
+    }
+    console.log('[AI] Initializing OpenAI client (lazy)')
+    _openai = new OpenAI({
+      apiKey: openaiKey,
+      fetch: globalThis.fetch, // Force use of global fetch for Cloudflare Workers compatibility
+    })
+  }
+  return _openai
 }
 
-export const openai = openaiKey
-  ? new OpenAI({
-    apiKey: openaiKey,
-  })
-  : null
+// For backwards compatibility - will throw if no API key
+export const openai = null as unknown as OpenAI | null
 
 export interface GenerateContentOptionsOpenAI {
   prompt: string
@@ -39,11 +46,10 @@ export interface GeneratedContentOpenAI {
 export async function generateContentWithOpenAI(
   options: GenerateContentOptionsOpenAI
 ): Promise<GeneratedContentOpenAI> {
-  if (!openai) {
-    throw new Error('OpenAI API key not configured')
-  }
+  const openai = getOpenAI()
 
   const defaultModel = 'gpt-4o-mini'
+
 
   const {
     prompt,
@@ -95,9 +101,7 @@ export async function generateContentWithOpenAI(
  * Generate embeddings for semantic search and content recommendations
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  if (!openai) {
-    throw new Error('OpenAI API key not configured')
-  }
+  const openai = getOpenAI()
 
   const response = await openai.embeddings.create({
     model: 'text-embedding-3-small',
@@ -111,9 +115,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
  * Generate embeddings for multiple texts in batch
  */
 export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
-  if (!openai) {
-    throw new Error('OpenAI API key not configured')
-  }
+  const openai = getOpenAI()
 
   const response = await openai.embeddings.create({
     model: 'text-embedding-3-small',
@@ -156,9 +158,7 @@ export async function generateImage(
     style?: 'vivid' | 'natural'
   }
 ): Promise<{ url: string; revisedPrompt: string }> {
-  if (!openai) {
-    throw new Error('OpenAI API key not configured')
-  }
+  const openai = getOpenAI()
 
   const response = await openai.images.generate({
     model: 'dall-e-3',
@@ -194,9 +194,7 @@ export async function analyzeSentiment(
   score: number
   explanation: string
 }> {
-  if (!openai) {
-    throw new Error('OpenAI API key not configured')
-  }
+  const openai = getOpenAI()
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-5.2',
@@ -249,9 +247,7 @@ export async function moderateContent(text: string): Promise<{
     violenceGraphic: boolean
   }
 }> {
-  if (!openai) {
-    throw new Error('OpenAI API key not configured')
-  }
+  const openai = getOpenAI()
 
   const moderation = await openai.moderations.create({
     input: text,

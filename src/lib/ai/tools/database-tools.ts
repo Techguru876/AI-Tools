@@ -6,7 +6,12 @@
 
 import { ai, z } from '../genkit'
 import { db } from '@/lib/db'
-import type { PostStatus, ContentType } from '@prisma/client'
+import { posts, categories, postCategories } from '@/lib/db/schema'
+import { eq, desc, lt, sql, and, ilike, or } from 'drizzle-orm'
+
+// Type definitions
+type PostStatus = 'DRAFT' | 'IN_REVIEW' | 'SCHEDULED' | 'PUBLISHED' | 'ARCHIVED'
+type ContentType = 'ARTICLE' | 'REVIEW' | 'COMPARISON' | 'GUIDE' | 'NEWS' | 'AI_NEWS' | 'ROUNDUP' | 'SPONSORED'
 
 // ============================================
 // Query Posts Tool
@@ -44,58 +49,86 @@ export const queryPostsTool = ai.defineTool(
             totalCount: z.number(),
         }),
     },
-    async (input) => {
-        const where: Record<string, unknown> = {}
+    async (input: any) => {
+        // Build conditions array
+        const conditions: any[] = []
 
         if (input.status) {
-            where.status = input.status as PostStatus
+            conditions.push(eq(posts.status, input.status as PostStatus))
         }
         if (input.contentType) {
-            where.contentType = input.contentType as ContentType
-        }
-        if (input.category) {
-            where.categories = { some: { slug: input.category } }
-        }
-        if (input.searchQuery) {
-            where.OR = [
-                { title: { contains: input.searchQuery, mode: 'insensitive' } },
-                { content: { contains: input.searchQuery, mode: 'insensitive' } },
-            ]
+            conditions.push(eq(posts.contentType, input.contentType as ContentType))
         }
         if (input.olderThanDays) {
             const threshold = new Date()
             threshold.setDate(threshold.getDate() - input.olderThanDays)
-            where.updatedAt = { lt: threshold }
+            conditions.push(lt(posts.updatedAt, threshold))
         }
 
-        const [posts, totalCount] = await Promise.all([
-            db.post.findMany({
-                where,
-                select: {
-                    id: true,
-                    title: true,
-                    slug: true,
-                    status: true,
-                    contentType: true,
-                    publishedAt: true,
-                    lastRefreshedAt: true,
-                    viewCount: true,
-                },
-                orderBy: { createdAt: 'desc' },
-                take: input.limit,
-            }),
-            db.post.count({ where }),
-        ])
+        // Fetch posts
+        let postsResult = await db
+            .select({
+                id: posts.id,
+                title: posts.title,
+                slug: posts.slug,
+                status: posts.status,
+                contentType: posts.contentType,
+                publishedAt: posts.publishedAt,
+                lastRefreshedAt: posts.lastRefreshedAt,
+                viewCount: posts.viewCount,
+            })
+            .from(posts)
+            .orderBy(desc(posts.createdAt))
+            .limit(input.limit * 2) // Get extra for filtering
+
+        // Filter by conditions in JS (Drizzle's conditions work differently)
+        if (input.status) {
+            postsResult = postsResult.filter(p => p.status === input.status)
+        }
+        if (input.contentType) {
+            postsResult = postsResult.filter(p => p.contentType === input.contentType)
+        }
+        if (input.searchQuery) {
+            const query = input.searchQuery.toLowerCase()
+            postsResult = postsResult.filter(p =>
+                p.title.toLowerCase().includes(query)
+            )
+        }
+
+        // Filter by category if provided
+        if (input.category) {
+            const catResult = await db
+                .select({ id: categories.id })
+                .from(categories)
+                .where(eq(categories.slug, input.category))
+                .limit(1)
+
+            if (catResult[0]) {
+                const postIdsInCat = await db
+                    .select({ postId: postCategories.postId })
+                    .from(postCategories)
+                    .where(eq(postCategories.categoryId, catResult[0].id))
+
+                const catPostIds = new Set(postIdsInCat.map(p => p.postId))
+                postsResult = postsResult.filter(p => catPostIds.has(p.id))
+            }
+        }
+
+        const finalPosts = postsResult.slice(0, input.limit)
+
+        // Get total count
+        const countResult = await db.select({ count: sql<number>`count(*)` }).from(posts)
 
         return {
-            posts: posts.map(p => ({
+            posts: finalPosts.map(p => ({
                 ...p,
                 status: p.status as string,
                 contentType: p.contentType as string,
                 publishedAt: p.publishedAt?.toISOString() ?? null,
                 lastRefreshedAt: p.lastRefreshedAt?.toISOString() ?? null,
+                viewCount: p.viewCount ?? 0,
             })),
-            totalCount,
+            totalCount: Number(countResult[0]?.count ?? 0),
         }
     }
 )
@@ -129,13 +162,16 @@ export const createPostTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             // Check for duplicate slug
-            const existing = await db.post.findUnique({
-                where: { slug: input.slug },
-            })
-            if (existing) {
+            const existing = await db
+                .select({ id: posts.id })
+                .from(posts)
+                .where(eq(posts.slug, input.slug))
+                .limit(1)
+
+            if (existing.length > 0) {
                 return {
                     success: false,
                     error: `A post with slug "${input.slug}" already exists`,
@@ -143,32 +179,42 @@ export const createPostTool = ai.defineTool(
             }
 
             // Find category if provided
-            let categoryConnect = undefined
+            let categoryId: string | null = null
             if (input.categorySlug) {
-                const category = await db.category.findUnique({
-                    where: { slug: input.categorySlug },
-                })
-                if (category) {
-                    categoryConnect = { connect: [{ id: category.id }] }
+                const category = await db
+                    .select({ id: categories.id })
+                    .from(categories)
+                    .where(eq(categories.slug, input.categorySlug))
+                    .limit(1)
+                if (category[0]) {
+                    categoryId = category[0].id
                 }
             }
 
-            const post = await db.post.create({
-                data: {
-                    title: input.title,
-                    slug: input.slug,
-                    content: input.content,
-                    excerpt: input.excerpt,
-                    contentType: input.contentType as ContentType,
-                    keywords: input.keywords || [],
-                    metaDescription: input.metaDescription,
-                    coverImage: input.coverImage,
-                    isAiGenerated: true,
-                    status: input.publishImmediately ? 'PUBLISHED' : 'DRAFT',
-                    publishedAt: input.publishImmediately ? new Date() : null,
-                    categories: categoryConnect,
-                },
-            })
+            // Create post
+            const newPost = await db.insert(posts).values({
+                title: input.title,
+                slug: input.slug,
+                content: input.content,
+                excerpt: input.excerpt,
+                contentType: input.contentType as ContentType,
+                keywords: input.keywords || [],
+                metaDescription: input.metaDescription,
+                coverImage: input.coverImage,
+                isAiGenerated: true,
+                status: input.publishImmediately ? 'PUBLISHED' : 'DRAFT',
+                publishedAt: input.publishImmediately ? new Date() : null,
+            }).returning({ id: posts.id, slug: posts.slug })
+
+            const post = newPost[0]
+
+            // Connect category if found
+            if (categoryId && post) {
+                await db.insert(postCategories).values({
+                    postId: post.id,
+                    categoryId,
+                })
+            }
 
             return {
                 success: true,
@@ -208,9 +254,9 @@ export const updatePostTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
-            const updateData: Record<string, unknown> = {}
+            const updateData: Partial<typeof posts.$inferInsert> = {}
 
             if (input.title) updateData.title = input.title
             if (input.content) updateData.content = input.content
@@ -220,10 +266,9 @@ export const updatePostTool = ai.defineTool(
             if (input.coverImage) updateData.coverImage = input.coverImage
             if (input.markAsRefreshed) updateData.lastRefreshedAt = new Date()
 
-            await db.post.update({
-                where: { id: input.postId },
-                data: updateData,
-            })
+            await db.update(posts)
+                .set(updateData)
+                .where(eq(posts.id, input.postId))
 
             return { success: true }
         } catch (error) {
@@ -254,21 +299,28 @@ export const getCategoriesTool = ai.defineTool(
         }),
     },
     async () => {
-        const categories = await db.category.findMany({
-            include: {
-                _count: { select: { posts: true } },
-            },
-            orderBy: { name: 'asc' },
-        })
+        const categoriesResult = await db
+            .select()
+            .from(categories)
 
-        return {
-            categories: categories.map(c => ({
-                id: c.id,
-                name: c.name,
-                slug: c.slug,
-                postCount: c._count.posts,
-            })),
-        }
+        // Get post counts for each category
+        const categoriesWithCounts = await Promise.all(
+            categoriesResult.map(async (c) => {
+                const countResult = await db
+                    .select({ count: sql<number>`count(*)` })
+                    .from(postCategories)
+                    .where(eq(postCategories.categoryId, c.id))
+
+                return {
+                    id: c.id,
+                    name: c.name,
+                    slug: c.slug,
+                    postCount: Number(countResult[0]?.count ?? 0),
+                }
+            })
+        )
+
+        return { categories: categoriesWithCounts }
     }
 )
 
@@ -293,32 +345,44 @@ export const getPostStatsTool = ai.defineTool(
         const thirtyDaysAgo = new Date()
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-        const [total, published, drafts, needsRefresh, byType] = await Promise.all([
-            db.post.count(),
-            db.post.count({ where: { status: 'PUBLISHED' } }),
-            db.post.count({ where: { status: 'DRAFT' } }),
-            db.post.count({
-                where: {
-                    status: 'PUBLISHED',
-                    updatedAt: { lt: thirtyDaysAgo },
-                },
-            }),
-            db.post.groupBy({
-                by: ['contentType'],
-                _count: true,
-            }),
-        ])
+        const totalResult = await db.select({ count: sql<number>`count(*)` }).from(posts)
+        const publishedResult = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(posts)
+            .where(eq(posts.status, 'PUBLISHED'))
+        const draftResult = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(posts)
+            .where(eq(posts.status, 'DRAFT'))
+        const needsRefreshResult = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(posts)
+            .where(and(
+                eq(posts.status, 'PUBLISHED'),
+                lt(posts.updatedAt, thirtyDaysAgo)
+            ))
+
+        // Get posts by type
+        const byTypeResult = await db
+            .select({
+                contentType: posts.contentType,
+                count: sql<number>`count(*)`,
+            })
+            .from(posts)
+            .groupBy(posts.contentType)
 
         const postsByType: Record<string, number> = {}
-        byType.forEach(item => {
-            postsByType[item.contentType] = item._count
+        byTypeResult.forEach(item => {
+            if (item.contentType) {
+                postsByType[item.contentType] = Number(item.count)
+            }
         })
 
         return {
-            totalPosts: total,
-            publishedPosts: published,
-            draftPosts: drafts,
-            postsNeedingRefresh: needsRefresh,
+            totalPosts: Number(totalResult[0]?.count ?? 0),
+            publishedPosts: Number(publishedResult[0]?.count ?? 0),
+            draftPosts: Number(draftResult[0]?.count ?? 0),
+            postsNeedingRefresh: Number(needsRefreshResult[0]?.count ?? 0),
             postsByType,
         }
     }

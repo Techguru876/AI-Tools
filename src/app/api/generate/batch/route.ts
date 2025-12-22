@@ -1,8 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { posts, categories, tags, postCategories, postTags } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 import { generateArticle } from '@/lib/ai/content-generator'
 import { slugify } from '@/lib/utils'
-import type { ContentType, PostStatus } from '@prisma/client'
+
+// Type definitions
+type ContentType = 'ARTICLE' | 'REVIEW' | 'COMPARISON' | 'GUIDE' | 'NEWS' | 'AI_NEWS' | 'ROUNDUP' | 'SPONSORED'
+type PostStatus = 'DRAFT' | 'IN_REVIEW' | 'SCHEDULED' | 'PUBLISHED' | 'ARCHIVED'
+
+// GET handler - returns API usage instructions
+export async function GET() {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
+    return NextResponse.json({
+        status: 'ok',
+        endpoint: '/api/generate/batch',
+        method: 'POST',
+        description: 'Batch generate AI articles',
+        contentType: 'application/json',
+        parameters: {
+            count: { type: 'number', default: 3, description: 'Number of articles to generate (1-10)' },
+            topics: { type: 'string[]', optional: true, description: 'Array of topics (auto-generated if not provided)' },
+            autoPublish: { type: 'boolean', default: false, description: 'Publish immediately or save as IN_REVIEW' },
+            cronSecret: { type: 'string', optional: true, description: 'Secret for automated cron calls' },
+        },
+        examples: {
+            windows_cmd: `curl -X POST "${baseUrl}/api/generate/batch" -H "Content-Type: application/json" -d "{\\"count\\": 1}"`,
+            windows_powershell: `Invoke-RestMethod -Uri "${baseUrl}/api/generate/batch" -Method POST -ContentType "application/json" -Body '{"count": 1}'`,
+            linux_macos: `curl -X POST '${baseUrl}/api/generate/batch' -H 'Content-Type: application/json' -d '{"count": 1}'`,
+            with_topics: `curl -X POST '${baseUrl}/api/generate/batch' -H 'Content-Type: application/json' -d '{"count": 2, "topics": ["AI trends 2025", "Best laptops for developers"]}'`,
+        },
+        troubleshooting: [
+            'Use 127.0.0.1 or localhost, NOT 0.0.0.1',
+            'Always include Content-Type: application/json header',
+            'On Windows cmd, escape quotes with backslash: \\"',
+            'Ensure JSON braces {} are inside quotes to avoid shell interpretation',
+        ],
+    })
+}
 
 // Content mix percentages for automated generation
 const CONTENT_MIX = {
@@ -39,7 +75,7 @@ export async function POST(request: NextRequest) {
 
         if (!hasAnthropic && !hasOpenAI) {
             return NextResponse.json(
-                { error: 'No AI provider configured. Set ANTHROPIC_API_KEY or OPENAI_API_KEY.' },
+                { error: 'No AI provider configured. Set OPENAI_API_KEY (recommended for Cloudflare) or ANTHROPIC_API_KEY.' },
                 { status: 500 }
             )
         }
@@ -72,51 +108,95 @@ export async function POST(request: NextRequest) {
                 console.log(`Generating ${contentType}: ${topic}`)
 
                 // Generate article content
+                // Prefer OpenAI for Cloudflare Workers compatibility (Anthropic SDK uses MessagePort)
                 const generated = await generateArticle({
                     type: contentType as ContentType,
                     topic,
-                    aiProvider: hasAnthropic ? 'claude' : 'openai',
+                    aiProvider: hasOpenAI ? 'openai' : 'claude',
                 })
 
                 // Get category
                 const categorySlug = CONTENT_TO_CATEGORY[contentType] || 'tech'
-                const category = await db.category.findUnique({
-                    where: { slug: categorySlug },
-                })
+                const categoryResult = await db
+                    .select({ id: categories.id })
+                    .from(categories)
+                    .where(eq(categories.slug, categorySlug))
+                    .limit(1)
+
+                const category = categoryResult[0]
 
                 // Check for duplicate slug
                 let finalSlug = generated.slug
-                const existingPost = await db.post.findUnique({
-                    where: { slug: finalSlug },
-                })
-                if (existingPost) {
+                const existingPost = await db
+                    .select({ id: posts.id })
+                    .from(posts)
+                    .where(eq(posts.slug, finalSlug))
+                    .limit(1)
+
+                if (existingPost.length > 0) {
                     finalSlug = `${finalSlug}-${Date.now()}`
                 }
 
                 // Create post
                 const status: PostStatus = autoPublish ? 'PUBLISHED' : 'IN_REVIEW'
-                const post = await db.post.create({
-                    data: {
-                        title: generated.title,
-                        slug: finalSlug,
-                        content: generated.content,
-                        excerpt: generated.excerpt,
-                        metaTitle: generated.title,
-                        metaDescription: generated.metaDescription,
-                        keywords: generated.keywords,
-                        contentType: contentType as ContentType,
-                        status,
-                        isAiGenerated: true,
-                        publishedAt: autoPublish ? new Date() : null,
-                        categories: category ? { connect: [{ id: category.id }] } : undefined,
-                        tags: {
-                            connectOrCreate: generated.keywords.slice(0, 5).map((kw) => ({
-                                where: { slug: slugify(kw) },
-                                create: { name: kw, slug: slugify(kw) },
-                            })),
-                        },
-                    },
+                const newPost = await db.insert(posts).values({
+                    title: generated.title,
+                    slug: finalSlug,
+                    content: generated.content,
+                    excerpt: generated.excerpt,
+                    metaTitle: generated.title,
+                    metaDescription: generated.metaDescription,
+                    keywords: generated.keywords,
+                    contentType: contentType as ContentType,
+                    status,
+                    isAiGenerated: true,
+                    publishedAt: autoPublish ? new Date() : null,
+                }).returning({
+                    id: posts.id,
+                    title: posts.title,
+                    slug: posts.slug,
+                    status: posts.status,
+                    contentType: posts.contentType,
                 })
+
+                const post = newPost[0]
+
+                // Connect category if found
+                if (category && post) {
+                    await db.insert(postCategories).values({
+                        postId: post.id,
+                        categoryId: category.id,
+                    })
+                }
+
+                // Create/connect tags from keywords
+                for (const kw of generated.keywords.slice(0, 5)) {
+                    const tagSlug = slugify(kw)
+
+                    // Find or create tag
+                    let tagRecord = await db
+                        .select({ id: tags.id })
+                        .from(tags)
+                        .where(eq(tags.slug, tagSlug))
+                        .limit(1)
+
+                    let tagId: string
+                    if (tagRecord[0]) {
+                        tagId = tagRecord[0].id
+                    } else {
+                        const newTag = await db.insert(tags).values({
+                            name: kw,
+                            slug: tagSlug,
+                        }).returning({ id: tags.id })
+                        tagId = newTag[0].id
+                    }
+
+                    // Connect tag to post
+                    await db.insert(postTags).values({
+                        postId: post.id,
+                        tagId,
+                    }).onConflictDoNothing()
+                }
 
                 results.push({
                     id: post.id,

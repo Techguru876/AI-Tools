@@ -1,4 +1,6 @@
 import { db } from '@/lib/db'
+import { posts, users, categories, postCategories } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -8,14 +10,50 @@ import { Edit, Eye, Trash2 } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function PostsPage() {
-    const posts = await db.post.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 50,
-        include: {
-            author: { select: { name: true } },
-            categories: { select: { name: true, slug: true } },
-        },
-    })
+    const postsResult = await db
+        .select({
+            id: posts.id,
+            title: posts.title,
+            slug: posts.slug,
+            status: posts.status,
+            viewCount: posts.viewCount,
+            authorId: posts.authorId,
+        })
+        .from(posts)
+        .orderBy(desc(posts.createdAt))
+        .limit(50)
+
+    // Fetch author and categories for each post
+    const postsWithRelations = await Promise.all(
+        postsResult.map(async (post) => {
+            // Fetch author
+            let author = null
+            if (post.authorId) {
+                const authorResult = await db
+                    .select({ name: users.name })
+                    .from(users)
+                    .where(eq(users.id, post.authorId))
+                    .limit(1)
+                author = authorResult[0] || null
+            }
+
+            // Fetch categories
+            const postCats = await db
+                .select({
+                    name: categories.name,
+                    slug: categories.slug,
+                })
+                .from(categories)
+                .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+                .where(eq(postCategories.postId, post.id))
+
+            return {
+                ...post,
+                author,
+                categories: postCats,
+            }
+        })
+    )
 
     return (
         <div className="space-y-6">
@@ -31,10 +69,10 @@ export default async function PostsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>All Posts ({posts.length})</CardTitle>
+                    <CardTitle>All Posts ({postsWithRelations.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {posts.length === 0 ? (
+                    {postsWithRelations.length === 0 ? (
                         <p className="text-muted-foreground py-8 text-center">
                             No posts yet. <Link href="/admin/generate" className="text-primary hover:underline">Create your first article</Link>
                         </p>
@@ -52,7 +90,7 @@ export default async function PostsPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {posts.map((post) => (
+                                    {postsWithRelations.map((post) => (
                                         <tr key={post.id} className="border-t hover:bg-muted/20">
                                             <td className="px-4 py-3">
                                                 <span className="font-medium">{post.title}</span>

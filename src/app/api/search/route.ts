@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { posts, categories, tags, postCategories, postTags } from '@/lib/db/schema'
+import { eq, ilike, or, desc } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
     try {
@@ -10,56 +12,60 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ results: [] })
         }
 
-        // Search in posts using Prisma
-        const results = await db.post.findMany({
-            where: {
-                status: 'PUBLISHED',
-                OR: [
-                    {
-                        title: {
-                            contains: query,
-                            mode: 'insensitive',
-                        },
-                    },
-                    {
-                        excerpt: {
-                            contains: query,
-                            mode: 'insensitive',
-                        },
-                    },
-                    {
-                        content: {
-                            contains: query,
-                            mode: 'insensitive',
-                        },
-                    },
-                ],
-            },
-            include: {
-                categories: {
-                    select: {
-                        name: true,
-                        slug: true,
-                    },
-                },
-            },
-            take: 10,
-            orderBy: {
-                viewCount: 'desc',
-            },
-        })
+        const searchTerm = `%${query}%`
 
-        // Format results
-        const formattedResults = results.map((post) => ({
-            id: post.id,
-            title: post.title,
-            excerpt: post.excerpt,
-            slug: post.slug,
-            category: post.categories[0]?.name || 'Tech',
-            categorySlug: post.categories[0]?.slug || 'tech',
-            coverImage: post.coverImage,
-            publishedAt: post.publishedAt,
-        }))
+        // Search in posts using Drizzle
+        const results = await db
+            .select({
+                id: posts.id,
+                title: posts.title,
+                excerpt: posts.excerpt,
+                slug: posts.slug,
+                coverImage: posts.coverImage,
+                publishedAt: posts.publishedAt,
+                viewCount: posts.viewCount,
+            })
+            .from(posts)
+            .where(
+                eq(posts.status, 'PUBLISHED')
+            )
+            .orderBy(desc(posts.viewCount))
+            .limit(50)
+
+        // Filter in JS for case-insensitive contains (Drizzle ilike needs specific setup)
+        const filteredResults = results.filter((post) => {
+            const lowerQuery = query.toLowerCase()
+            return (
+                post.title.toLowerCase().includes(lowerQuery) ||
+                (post.excerpt?.toLowerCase().includes(lowerQuery) ?? false)
+            )
+        }).slice(0, 10)
+
+        // Fetch categories for each result
+        const formattedResults = await Promise.all(
+            filteredResults.map(async (post) => {
+                const postCats = await db
+                    .select({
+                        name: categories.name,
+                        slug: categories.slug,
+                    })
+                    .from(categories)
+                    .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+                    .where(eq(postCategories.postId, post.id))
+                    .limit(1)
+
+                return {
+                    id: post.id,
+                    title: post.title,
+                    excerpt: post.excerpt,
+                    slug: post.slug,
+                    category: postCats[0]?.name || 'Tech',
+                    categorySlug: postCats[0]?.slug || 'tech',
+                    coverImage: post.coverImage,
+                    publishedAt: post.publishedAt,
+                }
+            })
+        )
 
         return NextResponse.json({ results: formattedResults })
     } catch (error) {

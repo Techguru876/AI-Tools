@@ -3,32 +3,49 @@ import { TrendingUp, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 import { db } from '@/lib/db'
+import { posts, categories, postCategories } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 
 export async function TrendingWidget() {
   // Fetch real trending posts from database based on view count
-  const trendingPosts = await db.post.findMany({
-    where: {
-      status: 'PUBLISHED',
-    },
-    include: {
-      categories: {
-        select: {
-          name: true,
-          slug: true,
-        },
-      },
-    },
-    orderBy: [
-      { viewCount: 'desc' },
-      { publishedAt: 'desc' },
-    ],
-    take: 5,
-  })
+  const trendingPostsResult = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      viewCount: posts.viewCount,
+      publishedAt: posts.publishedAt,
+      createdAt: posts.createdAt,
+    })
+    .from(posts)
+    .where(eq(posts.status, 'PUBLISHED'))
+    .orderBy(desc(posts.viewCount), desc(posts.publishedAt))
+    .limit(5)
 
   // If no posts, don't render the widget
-  if (trendingPosts.length === 0) {
+  if (trendingPostsResult.length === 0) {
     return null
   }
+
+  // Fetch categories for each post
+  const trendingPosts = await Promise.all(
+    trendingPostsResult.map(async (post) => {
+      const postCats = await db
+        .select({
+          name: categories.name,
+          slug: categories.slug,
+        })
+        .from(categories)
+        .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+        .where(eq(postCategories.postId, post.id))
+        .limit(1)
+
+      return {
+        ...post,
+        categories: postCats,
+      }
+    })
+  )
 
   return (
     <div className="rounded-lg border bg-card p-6">
@@ -41,7 +58,7 @@ export async function TrendingWidget() {
         {trendingPosts.map((post, index) => {
           const categorySlug = post.categories[0]?.slug || 'tech'
           const categoryName = post.categories[0]?.name || 'Tech'
-          const publishedDate = post.publishedAt || post.createdAt
+          const publishedDate = post.publishedAt || post.createdAt || new Date()
 
           return (
             <Link

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import type { PostStatus } from '@prisma/client'
+import { posts, postAnalytics, comments, affiliateLinks, postCategories, postTags } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 // Update post status (approve/reject/publish)
 export async function PATCH(
@@ -14,34 +15,36 @@ export async function PATCH(
         const { id: postId } = await params
 
         // Verify post exists
-        const post = await db.post.findUnique({
-            where: { id: postId },
-        })
+        const postResult = await db
+            .select({ id: posts.id })
+            .from(posts)
+            .where(eq(posts.id, postId))
+            .limit(1)
 
-        if (!post) {
+        if (postResult.length === 0) {
             return NextResponse.json({ error: 'Post not found' }, { status: 404 })
         }
 
-        let updateData: any = {}
+        let updateData: Partial<typeof posts.$inferInsert> = {}
 
         switch (action) {
             case 'approve':
                 // Move to approved/scheduled status
                 updateData = {
-                    status: 'PUBLISHED' as PostStatus,
+                    status: 'PUBLISHED',
                     publishedAt: scheduledFor ? new Date(scheduledFor) : new Date(),
                 }
                 break
 
             case 'reject':
                 updateData = {
-                    status: 'REJECTED' as PostStatus,
+                    status: 'ARCHIVED', // Using ARCHIVED as REJECTED doesn't exist in enum
                 }
                 break
 
             case 'draft':
                 updateData = {
-                    status: 'DRAFT' as PostStatus,
+                    status: 'DRAFT',
                     publishedAt: null,
                 }
                 break
@@ -54,7 +57,7 @@ export async function PATCH(
                     )
                 }
                 updateData = {
-                    status: 'SCHEDULED' as PostStatus,
+                    status: 'SCHEDULED',
                     scheduledFor: new Date(scheduledFor),
                 }
                 break
@@ -83,19 +86,25 @@ export async function PATCH(
                 )
         }
 
-        const updatedPost = await db.post.update({
-            where: { id: postId },
-            data: updateData,
-        })
+        await db.update(posts)
+            .set(updateData)
+            .where(eq(posts.id, postId))
+
+        // Fetch updated post
+        const updatedPost = await db
+            .select({
+                id: posts.id,
+                title: posts.title,
+                status: posts.status,
+                publishedAt: posts.publishedAt,
+            })
+            .from(posts)
+            .where(eq(posts.id, postId))
+            .limit(1)
 
         return NextResponse.json({
             success: true,
-            post: {
-                id: updatedPost.id,
-                title: updatedPost.title,
-                status: updatedPost.status,
-                publishedAt: updatedPost.publishedAt,
-            },
+            post: updatedPost[0],
         })
     } catch (error: any) {
         console.error('Error updating post:', error)
@@ -116,24 +125,20 @@ export async function DELETE(
 
         // Delete in correct order to handle foreign key constraints
         // 1. Delete post analytics
-        await db.postAnalytics.deleteMany({
-            where: { postId },
-        })
+        await db.delete(postAnalytics).where(eq(postAnalytics.postId, postId))
 
         // 2. Delete comments
-        await db.comment.deleteMany({
-            where: { postId },
-        })
+        await db.delete(comments).where(eq(comments.postId, postId))
 
         // 3. Delete affiliate links
-        await db.affiliateLink.deleteMany({
-            where: { postId },
-        })
+        await db.delete(affiliateLinks).where(eq(affiliateLinks.postId, postId))
 
-        // 4. Delete the post (tags relationship will be handled by Prisma's implicit many-to-many)
-        await db.post.delete({
-            where: { id: postId },
-        })
+        // 4. Delete junction table entries
+        await db.delete(postCategories).where(eq(postCategories.postId, postId))
+        await db.delete(postTags).where(eq(postTags.postId, postId))
+
+        // 5. Delete the post
+        await db.delete(posts).where(eq(posts.id, postId))
 
         return NextResponse.json({ success: true })
     } catch (error: any) {

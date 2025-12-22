@@ -6,6 +6,8 @@
 
 import { ai, z } from '../genkit'
 import { db } from '@/lib/db'
+import { posts } from '@/lib/db/schema'
+import { eq, gte, desc } from 'drizzle-orm'
 import { RSS_FEEDS } from '../config/rss-feeds'
 import Parser from 'rss-parser'
 
@@ -41,7 +43,7 @@ export const fetchRSSFeedsTool = ai.defineTool(
             fetchedAt: z.string(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const feeds = RSS_FEEDS[input.category] || RSS_FEEDS.NEWS
         const allItems: Array<{
             title: string
@@ -108,7 +110,7 @@ export const getTrendingTopicsTool = ai.defineTool(
             })),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         // Fetch recent RSS items
         const feeds = RSS_FEEDS[input.category] || RSS_FEEDS.NEWS
         const allHeadlines: Array<{ title: string; source: string }> = []
@@ -194,29 +196,34 @@ export const checkTopicCoverageTool = ai.defineTool(
             recommendation: z.string(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const cutoffDate = new Date()
         cutoffDate.setDate(cutoffDate.getDate() - input.daysBack)
 
-        // Search for similar posts
-        const recentPosts = await db.post.findMany({
-            where: {
-                publishedAt: { gte: cutoffDate },
-                status: 'PUBLISHED',
-                OR: [
-                    { title: { contains: input.topic, mode: 'insensitive' } },
-                    { content: { contains: input.topic, mode: 'insensitive' } },
-                ],
-            },
-            select: {
-                id: true,
-                title: true,
-                publishedAt: true,
-            },
-            take: 5,
+        // Fetch recent published posts
+        const recentPostsResult = await db
+            .select({
+                id: posts.id,
+                title: posts.title,
+                content: posts.content,
+                publishedAt: posts.publishedAt,
+            })
+            .from(posts)
+            .where(eq(posts.status, 'PUBLISHED'))
+            .orderBy(desc(posts.publishedAt))
+            .limit(50)
+
+        // Filter by date and search term in JS
+        const topicLower = input.topic.toLowerCase()
+        const matchingPosts = recentPostsResult.filter((post) => {
+            if (post.publishedAt && post.publishedAt < cutoffDate) return false
+            return (
+                post.title.toLowerCase().includes(topicLower) ||
+                post.content.toLowerCase().includes(topicLower)
+            )
         })
 
-        const similarPosts = recentPosts.map(post => ({
+        const similarPosts = matchingPosts.slice(0, 5).map((post) => ({
             id: post.id,
             title: post.title,
             publishedAt: post.publishedAt?.toISOString() || null,

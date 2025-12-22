@@ -3,6 +3,8 @@ import { Footer } from '@/components/layout/footer'
 import { ArticleCard } from '@/components/article-cards/article-card'
 import { Sidebar } from '@/components/sidebar/sidebar'
 import { db } from '@/lib/db'
+import { posts, categories, tags, postCategories, postTags } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 import { Search } from 'lucide-react'
 
 // Force dynamic rendering - prevents build-time database queries
@@ -30,38 +32,87 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = params.q || ''
 
   // Query database for matching articles
-  const posts = query
-    ? await db.post.findMany({
-      where: {
-        status: 'PUBLISHED',
-        OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-          { excerpt: { contains: query, mode: 'insensitive' } },
-          { content: { contains: query, mode: 'insensitive' } },
-        ],
-      },
-      include: {
-        categories: {
-          select: {
-            name: true,
-            slug: true,
-            color: true,
-          },
-        },
-        tags: {
-          select: {
-            name: true,
-            slug: true,
-          },
-        },
-      },
-      orderBy: { publishedAt: 'desc' },
-      take: 20,
-    })
-    : []
+  let postsWithRelations: Array<{
+    id: string
+    title: string
+    slug: string
+    excerpt: string | null
+    coverImage: string | null
+    publishedAt: Date | null
+    contentType: string | null
+    viewCount: number | null
+    categories: Array<{ name: string; slug: string; color: string | null }>
+    tags: Array<{ name: string; slug: string }>
+  }> = []
+
+  if (query) {
+    // Fetch all published posts
+    const postsResult = await db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        excerpt: posts.excerpt,
+        content: posts.content,
+        coverImage: posts.coverImage,
+        publishedAt: posts.publishedAt,
+        contentType: posts.contentType,
+        viewCount: posts.viewCount,
+      })
+      .from(posts)
+      .where(eq(posts.status, 'PUBLISHED'))
+      .orderBy(desc(posts.publishedAt))
+      .limit(100)
+
+    // Filter by search query (case-insensitive)
+    const lowerQuery = query.toLowerCase()
+    const filteredPosts = postsResult.filter((post) =>
+      post.title.toLowerCase().includes(lowerQuery) ||
+      (post.excerpt?.toLowerCase().includes(lowerQuery) ?? false) ||
+      post.content.toLowerCase().includes(lowerQuery)
+    ).slice(0, 20)
+
+    // Fetch categories and tags for each post
+    postsWithRelations = await Promise.all(
+      filteredPosts.map(async (post) => {
+        const postCats = await db
+          .select({
+            name: categories.name,
+            slug: categories.slug,
+            color: categories.color,
+          })
+          .from(categories)
+          .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+          .where(eq(postCategories.postId, post.id))
+
+        const postTagsResult = await db
+          .select({
+            name: tags.name,
+            slug: tags.slug,
+          })
+          .from(tags)
+          .innerJoin(postTags, eq(tags.id, postTags.tagId))
+          .where(eq(postTags.postId, post.id))
+          .limit(5)
+
+        return {
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt,
+          coverImage: post.coverImage,
+          publishedAt: post.publishedAt,
+          contentType: post.contentType,
+          viewCount: post.viewCount,
+          categories: postCats,
+          tags: postTagsResult,
+        }
+      })
+    )
+  }
 
   // Transform to match ArticleCardProps interface
-  const results = posts.map((post) => ({
+  const results = postsWithRelations.map((post) => ({
     id: post.id,
     title: post.title,
     excerpt: post.excerpt || '',
@@ -72,10 +123,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     author: 'TechBlog USA Team',
     publishedAt: post.publishedAt?.toISOString() || new Date().toISOString(),
     image: post.coverImage || `https://source.unsplash.com/800x600/?technology`,
-    contentType: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    contentType: post.contentType?.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
     tags: post.tags.slice(0, 5).map((tag) => tag.name),
-    trending: post.viewCount > 500,
-    type: post.contentType.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
+    trending: (post.viewCount ?? 0) > 500,
+    type: post.contentType?.toLowerCase() as 'news' | 'feature' | 'review' | 'deal' | 'opinion',
   }))
 
   return (

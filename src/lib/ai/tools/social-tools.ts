@@ -31,7 +31,7 @@ export const generateSocialPostTool = ai.defineTool(
             }).optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const result: {
             twitter?: { text: string; characterCount: number }
             linkedin?: { text: string; characterCount: number }
@@ -109,7 +109,7 @@ export const postToTwitterTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const apiKey = process.env.TWITTER_API_KEY
         const apiSecret = process.env.TWITTER_API_SECRET
         const accessToken = process.env.TWITTER_ACCESS_TOKEN
@@ -177,7 +177,7 @@ export const postToLinkedInTool = ai.defineTool(
             error: z.string().optional(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         const accessToken = process.env.LINKEDIN_ACCESS_TOKEN
 
         if (!accessToken) {
@@ -260,7 +260,7 @@ export const scheduleSocialPostTool = ai.defineTool(
             message: z.string(),
         }),
     },
-    async (input) => {
+    async (input: any) => {
         try {
             const scheduledDate = new Date(input.scheduledFor)
 

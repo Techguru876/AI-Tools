@@ -1,4 +1,6 @@
 import { db } from '@/lib/db'
+import { posts, categories, tags, postCategories, postTags } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { PostEditClient } from './client'
 
@@ -11,16 +13,49 @@ interface Props {
 export default async function EditPostPage({ params }: Props) {
     const { id } = await params
 
-    const post = await db.post.findUnique({
-        where: { id },
-        include: {
-            categories: { select: { name: true, slug: true } },
-            tags: { select: { name: true, slug: true } },
-        },
-    })
+    const postResult = await db
+        .select()
+        .from(posts)
+        .where(eq(posts.id, id))
+        .limit(1)
+
+    const post = postResult[0]
 
     if (!post) {
         notFound()
+    }
+
+    // Fetch categories
+    const postCats = await db
+        .select({
+            name: categories.name,
+            slug: categories.slug,
+        })
+        .from(categories)
+        .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+        .where(eq(postCategories.postId, post.id))
+
+    // Fetch tags
+    const postTagsResult = await db
+        .select({
+            name: tags.name,
+            slug: tags.slug,
+        })
+        .from(tags)
+        .innerJoin(postTags, eq(tags.id, postTags.tagId))
+        .where(eq(postTags.postId, post.id))
+
+    const postWithRelations = {
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        content: post.content,
+        coverImage: post.coverImage,
+        status: post.status ?? 'DRAFT',
+        contentType: post.contentType ?? 'ARTICLE',
+        categories: postCats,
+        tags: postTagsResult,
     }
 
     return (
@@ -32,7 +67,7 @@ export default async function EditPostPage({ params }: Props) {
                 </p>
             </div>
 
-            <PostEditClient post={post} />
+            <PostEditClient post={postWithRelations} />
         </div>
     )
 }
