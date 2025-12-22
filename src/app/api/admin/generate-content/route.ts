@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { openai } from '@/lib/ai/openai'
+import { generateContentWithOpenAI } from '@/lib/ai/openai'
 import { SYSTEM_PROMPTS, CONTENT_PROMPTS } from '@/lib/ai/prompts'
 
 export async function POST(req: NextRequest) {
     try {
-        if (!openai) {
+        // Check if OpenAI API key is configured
+        if (!process.env.OPENAI_API_KEY) {
             return NextResponse.json(
                 { error: 'OpenAI API key not configured' },
                 { status: 500 }
@@ -32,19 +33,16 @@ export async function POST(req: NextRequest) {
             : CONTENT_PROMPTS.generateNews(topic, additionalContext)
 
         // Log which model we're using
-        const model = 'gpt-4o-mini'
-        console.log(`   Using model: ${model}`)
+        console.log(`   Using model: gpt-4o-mini`)
 
-        const completion = await openai.chat.completions.create({
-            model: model,
-            messages: [
-                { role: 'system', content: systemMessage },
-                { role: 'user', content: prompt }
-            ],
-            max_tokens: 4000,
+        const result = await generateContentWithOpenAI({
+            prompt,
+            systemPrompt: systemMessage,
+            model: 'gpt-4o-mini',
+            maxTokens: 4000,
         })
 
-        const content = completion.choices[0]?.message?.content
+        const content = result.content
 
         if (!content) {
             throw new Error('No content generation returned from API')
