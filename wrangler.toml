@@ -1,37 +1,12 @@
 name = "techblogusa"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
-main = ".open-next/worker.js"
 
 # Required for Cloudflare Pages
 pages_build_output_dir = ".open-next/assets"
-
-# Static Assets Configuration (required by OpenNext)
-[assets]
-directory = ".open-next/assets"
-binding = "ASSETS"
 
 # Environment variables (add in Cloudflare dashboard for secrets)
 [vars]
 NEXT_PUBLIC_HAS_OPENAI = "true"
 NEXT_PUBLIC_HAS_ANTHROPIC = "false"
 NEXT_PUBLIC_APP_URL = "https://techblogusa.com"
-
-# R2 bucket for incremental cache (required by OpenNext)
-[[r2_buckets]]
-bucket_name = "techblogusa-cache"
-binding = "NEXT_INC_CACHE_R2_BUCKET"
-
-# KV namespace for cache (optional - improves performance)
-# [[kv_namespaces]]
-# binding = "NEXT_CACHE_WORKERS_KV"
-# id = "your-kv-namespace-id"
-
-# Custom domain routes
-[[routes]]
-pattern = "techblogusa.com"
-custom_domain = true
-
-[[routes]]
-pattern = "www.techblogusa.com"
-custom_domain = true
