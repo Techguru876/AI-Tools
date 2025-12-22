@@ -4,34 +4,77 @@ import { DollarSign, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { db } from '@/lib/db'
+import { posts, categories, postCategories } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 
 export async function DealsWidget() {
-  // Fetch real deal articles from database (filter by Deals category)
-  const dealArticles = await db.post.findMany({
-    where: {
-      status: 'PUBLISHED',
-      categories: {
-        some: {
-          slug: 'deals',
-        },
-      },
-    },
-    include: {
-      categories: {
-        select: {
-          name: true,
-          slug: true,
-        },
-      },
-    },
-    orderBy: { publishedAt: 'desc' },
-    take: 3,
-  })
+  // First, find the deals category
+  const dealsCategory = await db
+    .select({ id: categories.id })
+    .from(categories)
+    .where(eq(categories.slug, 'deals'))
+    .limit(1)
+
+  if (dealsCategory.length === 0) {
+    return null
+  }
+
+  // Find post IDs that belong to deals category
+  const dealPostIds = await db
+    .select({ postId: postCategories.postId })
+    .from(postCategories)
+    .where(eq(postCategories.categoryId, dealsCategory[0].id))
+
+  const postIds = dealPostIds.map((r) => r.postId)
+
+  if (postIds.length === 0) {
+    return null
+  }
+
+  // Fetch published posts that are deals
+  const allPublishedPosts = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      slug: posts.slug,
+      excerpt: posts.excerpt,
+      coverImage: posts.coverImage,
+      publishedAt: posts.publishedAt,
+    })
+    .from(posts)
+    .where(eq(posts.status, 'PUBLISHED'))
+    .orderBy(desc(posts.publishedAt))
+    .limit(20)
+
+  // Filter to deals only
+  const dealArticles = allPublishedPosts
+    .filter((p) => postIds.includes(p.id))
+    .slice(0, 3)
 
   // If no deals in database, don't render the widget
   if (dealArticles.length === 0) {
     return null
   }
+
+  // Fetch categories for each deal
+  const dealsWithCategories = await Promise.all(
+    dealArticles.map(async (deal) => {
+      const postCats = await db
+        .select({
+          name: categories.name,
+          slug: categories.slug,
+        })
+        .from(categories)
+        .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+        .where(eq(postCategories.postId, deal.id))
+        .limit(1)
+
+      return {
+        ...deal,
+        categories: postCats,
+      }
+    })
+  )
 
   return (
     <div className="rounded-lg border bg-card p-6">
@@ -41,7 +84,7 @@ export async function DealsWidget() {
       </div>
 
       <div className="space-y-4">
-        {dealArticles.map((deal) => {
+        {dealsWithCategories.map((deal) => {
           // Extract category slug from first category
           const categorySlug = deal.categories[0]?.slug || 'deals'
 
@@ -58,6 +101,7 @@ export async function DealsWidget() {
                     src={deal.coverImage}
                     alt={deal.title}
                     fill
+                    unoptimized
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <Badge className="absolute right-2 top-2 bg-red-600 hover:bg-red-700">

@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator'
 import { Clock, User, Share2, Facebook, Twitter, Linkedin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { db } from '@/lib/db'
+import { posts, categories, tags, users, postCategories, postTags } from '@/lib/db/schema'
+import { eq, desc, ne, and, sql } from 'drizzle-orm'
 import { getCategoryBySlug } from '@/lib/constants/categories'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -30,9 +32,18 @@ interface ArticlePageProps {
 
 export async function generateMetadata({ params }: ArticlePageProps) {
   const resolvedParams = await params
-  const post = await db.post.findUnique({
-    where: { slug: resolvedParams.slug },
-  })
+  const postResult = await db
+    .select({
+      title: posts.title,
+      excerpt: posts.excerpt,
+      metaDescription: posts.metaDescription,
+      coverImage: posts.coverImage,
+    })
+    .from(posts)
+    .where(eq(posts.slug, resolvedParams.slug))
+    .limit(1)
+
+  const post = postResult[0]
 
   if (!post) {
     return {
@@ -66,70 +77,131 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   // Fetch article from database
-  const post = await db.post.findUnique({
-    where: { slug: resolvedParams.slug },
-    include: {
-      categories: {
-        select: {
-          name: true,
-          slug: true,
-          color: true,
-        },
-      },
-      tags: {
-        select: {
-          name: true,
-          slug: true,
-        },
-      },
-      author: {
-        select: {
-          name: true,
-          image: true,
-          bio: true,
-          title: true,
-        },
-      },
-    },
-  })
+  const postResult = await db
+    .select()
+    .from(posts)
+    .where(eq(posts.slug, resolvedParams.slug))
+    .limit(1)
+
+  const post = postResult[0]
 
   if (!post) {
     notFound()
   }
 
+  // Fetch post categories
+  const postCats = await db
+    .select({
+      name: categories.name,
+      slug: categories.slug,
+      color: categories.color,
+    })
+    .from(categories)
+    .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+    .where(eq(postCategories.postId, post.id))
+
+  // Fetch post tags
+  const postTagsResult = await db
+    .select({
+      name: tags.name,
+      slug: tags.slug,
+    })
+    .from(tags)
+    .innerJoin(postTags, eq(tags.id, postTags.tagId))
+    .where(eq(postTags.postId, post.id))
+
+  // Fetch author if exists
+  let author = null
+  if (post.authorId) {
+    const authorResult = await db
+      .select({
+        name: users.name,
+        image: users.image,
+        bio: users.bio,
+        title: users.title,
+      })
+      .from(users)
+      .where(eq(users.id, post.authorId))
+      .limit(1)
+    author = authorResult[0] || null
+  }
+
   // Increment view count (fire and forget)
-  db.post.update({
-    where: { id: post.id },
-    data: { viewCount: { increment: 1 } },
-  }).catch(() => { }) // Silently fail if update fails
+  db.update(posts)
+    .set({ viewCount: sql`${posts.viewCount} + 1` })
+    .where(eq(posts.id, post.id))
+    .execute()
+    .catch(() => { }) // Silently fail if update fails
 
   // Get related articles (same category, exclude current)
-  const relatedPosts = await db.post.findMany({
-    where: {
-      status: 'PUBLISHED',
-      id: { not: post.id },
-      categories: {
-        some: {
-          slug: resolvedParams.category,
-        },
-      },
-    },
-    include: {
-      categories: {
-        select: {
-          name: true,
-          slug: true,
-          color: true,
-        },
-      },
-    },
-    orderBy: { publishedAt: 'desc' },
-    take: 3,
-  })
+  const categoryData = postCats[0]
+  let relatedPosts: Array<{
+    id: string
+    title: string
+    slug: string
+    excerpt: string | null
+    coverImage: string | null
+    categories: Array<{ name: string; slug: string; color: string | null }>
+  }> = []
 
-  const articleCategory = post.categories[0] || { name: category.label, slug: resolvedParams.category, color: category.color }
+  if (categoryData) {
+    // Find posts with similar categories
+    const catRecord = await db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.slug, categoryData.slug))
+      .limit(1)
+
+    if (catRecord[0]) {
+      const relatedPostIds = await db
+        .select({ postId: postCategories.postId })
+        .from(postCategories)
+        .where(eq(postCategories.categoryId, catRecord[0].id))
+        .limit(10)
+
+      const relatedIds = relatedPostIds
+        .map((r) => r.postId)
+        .filter((id) => id !== post.id)
+        .slice(0, 3)
+
+      if (relatedIds.length > 0) {
+        const relatedResult = await db
+          .select({
+            id: posts.id,
+            title: posts.title,
+            slug: posts.slug,
+            excerpt: posts.excerpt,
+            coverImage: posts.coverImage,
+          })
+          .from(posts)
+          .where(eq(posts.status, 'PUBLISHED'))
+          .orderBy(desc(posts.publishedAt))
+          .limit(10)
+
+        const filtered = relatedResult.filter((p) => relatedIds.includes(p.id)).slice(0, 3)
+
+        relatedPosts = await Promise.all(
+          filtered.map(async (p) => {
+            const cats = await db
+              .select({
+                name: categories.name,
+                slug: categories.slug,
+                color: categories.color,
+              })
+              .from(categories)
+              .innerJoin(postCategories, eq(categories.id, postCategories.categoryId))
+              .where(eq(postCategories.postId, p.id))
+
+            return { ...p, categories: cats }
+          })
+        )
+      }
+    }
+  }
+
+  const articleCategory = postCats[0] || { name: category.label, slug: resolvedParams.category, color: category.color }
   const authorName = 'TechBlog USA Team'
-  const publishedAt = post.publishedAt || post.createdAt
+  const publishedAt = post.publishedAt || post.createdAt || new Date()
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -189,7 +261,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span>{post.viewCount.toLocaleString()} views</span>
+                <span>{(post.viewCount ?? 0).toLocaleString()} views</span>
               </div>
               {/* Social Share */}
               <div className="ml-auto flex gap-2">
@@ -217,6 +289,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   src={post.coverImage}
                   alt={post.title}
                   fill
+                  unoptimized
                   className="object-cover"
                   priority
                 />
@@ -237,25 +310,26 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
 
           {/* Author Bio */}
-          {post.author && (
+          {author && (
             <div className="mx-auto mt-12 max-w-[680px] rounded-lg border bg-card p-6">
               <div className="flex items-start gap-4">
-                {post.author.image && (
+                {author.image && (
                   <Image
-                    src={post.author.image}
-                    alt={post.author.name || 'Author'}
+                    src={author.image}
+                    alt={author.name || 'Author'}
                     width={64}
                     height={64}
+                    unoptimized
                     className="rounded-full"
                   />
                 )}
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold">{post.author.name || authorName}</h3>
-                  {post.author.title && (
-                    <p className="text-sm text-muted-foreground">{post.author.title}</p>
+                  <h3 className="text-lg font-semibold">{author.name || authorName}</h3>
+                  {author.title && (
+                    <p className="text-sm text-muted-foreground">{author.title}</p>
                   )}
-                  {post.author.bio && (
-                    <p className="mt-2 text-sm text-muted-foreground">{post.author.bio}</p>
+                  {author.bio && (
+                    <p className="mt-2 text-sm text-muted-foreground">{author.bio}</p>
                   )}
                 </div>
               </div>
@@ -263,10 +337,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           )}
 
           {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
+          {postTagsResult && postTagsResult.length > 0 && (
             <div className="mt-8">
               <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
+                {postTagsResult.map((tag) => (
                   <Link key={tag.slug} href={`/topics/${tag.slug}`}>
                     <Badge variant="outline" className="hover:bg-accent">
                       {tag.name}
@@ -297,6 +371,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                             src={related.coverImage}
                             alt={related.title}
                             fill
+                            unoptimized
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                           />
                         </div>
