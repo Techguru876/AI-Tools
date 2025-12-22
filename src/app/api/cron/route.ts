@@ -74,14 +74,18 @@ export async function POST(request: NextRequest) {
             categoriesProcessed: result.categoriesProcessed,
         })
     } catch (error) {
-        console.error('[CRON] Generation failed:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        const errorStack = error instanceof Error ? error.stack : ''
+
+        console.error('[CRON] Generation failed:', errorMessage)
+        if (errorStack) console.error('[CRON] Error Stack:', errorStack)
+
         return NextResponse.json(
             {
                 error: 'Generation failed',
-                details: error instanceof Error ? error.message : 'Unknown error',
+                details: errorMessage,
             },
             { status: 500 }
         )
     }
 }
-

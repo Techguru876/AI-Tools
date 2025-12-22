@@ -1,9 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { env } from '@/lib/env'
-
-export const anthropic = new Anthropic({
-  apiKey: env.ANTHROPIC_API_KEY,
-})
+// Claude/Anthropic SDK is disabled for Cloudflare Workers compatibility
+// (The SDK uses MessagePort which is not available in Cloudflare Workers)
+// Use OpenAI instead via the aiProvider option
 
 export interface GenerateContentOptions {
   prompt: string
@@ -22,37 +19,8 @@ export interface GeneratedContent {
 }
 
 export async function generateContent(options: GenerateContentOptions): Promise<GeneratedContent> {
-  const {
-    prompt,
-    model = 'claude-sonnet-4-5-20250929',
-    temperature = 0.7,
-    maxTokens = 4000,
-    systemPrompt,
-  } = options
-
-  const message = await anthropic.messages.create({
-    model,
-    max_tokens: maxTokens,
-    temperature,
-    system: systemPrompt,
-    messages: [
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  })
-
-  const content = message.content[0]
-  if (content.type !== 'text') {
-    throw new Error('Unexpected response type from Claude API')
-  }
-
-  return {
-    content: content.text,
-    usage: {
-      inputTokens: message.usage.input_tokens,
-      outputTokens: message.usage.output_tokens,
-    },
-  }
+  throw new Error(
+    'Claude/Anthropic SDK is disabled for Cloudflare Workers compatibility. ' +
+    'Please use OpenAI instead by setting aiProvider: "openai" or ensuring OPENAI_API_KEY is set.'
+  )
 }

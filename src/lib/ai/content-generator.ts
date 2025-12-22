@@ -1,8 +1,20 @@
-import { generateContent } from './claude'
+// Note: Claude import is done dynamically to avoid bundling @anthropic-ai/sdk
+// which uses MessagePort (not available in Cloudflare Workers)
 import { generateContentWithOpenAI } from './openai'
 import { SYSTEM_PROMPTS, CONTENT_PROMPTS } from './prompts'
 import { slugify } from '@/lib/utils'
-import type { ContentType } from '@prisma/client'
+import { ContentType } from '@/lib/db'
+
+// Dynamic import for Claude to avoid MessagePort issues in Cloudflare Workers
+async function generateContentWithClaude(options: {
+  prompt: string
+  systemPrompt?: string
+  temperature?: number
+  maxTokens?: number
+}) {
+  const { generateContent } = await import('./claude')
+  return generateContent(options)
+}
 
 export interface GenerateArticleInput {
   type: ContentType
@@ -97,7 +109,7 @@ export async function generateArticle(input: GenerateArticleInput): Promise<Gene
       maxTokens: 4000,
     })
   } else {
-    result = await generateContent({
+    result = await generateContentWithClaude({
       prompt: userPrompt,
       systemPrompt,
       temperature: 0.7,
@@ -151,7 +163,7 @@ Respond in JSON format:
   "metaDescription": "description here"
 }`
 
-  const result = await generateContent({
+  const result = await generateContentWithClaude({
     prompt,
     systemPrompt: 'You are an SEO expert. Provide JSON responses only.',
     temperature: 0.5,
@@ -204,7 +216,7 @@ Format:
 - Change 2
 ...`
 
-  const result = await generateContent({
+  const result = await generateContentWithClaude({
     prompt,
     systemPrompt: SYSTEM_PROMPTS.TECH_NEWS,
     temperature: 0.6,
