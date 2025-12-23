@@ -1,12 +1,37 @@
 name = "techblogusa"
+main = ".open-next/worker.js"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Required for Cloudflare Pages
-pages_build_output_dir = ".open-next/assets"
+# Disable workers.dev to only use custom domains
+workers_dev = false
+
+# Custom domain routes (no wildcards or paths for custom domains)
+[[routes]]
+pattern = "techblogusa.com"
+zone_name = "techblogusa.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.techblogusa.com"
+zone_name = "techblogusa.com"
+custom_domain = true
+
+# Static assets configuration
+[assets]
+directory = ".open-next/assets"
+
+# R2 bucket for Next.js incremental cache
+[[r2_buckets]]
+binding = "NEXT_INC_CACHE_R2_BUCKET"
+bucket_name = "techblogusa-cache"
 
 # Environment variables (add in Cloudflare dashboard for secrets)
 [vars]
 NEXT_PUBLIC_HAS_OPENAI = "true"
 NEXT_PUBLIC_HAS_ANTHROPIC = "false"
 NEXT_PUBLIC_APP_URL = "https://techblogusa.com"
+
+# Logging
+[observability.logs]
+enabled = true
