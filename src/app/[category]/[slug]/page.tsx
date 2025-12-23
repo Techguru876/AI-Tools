@@ -227,12 +227,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {post.title}
             </h1>
 
-            {/* Excerpt/Dek */}
-            {post.excerpt && (
-              <p className="text-xl text-muted-foreground">
-                {post.excerpt}
-              </p>
-            )}
 
             {/* Metadata */}
             <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
