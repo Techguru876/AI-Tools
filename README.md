@@ -44,10 +44,9 @@ A comprehensive, AI-automated tech blog platform featuring automated content gen
 - **State**: React Context + Zustand
 
 ### Backend
-- **Runtime**: Node.js 18+
-- **Database**: PostgreSQL + Prisma ORM
-- **Caching**: Redis
-- **Jobs**: BullMQ
+- **Runtime**: Node.js 18+ / Cloudflare Workers
+- **Database**: Neon PostgreSQL + Drizzle ORM
+- **Cache**: Cloudflare R2
 
 ### AI & Content
 - **Content Generation**: OpenAI GPT-5 mini (default) with optional Anthropic fallback
@@ -55,9 +54,11 @@ A comprehensive, AI-automated tech blog platform featuring automated content gen
 - **Embeddings**: OpenAI
 
 ### Infrastructure
-- **Hosting**: Netlify
-- **CDN**: Netlify CDN
-- **Monitoring**: Netlify Analytics + Sentry
+- **Hosting**: Cloudflare Workers (via OpenNext)
+- **Database**: Neon PostgreSQL (serverless)
+- **CDN**: Cloudflare
+- **Cache**: Cloudflare R2
+- **Monitoring**: Cloudflare Analytics
 - **Email**: Resend
 - **Payments**: Stripe
 
@@ -269,21 +270,46 @@ See `.env.example` for all available environment variables.
 
 ## Deployment
 
-### Netlify (Recommended)
+### Cloudflare Workers (Production)
 
-1. Push your code to GitHub
-2. Import project in Netlify
-3. Add environment variables
-4. Deploy!
-
-### Docker
+This site uses **Cloudflare Workers with OpenNext** - NOT static Cloudflare Pages.
 
 ```bash
-# Build the image
-docker build -t ai-tech-blog .
+# Build for Cloudflare
+npm run cf:build
 
-# Run the container
-docker run -p 3000:3000 ai-tech-blog
+# Deploy to production
+npx wrangler deploy
+```
+
+> ⚠️ **IMPORTANT**: Always use `npx wrangler deploy`, NOT `wrangler pages deploy`. The site requires the Worker to run the Next.js server code.
+
+#### Key Configuration (wrangler.toml)
+```toml
+main = ".open-next/worker.js"     # Worker entry point
+[assets]
+directory = ".open-next/assets"    # Static files
+[[r2_buckets]]
+binding = "NEXT_INC_CACHE_R2_BUCKET"
+bucket_name = "techblogusa-cache"  # Required for OpenNext
+```
+
+#### Custom Domains
+- `techblogusa.com`
+- `www.techblogusa.com`
+
+#### Environment Variables (set in Cloudflare Dashboard)
+- `DATABASE_URL` - Neon PostgreSQL connection string
+- `OPENAI_API_KEY` - For AI content generation
+- `UNSPLASH_ACCESS_KEY` - For cover images
+
+See [.agent/workflows/deploy-cloudflare.md](.agent/workflows/deploy-cloudflare.md) for complete deployment documentation.
+
+### Local Development
+
+```bash
+npm run dev          # Next.js dev server on port 1010
+npm run cf:preview   # Test Cloudflare Worker locally
 ```
 
 ## Documentation
